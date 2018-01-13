@@ -54,14 +54,14 @@ public class Main {
     /***********************************************/
 
     // USB Camera
-    /*
+    
     // This gets the image from a USB camera 
     // Usually this will be on device 0, but there are other overloads
     // that can be used
     UsbCamera camera = setUsbCamera(0, inputStream);
     // Set the resolution for our camera, since this is over USB
     camera.setResolution(640,480);
-    */
+
 
     // This creates a CvSink for us to use. This grabs images from our selected camera, 
     // and will allow us to use those images in opencv
