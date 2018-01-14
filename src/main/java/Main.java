@@ -1,20 +1,32 @@
+package main.java;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 
-import edu.wpi.first.wpilibj.networktables.*;
-import edu.wpi.first.wpilibj.tables.*;
-import edu.wpi.cscore.*;
+import javax.imageio.ImageIO;
+
 import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
+import org.opencv.core.MatOfByte;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.videoio.VideoCapture;
+
+import ca.team2706.vision.trackerboxreloaded.DisplayGui;
+import edu.wpi.cscore.HttpCamera;
+import edu.wpi.cscore.MjpegServer;
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.tables.ITable;
 
 public class Main {
-  public static void main(String[] args) {
+	public static void main(String[] args) {
     // Loads our OpenCV library. This MUST be included
     System.loadLibrary("opencv_java310");
 
     // Connect NetworkTables, and get access to the publishing table
     NetworkTable.setClientMode();
     // Set your team number here
-    NetworkTable.setTeam(9999);
+    NetworkTable.setTeam(2706);
 
     NetworkTable.initialize();
 
@@ -58,7 +70,8 @@ public class Main {
     // This gets the image from a USB camera 
     // Usually this will be on device 0, but there are other overloads
     // that can be used
-    UsbCamera camera = setUsbCamera(0, inputStream);
+    /*                                                  THIS DOESNT WORK ON WINDOWS
+     * UsbCamera camera = setUsbCamera(0, inputStream);
     // Set the resolution for our camera, since this is over USB
     camera.setResolution(640,480);
 
@@ -94,52 +107,87 @@ public class Main {
       // This will most likely be a marked up image of what the camera sees
       // For now, we are just going to stream the HSV image
       imageSource.putFrame(hsv);
+    }*/
+    
+    VideoCapture camera = new VideoCapture(1);
+    Mat frame = new Mat();
+    camera.read(frame); 
+
+    if(!camera.isOpened()){
+        System.out.println("Error");
+    }else {
+    	
+    camera.read(frame);
+    
+    DisplayGui gui = null;
+	try {
+		gui = new DisplayGui(Mat2BufferedImage(frame));
+	} catch (Exception e) {
+		e.printStackTrace();
+	}                  
+        while(true){
+           if (camera.read(frame)){
+                try {
+					gui.updateImage(Mat2BufferedImage(frame));
+				} catch (Exception e) {
+					System.out.println("Window closed");
+					Runtime.getRuntime().halt(0);
+				}
+           }
+        }   
     }
+    camera.release();
   }
 
-  private static HttpCamera setHttpCamera(String cameraName, MjpegServer server) {
-    // Start by grabbing the camera from NetworkTables
-    NetworkTable publishingTable = NetworkTable.getTable("CameraPublisher");
-    // Wait for robot to connect. Allow this to be attempted indefinitely
-    while (true) {
-      try {
-        if (publishingTable.getSubTables().size() > 0) {
-          break;
-        }
-        Thread.sleep(500);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
+	private static HttpCamera setHttpCamera(String cameraName, MjpegServer server) {
+		// Start by grabbing the camera from NetworkTables
+		NetworkTable publishingTable = NetworkTable.getTable("CameraPublisher");
+		// Wait for robot to connect. Allow this to be attempted indefinitely
+		while (true) {
+			try {
+				if (publishingTable.getSubTables().size() > 0) {
+					break;
+				}
+				Thread.sleep(500);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 
+		HttpCamera camera = null;
+		if (!publishingTable.containsSubTable(cameraName)) {
+			return null;
+		}
+		ITable cameraTable = publishingTable.getSubTable(cameraName);
+		String[] urls = cameraTable.getStringArray("streams", null);
+		if (urls == null) {
+			return null;
+		}
+		ArrayList<String> fixedUrls = new ArrayList<String>();
+		for (String url : urls) {
+			if (url.startsWith("mjpg")) {
+				fixedUrls.add(url.split(":", 2)[1]);
+			}
+		}
+		camera = new HttpCamera("CoprocessorCamera", fixedUrls.toArray(new String[0]));
+		server.setSource(camera);
+		return camera;
+	}
 
-    HttpCamera camera = null;
-    if (!publishingTable.containsSubTable(cameraName)) {
-      return null;
-    }
-    ITable cameraTable = publishingTable.getSubTable(cameraName);
-    String[] urls = cameraTable.getStringArray("streams", null);
-    if (urls == null) {
-      return null;
-    }
-    ArrayList<String> fixedUrls = new ArrayList<String>();
-    for (String url : urls) {
-      if (url.startsWith("mjpg")) {
-        fixedUrls.add(url.split(":", 2)[1]);
-      }
-    }
-    camera = new HttpCamera("CoprocessorCamera", fixedUrls.toArray(new String[0]));
-    server.setSource(camera);
-    return camera;
-  }
+	private static UsbCamera setUsbCamera(int cameraId, MjpegServer server) {
+		// This gets the image from a USB camera
+		// Usually this will be on device 0, but there are other overloads
+		// that can be used
+		UsbCamera camera = new UsbCamera("CoprocessorCamera", cameraId);
+		server.setSource(camera);
+		return camera;
+	}
+	private static BufferedImage Mat2BufferedImage(Mat matrix)throws Exception {        
+	    MatOfByte mob=new MatOfByte();
+	    Imgcodecs.imencode(".jpg", matrix, mob);
+	    byte ba[]=mob.toArray();
 
-  private static UsbCamera setUsbCamera(int cameraId, MjpegServer server) {
-    // This gets the image from a USB camera 
-    // Usually this will be on device 0, but there are other overloads
-    // that can be used
-    UsbCamera camera = new UsbCamera("CoprocessorCamera", cameraId);
-    server.setSource(camera);
-    return camera;
-  }
+	    BufferedImage bi=ImageIO.read(new ByteArrayInputStream(ba));
+	    return bi;
+	}
 }
