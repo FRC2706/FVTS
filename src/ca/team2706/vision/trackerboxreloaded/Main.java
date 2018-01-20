@@ -13,7 +13,9 @@ import org.opencv.videoio.VideoCapture;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
+
 	public static void main(String[] args) {
+
 		// Loads our OpenCV library. This MUST be included
 		System.loadLibrary("opencv_java310");
 
@@ -29,10 +31,16 @@ public class Main {
 		// choice
 		int streamPort = 1185;
 
+		boolean windows = false;
+		if (System.getProperty("os.name").startsWith("Windows")) {
+			windows = true;
+		}
+
 		// Set to 1 for USB camera, set to 0 for webcam, i think 0 is USB if
 		// there is no webcam :/
 		VideoCapture camera = new VideoCapture(0);
 		Mat frame = new Mat();
+		Mat img = new Mat();
 		camera.read(frame);
 
 		if (!camera.isOpened()) {
@@ -40,27 +48,49 @@ public class Main {
 		} else {
 
 			camera.read(frame);
-			DisplayGui gui = null;
-			boolean windows = false;
-			if (System.getProperty("os.name").startsWith("Windows")) {
-				windows = true;
-			}
+			DisplayGui guiRawImg = null;
+			DisplayGui guiProcessedImg = null;
+
 			if (windows) {
 				try {
-					gui = new DisplayGui(Mat2BufferedImage(frame));
+					guiRawImg = new DisplayGui(Mat2BufferedImage(frame), "Raw Camera Image");
+					guiProcessedImg = new DisplayGui(Mat2BufferedImage(frame), "Processed Image");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 			while (true) {
 				if (camera.read(frame)) {
-					try {
-						BufferedImage img = process(frame);
-						if (windows) {
-							gui.updateImage(img);
+
+					// display the raw image
+					if (windows) {
+						try {
+							// May throw a NullPointerException if initializing the window failed
+							guiRawImg.updateImage(Mat2BufferedImage(frame));
+						} catch (Exception e) {
+							e.printStackTrace();
+							System.out.println("Window closed");
+							Runtime.getRuntime().halt(0);
 						}
-					} catch (Exception e) {
-						if (windows) {
+					}
+
+
+					try {
+						img = process(frame);
+					}
+					catch (Exception e) {
+						// frame failed to process .... do nothing and go to next frame?
+						continue;
+					}
+
+
+					// display the processed frame in the GUI
+					if (windows) {
+						try {
+							// May throw a NullPointerException if initializing the window failed
+							guiProcessedImg.updateImage(Mat2BufferedImage(img));
+						} catch (Exception e) {
+							e.printStackTrace();
 							System.out.println("Window closed");
 							Runtime.getRuntime().halt(0);
 						}
@@ -80,8 +110,8 @@ public class Main {
 		return bi;
 	}
 
-	public static BufferedImage process(Mat src) throws Exception {
+	public static Mat process(Mat src) throws Exception {
 		
-		return Mat2BufferedImage(src);
+		return src;
 	}
 }
