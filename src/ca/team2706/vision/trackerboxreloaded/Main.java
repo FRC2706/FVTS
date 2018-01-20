@@ -27,7 +27,7 @@ public class Main {
 		// This is the network port you want to stream the raw received image to
 		// By rules, this has to be between 1180 and 1190, so 1185 is a good
 		// choice
-		//int streamPort = 1185;
+		// int streamPort = 1185;
 
 		// This stores our reference to our mjpeg server for streaming the input
 		// image
@@ -98,7 +98,8 @@ public class Main {
 		 * camera sees // For now, we are just going to stream the HSV image
 		 * imageSource.putFrame(hsv); }
 		 */
-
+		// Set to 1 for USB camera, set to 0 for webcam, i think 0 is USB if
+		// there is no webcam :/
 		VideoCapture camera = new VideoCapture(0);
 		Mat frame = new Mat();
 		camera.read(frame);
@@ -108,29 +109,36 @@ public class Main {
 		} else {
 
 			camera.read(frame);
-
 			DisplayGui gui = null;
-			try {
-				gui = new DisplayGui(Mat2BufferedImage(frame));
-			} catch (Exception e) {
-				e.printStackTrace();
+			boolean windows = false;
+			if (System.getProperty("os.name").startsWith("Windows")) {
+				windows = true;
+			}
+			if (windows) {
+				try {
+					gui = new DisplayGui(Mat2BufferedImage(frame));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			while (true) {
 				if (camera.read(frame)) {
 					try {
-
 						BufferedImage img = process(frame);
-						gui.updateImage(img);
+						if (windows) {
+							gui.updateImage(img);
+						}
 					} catch (Exception e) {
-						System.out.println("Window closed");
-						Runtime.getRuntime().halt(0);
+						if (windows) {
+							System.out.println("Window closed");
+							Runtime.getRuntime().halt(0);
+						}
 					}
 				}
 			}
 		}
 		camera.release();
 	}
-
 
 	private static BufferedImage Mat2BufferedImage(Mat matrix) throws Exception {
 		MatOfByte mob = new MatOfByte();
@@ -143,25 +151,26 @@ public class Main {
 
 	public static BufferedImage process(Mat src) throws Exception {
 		// Pyramid down and back up
-		//Imgproc.pyrDown(src, src, new Size(src.cols() / 2, src.rows() / 2), Core.BORDER_DEFAULT);
-		//Imgproc.pyrUp(src, src, new Size(src.cols() * 2, src.rows() * 2), Core.BORDER_DEFAULT);
+		// Imgproc.pyrDown(src, src, new Size(src.cols() / 2, src.rows() / 2),
+		// Core.BORDER_DEFAULT);
+		// Imgproc.pyrUp(src, src, new Size(src.cols() * 2, src.rows() * 2),
+		// Core.BORDER_DEFAULT);
 
 		// Canny edge detection
 		/*
-		Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2GRAY);
-		Imgproc.threshold(src, src, 120, 255, Imgproc.THRESH_BINARY);
-		Imgproc.Canny(src, src, 60, 60 * 3);
-		
-		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-		//src.convertTo(src, CvType.CV_32SC1);
-		Imgproc.findContours(src, contours, new Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-		
-		Mat contourImg = new Mat(src.size(), CvType.CV_8U);
-		for (int i = 0; i < contours.size(); i++) {
-		    Imgproc.drawContours(contourImg, contours, i, new Scalar(255, 255, 255));
-		}
-		return Mat2BufferedImage(contourImg);
-		*/
+		 * Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2GRAY);
+		 * Imgproc.threshold(src, src, 120, 255, Imgproc.THRESH_BINARY);
+		 * Imgproc.Canny(src, src, 60, 60 * 3);
+		 * 
+		 * List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+		 * //src.convertTo(src, CvType.CV_32SC1); Imgproc.findContours(src,
+		 * contours, new Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+		 * 
+		 * Mat contourImg = new Mat(src.size(), CvType.CV_8U); for (int i = 0; i
+		 * < contours.size(); i++) { Imgproc.drawContours(contourImg, contours,
+		 * i, new Scalar(255, 255, 255)); } return
+		 * Mat2BufferedImage(contourImg);
+		 */
 		return Mat2BufferedImage(src);
 	}
 }
