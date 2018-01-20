@@ -114,7 +114,7 @@ public class Main {
 		 * imageSource.putFrame(hsv); }
 		 */
 
-		VideoCapture camera = new VideoCapture(1);
+		VideoCapture camera = new VideoCapture(0);
 		Mat frame = new Mat();
 		camera.read(frame);
 
