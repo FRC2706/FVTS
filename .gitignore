@@ -1,15 +1,15 @@
+# Gradle stuff we don't want in git
+.gradle/
+build/
+
 # Eclipse stuff we don't want in git
+output/
 .classpath
 .project
 
-# Gradle
-.gradle/
-
 # IntelliJ stuff we don't want in git
 bin/
-build/
 out/
-output/
 .idea/
 *.iws
 *.iml
