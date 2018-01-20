@@ -63,10 +63,10 @@ set CMD_LINE_ARGS=%*
 :execute
 @rem Setup the command line
 
-set CLASSPATH=%APP_HOME%\lib\NetworkTables-3.1.7-windows2015.jar;%APP_HOME%\lib\cscore-1.0.2-windows2015.jar;%APP_HOME%\lib\CameraVision.jar;%APP_HOME%\lib\opencv-java-3.1.0.jar
+set CLASSPATH=%APP_HOME%\lib\CameraVision.jar;%APP_HOME%\lib\NetworkTables-3.1.7-windows2015.jar;%APP_HOME%\lib\cscore-1.0.2-windows2015.jar;%APP_HOME%\lib\opencv-java-3.1.0.jar
 
 @rem Execute TrackerboxReloaded
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %TRACKERBOX_RELOADED_OPTS%  -classpath "%CLASSPATH%" ca.team2706.vision.trackerboxreloaded.Main.class %CMD_LINE_ARGS%
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %TRACKERBOX_RELOADED_OPTS%  -classpath "%CLASSPATH%" ca.team2706.vision.trackerboxreloaded.Main %CMD_LINE_ARGS%
 
 :end
 @rem End local scope for the variables with windows NT shell
