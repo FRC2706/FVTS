@@ -1,0 +1,16 @@
+# Gradle stuff we don't want in git
+.gradle/
+build/
+
+# Eclipse stuff we don't want in git
+output/
+.classpath
+.project
+
+# IntelliJ stuff we don't want in git
+bin/
+out/
+.idea/
+*.iws
+*.iml
+*.ipr
