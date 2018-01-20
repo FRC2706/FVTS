@@ -26,6 +26,14 @@ def projectName = 'CameraVision'
 // Shouldn't need to change anything below this point
 apply from: 'dependencies.gradle'
 
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+}
+
 repositories {
     mavenCentral()
     maven {
