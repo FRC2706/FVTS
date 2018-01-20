@@ -1,11 +1,13 @@
+# Eclipse stuff we don't want in git
+.classpath
+.project
 
-# IntelliJ
-/out/
 
-.idea
+# IntelliJ stuff we don't want in git
+bin/
+out/
+output/
+.idea/
 *.iws
 *.iml
-modules.xml
-.idea/misc.xml
 *.ipr
-/bin/
