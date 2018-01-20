@@ -17,19 +17,20 @@ public class DisplayGui extends JFrame implements Runnable {
 	private static final long serialVersionUID = 1L;
 	
 	/** The image. */
-	private BufferedImage image = null;
+	private BufferedImage image;
 	
 	/**
 	 * Instantiates a new display gui.
 	 *
 	 * @param image the image
 	 */
-	public DisplayGui(BufferedImage image){
+	public DisplayGui(BufferedImage image, String windowTitle){
 		this.image = image;
 		this.setPreferredSize(new Dimension(image.getWidth()+30,image.getHeight()+30));
 		this.setMinimumSize(new Dimension(image.getWidth()+30,image.getHeight()+30));
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setVisible(true);
+		this.setTitle(windowTitle);
 		new Thread(this).start();
 	}
 	
@@ -39,11 +40,12 @@ public class DisplayGui extends JFrame implements Runnable {
 	 * @param width the width
 	 * @param height the height
 	 */
-	public DisplayGui(int width, int height){
+	public DisplayGui(int width, int height, String windowTitle){
 		this.setPreferredSize(new Dimension(width+30,height+30));
 		this.setMinimumSize(new Dimension(width+30,height+30));
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setVisible(true);
+		this.setTitle(windowTitle);
 		new Thread(this).start();
 	}
 	
