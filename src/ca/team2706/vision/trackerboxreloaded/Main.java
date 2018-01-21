@@ -14,6 +14,16 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
 
+	/**
+	 * A class to hold any vision data returned by process()
+	 */
+	private static class VisionData {
+		public Mat outputImg = new Mat();
+
+	}
+
+
+
 	public static void main(String[] args) {
 
 		// Loads our OpenCV library. This MUST be included
@@ -74,9 +84,9 @@ public class Main {
 						}
 					}
 
-
+					VisionData visionData;
 					try {
-						img = process(frame);
+						visionData = process(frame);
 					}
 					catch (Exception e) {
 						// frame failed to process .... do nothing and go to next frame?
@@ -88,7 +98,7 @@ public class Main {
 					if (windows) {
 						try {
 							// May throw a NullPointerException if initializing the window failed
-							guiProcessedImg.updateImage(Mat2BufferedImage(img));
+							guiProcessedImg.updateImage(Mat2BufferedImage(visionData.outputImg));
 						} catch (Exception e) {
 							e.printStackTrace();
 							System.out.println("Window closed");
@@ -110,8 +120,14 @@ public class Main {
 		return bi;
 	}
 
-	public static Mat process(Mat src) throws Exception {
-		
-		return src;
+	public static VisionData process(Mat src) throws Exception {
+
+		// If there's any data or intermediate images that you want to return, add them to the VisionData class
+		// For example, any numbers that we want to return to the roboRIO.
+
+		VisionData visionData = new VisionData();
+		visionData.outputImg = src.clone();
+
+		return visionData;
 	}
 }
