@@ -19,123 +19,60 @@ import org.opencv.videoio.VideoCapture;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
-	public static int minHue;
-	public static int maxHue;
-	public static int minSaturation;
-	public static int maxSaturation;
-	public static int minValue;
-	public static int maxValue;
-	public static int iterations;
+
+	// Camera Type
+	// Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
+	// there is no webcam :/
+	private static final int CAMERA_NUM = 0;
+
+	/**
+	 * A class to hold calibration parameters for the image processing algorithm
+	 */
+	private class VisionParams {
+		public int minHue;
+		public int maxHue;
+		public int minSaturation;
+		public int maxSaturation;
+		public int minValue;
+		public int maxValue;
+		public int iterations;
+	}
+
+	private static VisionProperties visionParams = new VisionProperties();
 
 	/**
 	 * A class to hold any vision data returned by process()
 	 */
 	private static class VisionData {
 		public Mat outputImg = new Mat();
-
 	}
 
-	public static void main(String[] args) {
 
+
+	/*** Helper Functions ***/
+
+	private static void loadVisionParams() {
 		Properties properties = new Properties();
-		
 		try {
-			FileInputStream in = new FileInputStream("config.properties");
+			FileInputStream in = new FileInputStream("visionParams.properties");
 			properties.load(in);
+
 			minHue = Integer.valueOf(properties.getProperty("minHue"));
 			maxHue = Integer.valueOf(properties.getProperty("maxHue"));
 			minSaturation = Integer.valueOf(properties.getProperty("minSaturation"));
 			maxSaturation = Integer.valueOf(properties.getProperty("maxSaturation"));
 			minValue = Integer.valueOf(properties.getProperty("minValue"));
 			maxValue = Integer.valueOf(properties.getProperty("maxValue"));
-			iterations = Integer.valueOf(properties.getProperty("iterations"));
+			erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
 		} catch (Exception e1) {
 			e1.printStackTrace();
+			System.exit();
 		}
-		
-		
-		
-		// Loads our OpenCV library. This MUST be included
-		System.loadLibrary("opencv_java310");
+	}
 
-		// Connect NetworkTables, and get access to the publishing table
-		NetworkTable.setClientMode();
-		// Set your team number here
-		NetworkTable.setTeam(2706);
-
-		NetworkTable.initialize();
-
-		// This is the network port you want to stream the raw received image to
-		// By rules, this has to be between 1180 and 1190, so 1185 is a good
-		// choice
-		//int streamPort = 1185;
-
-		boolean windows = false;
-		if (System.getProperty("os.name").startsWith("Windows")) {
-			windows = true;
-		}
-
-		// Set to 1 for USB camera, set to 0 for webcam, i think 0 is USB if
-		// there is no webcam :/
-		VideoCapture camera = new VideoCapture(0);
-		Mat frame = new Mat();
-		VisionData img = new VisionData();
-		camera.read(frame);
-
-		if (!camera.isOpened()) {
-			System.out.println("Error");
-		} else {
-
-			camera.read(frame);
-			DisplayGui guiRawImg = null;
-			DisplayGui guiProcessedImg = null;
-
-			if (windows) {
-				try {
-					guiRawImg = new DisplayGui(Mat2BufferedImage(frame), "Raw Camera Image");
-					guiProcessedImg = new DisplayGui(Mat2BufferedImage(frame), "Processed Image");
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			while (true) {
-				if (camera.read(frame)) {
-
-					// display the raw image
-					if (windows) {
-						try {
-							// May throw a NullPointerException if initializing the window failed
-							guiRawImg.updateImage(Mat2BufferedImage(frame));
-						} catch (Exception e) {
-							e.printStackTrace();
-							System.out.println("Window closed");
-							Runtime.getRuntime().halt(0);
-						}
-					}
-
-
-					try {
-						img = process(frame);
-					}
-					catch (Exception e) {
-						// frame failed to process .... do nothing and go to next frame?
-						continue;
-					}
-					// display the processed frame in the GUI
-					if (windows) {
-						try {
-							// May throw a NullPointerException if initializing the window failed
-							guiProcessedImg.updateImage(Mat2BufferedImage(img.outputImg));
-						} catch (Exception e) {
-							e.printStackTrace();
-							System.out.println("Window closed");
-							Runtime.getRuntime().halt(0);
-						}
-					}
-				}
-			}
-		}
-		camera.release();
+	private static void saveProperties() {
+		// TODO -- basically the opposite of loadProperties()
+		// See guide: https://www.mkyong.com/java/java-properties-file-examples/
 	}
 
 	private static BufferedImage Mat2BufferedImage(Mat matrix) throws Exception {
@@ -151,16 +88,127 @@ public class Main {
 
 		// If there's any data or intermediate images that you want to return, add them to the VisionData class
 		// For example, any numbers that we want to return to the roboRIO.
-		Mat hsvThreshold = new Mat();
-		Core.inRange(src, new Scalar(minHue,minSaturation,minValue), new Scalar(maxHue,maxSaturation,maxValue), hsvThreshold);
-		//Mat mask = new Mat();
-		//src.copyTo(mask, hsvThreshold);
-		Mat dilate = new Mat();
-		Imgproc.dilate(hsvThreshold, dilate,new Mat(),new Point(), iterations, Core.BORDER_CONSTANT, new Scalar(0));
-		Mat erode = new Mat();
-		Imgproc.erode(dilate, erode,new Mat(),new Point(), iterations, Core.BORDER_CONSTANT, new Scalar(0));
 		VisionData visionData = new VisionData();
-		visionData.outputImg = erode.clone();
+
+
+		// Colour threshold
+		Mat hsvThreshold = new Mat();
+		Core.inRange(src, new Scalar(visionParams.minHue, visionParams.minSaturation, visionParams.minValue),
+				new Scalar(visionParams.maxHue, visionParams.maxSaturation, visionParams.maxValue), hsvThreshold);
+
+		// Dilate - Erode
+		Mat dilatedImg = new Mat();
+		Mat erode = new Mat();
+		Imgproc.dilate(hsvThreshold, dilatedImg, new Mat(), new Point(), visionParams.iterations, Core.BORDER_CONSTANT, new Scalar(0));
+		Imgproc.erode(dilatedImg, erode, new Mat(), new Point(), visionParams.iterations, Core.BORDER_CONSTANT, new Scalar(0));
+
+
+		visionData.outputImg = erode;
+
 		return visionData;
+	}
+
+	
+
+	/*** Main() ***/
+
+	public static void main(String[] args) {
+
+		// Loads our OpenCV library. This MUST be included
+		System.loadLibrary("opencv_java310");
+
+		// Connect NetworkTables, and get access to the publishing table
+		NetworkTable.setClientMode();
+		// Set your team number here
+		NetworkTable.setTeam(2706);
+
+		NetworkTable.initialize();
+
+		// This is the network port you want to stream the raw received image to
+		// By rules, this has to be between 1180 and 1190, so 1185 is a good
+		// choice
+		//int streamPort = 1185;
+
+		boolean use_GUI = false;
+		if (System.getProperty("os.name").startsWith("Windows")) {
+			use_GUI = true;
+		}
+
+		// read the vision calibration values from file.
+		loadVisionParams();
+
+		VideoCapture camera = new VideoCapture(CAMERA_NUM);
+		Mat frame = new Mat();
+		camera.read(frame);
+
+		if (!camera.isOpened()) {
+			System.out.println("Error: Can not connect to camera");
+		} else {
+
+			// Set up the camera feed
+			camera.read(frame);
+			DisplayGui guiRawImg = null;
+			DisplayGui guiProcessedImg = null;
+
+			// Set up the GUI display windows
+			if (use_GUI) {
+				try {
+					guiRawImg = new DisplayGui(Mat2BufferedImage(frame), "Raw Camera Image");
+					guiProcessedImg = new DisplayGui(Mat2BufferedImage(frame), "Processed Image");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			// Main video processing loop
+			while (true) {
+				if (camera.read(frame)) {
+
+					// If we're using the GUI, then re-load the params on each frame so we can tune it.
+					// ... if running on the Pi, then we can be a little more efficient and only load them once at the beginning.
+					if(use_GUI) {
+						loadVisionParams();
+					}
+
+					// display the raw frame
+					if (use_GUI) {
+						try {
+							// May throw a NullPointerException if initializing the window failed
+							guiRawImg.updateImage(Mat2BufferedImage(frame));
+						} catch (Exception e) {
+							e.printStackTrace();
+							System.out.println("Window closed");
+							Runtime.getRuntime().halt(0);
+						}
+					}
+
+					// Process the frame!
+					try {
+						img = process(frame);
+					}
+					catch (Exception e) {
+						// frame failed to process .... do nothing and go to next frame?
+						System.err.println("Error: Frame failed to process. Skipping frame.");
+						continue;
+					}
+
+					// display the processed frame in the GUI
+					if (use_GUI) {
+						try {
+							// May throw a NullPointerException if initializing the window failed
+							guiProcessedImg.updateImage(Mat2BufferedImage(img.outputImg));
+						} catch (Exception e) {
+							e.printStackTrace();
+							System.out.println("Window closed");
+							Runtime.getRuntime().halt(0);
+						}
+					}
+				}
+				else {
+					System.err.println("Error: Failed to get a frame from the camera");
+				}
+			} // end main video processing loop
+		}
+		camera.release();
 	}
 }
