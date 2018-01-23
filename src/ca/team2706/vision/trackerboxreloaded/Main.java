@@ -28,17 +28,17 @@ public class Main {
 	/**
 	 * A class to hold calibration parameters for the image processing algorithm
 	 */
-	private class VisionParams {
+	private static class VisionParams {
 		public int minHue;
 		public int maxHue;
 		public int minSaturation;
 		public int maxSaturation;
 		public int minValue;
 		public int maxValue;
-		public int iterations;
+		public int erodeDilateIterations;
 	}
 
-	private static VisionProperties visionParams = new VisionProperties();
+	private static VisionParams visionParams = new VisionParams();
 
 	/**
 	 * A class to hold any vision data returned by process()
@@ -57,16 +57,16 @@ public class Main {
 			FileInputStream in = new FileInputStream("visionParams.properties");
 			properties.load(in);
 
-			minHue = Integer.valueOf(properties.getProperty("minHue"));
-			maxHue = Integer.valueOf(properties.getProperty("maxHue"));
-			minSaturation = Integer.valueOf(properties.getProperty("minSaturation"));
-			maxSaturation = Integer.valueOf(properties.getProperty("maxSaturation"));
-			minValue = Integer.valueOf(properties.getProperty("minValue"));
-			maxValue = Integer.valueOf(properties.getProperty("maxValue"));
-			erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
+			visionParams.minHue = Integer.valueOf(properties.getProperty("minHue"));
+			visionParams.maxHue = Integer.valueOf(properties.getProperty("maxHue"));
+			visionParams.minSaturation = Integer.valueOf(properties.getProperty("minSaturation"));
+			visionParams.maxSaturation = Integer.valueOf(properties.getProperty("maxSaturation"));
+			visionParams.minValue = Integer.valueOf(properties.getProperty("minValue"));
+			visionParams.maxValue = Integer.valueOf(properties.getProperty("maxValue"));
+			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
 		} catch (Exception e1) {
 			e1.printStackTrace();
-			System.exit();
+			System.exit(1);
 		}
 	}
 
@@ -99,8 +99,8 @@ public class Main {
 		// Dilate - Erode
 		Mat dilatedImg = new Mat();
 		Mat erode = new Mat();
-		Imgproc.dilate(hsvThreshold, dilatedImg, new Mat(), new Point(), visionParams.iterations, Core.BORDER_CONSTANT, new Scalar(0));
-		Imgproc.erode(dilatedImg, erode, new Mat(), new Point(), visionParams.iterations, Core.BORDER_CONSTANT, new Scalar(0));
+		Imgproc.dilate(hsvThreshold, dilatedImg, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
+		Imgproc.erode(dilatedImg, erode, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
 
 
 		visionData.outputImg = erode;
@@ -183,8 +183,9 @@ public class Main {
 					}
 
 					// Process the frame!
+					VisionData visionData;
 					try {
-						img = process(frame);
+						visionData = process(frame);
 					}
 					catch (Exception e) {
 						// frame failed to process .... do nothing and go to next frame?
@@ -196,7 +197,7 @@ public class Main {
 					if (use_GUI) {
 						try {
 							// May throw a NullPointerException if initializing the window failed
-							guiProcessedImg.updateImage(Mat2BufferedImage(img.outputImg));
+							guiProcessedImg.updateImage(Mat2BufferedImage(visionData.outputImg));
 						} catch (Exception e) {
 							e.printStackTrace();
 							System.out.println("Window closed");
