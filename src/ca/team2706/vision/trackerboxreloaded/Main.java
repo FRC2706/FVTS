@@ -2,6 +2,8 @@ package ca.team2706.vision.trackerboxreloaded;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.util.Properties;
 
 import javax.imageio.ImageIO;
 
@@ -17,13 +19,13 @@ import org.opencv.videoio.VideoCapture;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
-	public static final int minHue = 24;
-	public static final int maxHue = 122;
-	public static final int minSaturation = 71;
-	public static final int maxSaturation = 255;
-	public static final int minValue = 151;
-	public static final int maxValue = 246;
-	public static final int iterations = 4;
+	public static int minHue;
+	public static int maxHue;
+	public static int minSaturation;
+	public static int maxSaturation;
+	public static int minValue;
+	public static int maxValue;
+	public static int iterations;
 
 	/**
 	 * A class to hold any vision data returned by process()
@@ -35,6 +37,24 @@ public class Main {
 
 	public static void main(String[] args) {
 
+		Properties properties = new Properties();
+		
+		try {
+			FileInputStream in = new FileInputStream("config.properties");
+			properties.load(in);
+			minHue = Integer.valueOf(properties.getProperty("minHue"));
+			maxHue = Integer.valueOf(properties.getProperty("maxHue"));
+			minSaturation = Integer.valueOf(properties.getProperty("minSaturation"));
+			maxSaturation = Integer.valueOf(properties.getProperty("maxSaturation"));
+			minValue = Integer.valueOf(properties.getProperty("minValue"));
+			maxValue = Integer.valueOf(properties.getProperty("maxValue"));
+			iterations = Integer.valueOf(properties.getProperty("iterations"));
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		
+		
+		
 		// Loads our OpenCV library. This MUST be included
 		System.loadLibrary("opencv_java310");
 
@@ -133,8 +153,8 @@ public class Main {
 		// For example, any numbers that we want to return to the roboRIO.
 		Mat hsvThreshold = new Mat();
 		Core.inRange(src, new Scalar(minHue,minSaturation,minValue), new Scalar(maxHue,maxSaturation,maxValue), hsvThreshold);
-		Mat mask = new Mat();
-		src.copyTo(mask, hsvThreshold);
+		//Mat mask = new Mat();
+		//src.copyTo(mask, hsvThreshold);
 		Mat dilate = new Mat();
 		Imgproc.dilate(hsvThreshold, dilate,new Mat(),new Point(), iterations, Core.BORDER_CONSTANT, new Scalar(0));
 		Mat erode = new Mat();
