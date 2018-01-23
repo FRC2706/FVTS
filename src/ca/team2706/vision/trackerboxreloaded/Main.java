@@ -5,15 +5,25 @@ import java.io.ByteArrayInputStream;
 
 import javax.imageio.ImageIO;
 
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
-
+	public static final int minHue = 24;
+	public static final int maxHue = 122;
+	public static final int minSaturation = 71;
+	public static final int maxSaturation = 255;
+	public static final int minValue = 151;
+	public static final int maxValue = 246;
+	public static final int iterations = 4;
 	public static void main(String[] args) {
 
 		// Loads our OpenCV library. This MUST be included
@@ -29,7 +39,7 @@ public class Main {
 		// This is the network port you want to stream the raw received image to
 		// By rules, this has to be between 1180 and 1190, so 1185 is a good
 		// choice
-		int streamPort = 1185;
+		//int streamPort = 1185;
 
 		boolean windows = false;
 		if (System.getProperty("os.name").startsWith("Windows")) {
@@ -111,7 +121,14 @@ public class Main {
 	}
 
 	public static Mat process(Mat src) throws Exception {
-		
-		return src;
+		Mat hsvThreshold = new Mat();
+		Core.inRange(src, new Scalar(minHue,minSaturation,minValue), new Scalar(maxHue,maxSaturation,maxValue), hsvThreshold);
+		Mat mask = new Mat();
+		src.copyTo(mask, hsvThreshold);
+		Mat dilate = new Mat();
+		Imgproc.dilate(hsvThreshold, dilate,new Mat(),new Point(), iterations, Core.BORDER_CONSTANT, new Scalar(0));
+		Mat erode = new Mat();
+		Imgproc.erode(dilate, erode,new Mat(),new Point(), iterations, Core.BORDER_CONSTANT, new Scalar(0));
+		return erode;
 	}
 }
