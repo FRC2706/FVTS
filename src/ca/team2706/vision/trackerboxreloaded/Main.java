@@ -24,6 +24,15 @@ public class Main {
 	public static final int minValue = 151;
 	public static final int maxValue = 246;
 	public static final int iterations = 4;
+
+	/**
+	 * A class to hold any vision data returned by process()
+	 */
+	private static class VisionData {
+		public Mat outputImg = new Mat();
+
+	}
+
 	public static void main(String[] args) {
 
 		// Loads our OpenCV library. This MUST be included
@@ -50,7 +59,7 @@ public class Main {
 		// there is no webcam :/
 		VideoCapture camera = new VideoCapture(0);
 		Mat frame = new Mat();
-		Mat img = new Mat();
+		VisionData img = new VisionData();
 		camera.read(frame);
 
 		if (!camera.isOpened()) {
@@ -92,13 +101,11 @@ public class Main {
 						// frame failed to process .... do nothing and go to next frame?
 						continue;
 					}
-
-
 					// display the processed frame in the GUI
 					if (windows) {
 						try {
 							// May throw a NullPointerException if initializing the window failed
-							guiProcessedImg.updateImage(Mat2BufferedImage(img));
+							guiProcessedImg.updateImage(Mat2BufferedImage(img.outputImg));
 						} catch (Exception e) {
 							e.printStackTrace();
 							System.out.println("Window closed");
@@ -120,7 +127,10 @@ public class Main {
 		return bi;
 	}
 
-	public static Mat process(Mat src) throws Exception {
+	public static VisionData process(Mat src) throws Exception {
+
+		// If there's any data or intermediate images that you want to return, add them to the VisionData class
+		// For example, any numbers that we want to return to the roboRIO.
 		Mat hsvThreshold = new Mat();
 		Core.inRange(src, new Scalar(minHue,minSaturation,minValue), new Scalar(maxHue,maxSaturation,maxValue), hsvThreshold);
 		Mat mask = new Mat();
@@ -129,6 +139,8 @@ public class Main {
 		Imgproc.dilate(hsvThreshold, dilate,new Mat(),new Point(), iterations, Core.BORDER_CONSTANT, new Scalar(0));
 		Mat erode = new Mat();
 		Imgproc.erode(dilate, erode,new Mat(),new Point(), iterations, Core.BORDER_CONSTANT, new Scalar(0));
-		return erode;
+		VisionData visionData = new VisionData();
+		visionData.outputImg = erode.clone();
+		return visionData;
 	}
 }
