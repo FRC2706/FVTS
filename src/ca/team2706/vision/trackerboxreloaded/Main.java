@@ -23,7 +23,6 @@ public class Main {
 	// Camera Type
 	// Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
 	// there is no webcam :/
-	private static final int CAMERA_NUM = 0;
 
 	/**
 	 * A class to hold calibration parameters for the image processing algorithm
@@ -36,6 +35,7 @@ public class Main {
 		public int minValue;
 		public int maxValue;
 		public int erodeDilateIterations;
+		public int CameraSelect;
 	}
 
 	private static VisionParams visionParams = new VisionParams();
@@ -57,6 +57,7 @@ public class Main {
 			FileInputStream in = new FileInputStream("visionParams.properties");
 			properties.load(in);
 
+			visionParams.CameraSelect = Integer.valueOf(properties.getProperty("CameraSelect"));
 			visionParams.minHue = Integer.valueOf(properties.getProperty("minHue"));
 			visionParams.maxHue = Integer.valueOf(properties.getProperty("maxHue"));
 			visionParams.minSaturation = Integer.valueOf(properties.getProperty("minSaturation"));
@@ -108,12 +109,11 @@ public class Main {
 		return visionData;
 	}
 
-	
+
 
 	/*** Main() ***/
 
 	public static void main(String[] args) {
-
 		// Loads our OpenCV library. This MUST be included
 		System.loadLibrary("opencv_java310");
 
@@ -130,14 +130,15 @@ public class Main {
 		//int streamPort = 1185;
 
 		boolean use_GUI = false;
-		if (System.getProperty("os.name").startsWith("Windows")) {
+		if (System.getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
 			use_GUI = true;
+			System.out.println(use_GUI);
 		}
 
 		// read the vision calibration values from file.
 		loadVisionParams();
 
-		VideoCapture camera = new VideoCapture(CAMERA_NUM);
+		VideoCapture camera = new VideoCapture(visionParams.CameraSelect);
 		Mat frame = new Mat();
 		camera.read(frame);
 
