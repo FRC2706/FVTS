@@ -15,6 +15,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
+import org.opencv.videoio.Videoio;
 
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
@@ -24,6 +25,10 @@ public class Main {
 	// Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
 	// there is no webcam :/
 	private static final int CAMERA_NUM = 0;
+
+
+	/** Numerical Constants **/
+	private static final int NANOSECONDS_PER_SECOND = 1000000000;
 
 	/**
 	 * A class to hold calibration parameters for the image processing algorithm
@@ -45,6 +50,7 @@ public class Main {
 	 */
 	private static class VisionData {
 		public Mat outputImg = new Mat();
+		double fps;
 	}
 
 
@@ -86,6 +92,8 @@ public class Main {
 
 	public static VisionData process(Mat src) throws Exception {
 
+		long startTime = System.nanoTime();
+
 		// If there's any data or intermediate images that you want to return, add them to the VisionData class
 		// For example, any numbers that we want to return to the roboRIO.
 		VisionData visionData = new VisionData();
@@ -104,6 +112,9 @@ public class Main {
 
 
 		visionData.outputImg = erode;
+
+
+		visionData.fps = ((double) NANOSECONDS_PER_SECOND) / (System.nanoTime() - startTime);
 
 		return visionData;
 	}
@@ -137,7 +148,12 @@ public class Main {
 		// read the vision calibration values from file.
 		loadVisionParams();
 
+		// Open a connection to the camera
 		VideoCapture camera = new VideoCapture(CAMERA_NUM);
+
+		// Read the camera's supported frame-rate
+		double cameraFps = camera.get(Videoio.CAP_PROP_FPS);
+
 		Mat frame = new Mat();
 		camera.read(frame);
 
@@ -204,6 +220,9 @@ public class Main {
 							Runtime.getRuntime().halt(0);
 						}
 					}
+
+                    // Display the frame rate
+                    System.out.printf("Vision FPS: %3.2f, camera FPS: 3.2f", visionData.fps, cameraFps);
 				}
 				else {
 					System.err.println("Error: Failed to get a frame from the camera");
