@@ -91,9 +91,15 @@ public class Main {
 		return bi;
 	}
 
-	public static VisionData process(Mat src) throws Exception {
+    public static long fpsTimer = System.nanoTime();
 
-		long startTime = System.nanoTime();
+    /**
+     * The vision pipeline!
+     *
+     * @param src Raw source image to process
+     * @return All the data!
+     */
+	public static VisionData process(Mat src) {
 
 		// If there's any data or intermediate images that you want to return, add them to the VisionData class
 		// For example, any numbers that we want to return to the roboRIO.
@@ -114,8 +120,9 @@ public class Main {
 
 		visionData.outputImg = erode;
 
-
-		visionData.fps = ((double) NANOSECONDS_PER_SECOND) / (System.nanoTime() - startTime);
+        long now = System.nanoTime();
+		visionData.fps = ((double) NANOSECONDS_PER_SECOND) / (now - fpsTimer);
+        fpsTimer = now;
 
 		return visionData;
 	}
