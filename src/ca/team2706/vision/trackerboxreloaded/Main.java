@@ -230,7 +230,7 @@ public class Main {
 					}
 
                     // Display the frame rate
-                    System.out.printf("Vision FPS: %3.2f, camera FPS: 3.2f", visionData.fps, cameraFps);
+                    System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f\n", visionData.fps, cameraFps);
 				}
 				else {
 					System.err.println("Error: Failed to get a frame from the camera");
