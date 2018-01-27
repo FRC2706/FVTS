@@ -15,6 +15,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
+import org.opencv.videoio.Videoio;
 
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
@@ -23,6 +24,10 @@ public class Main {
 	// Camera Type
 	// Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
 	// there is no webcam :/
+
+
+	/** Numerical Constants **/
+	private static final int NANOSECONDS_PER_SECOND = 1000000000;
 
 	/**
 	 * A class to hold calibration parameters for the image processing algorithm
@@ -45,6 +50,7 @@ public class Main {
 	 */
 	private static class VisionData {
 		public Mat outputImg = new Mat();
+		double fps;
 	}
 
 
@@ -85,7 +91,15 @@ public class Main {
 		return bi;
 	}
 
-	public static VisionData process(Mat src) throws Exception {
+    public static long fpsTimer = System.nanoTime();
+
+    /**
+     * The vision pipeline!
+     *
+     * @param src Raw source image to process
+     * @return All the data!
+     */
+	public static VisionData process(Mat src) {
 
 		// If there's any data or intermediate images that you want to return, add them to the VisionData class
 		// For example, any numbers that we want to return to the roboRIO.
@@ -105,6 +119,10 @@ public class Main {
 
 
 		visionData.outputImg = erode;
+
+        long now = System.nanoTime();
+		visionData.fps = ((double) NANOSECONDS_PER_SECOND) / (now - fpsTimer);
+        fpsTimer = now;
 
 		return visionData;
 	}
@@ -138,7 +156,12 @@ public class Main {
 		// read the vision calibration values from file.
 		loadVisionParams();
 
-		VideoCapture camera = new VideoCapture(visionParams.CameraSelect);
+		// Open a connection to the camera
+        VideoCapture camera = new VideoCapture(visionParams.CameraSelect);
+
+		// Read the camera's supported frame-rate
+		double cameraFps = camera.get(Videoio.CAP_PROP_FPS);
+
 		Mat frame = new Mat();
 		camera.read(frame);
 
@@ -205,6 +228,9 @@ public class Main {
 							Runtime.getRuntime().halt(0);
 						}
 					}
+
+                    // Display the frame rate
+                    System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f\n", visionData.fps, cameraFps);
 				}
 				else {
 					System.err.println("Error: Failed to get a frame from the camera");
