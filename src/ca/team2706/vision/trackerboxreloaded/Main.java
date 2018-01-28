@@ -14,6 +14,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -123,6 +124,14 @@ public class Main {
 		//Find contours
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 		Imgproc.findContours(erode, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+
+		//Make Bounding Box
+
+
+		for (MatOfPoint contour : contours)
+{
+    Rect rect = Imgproc.boundingRect(contour);
+}
 
 		visionData.outputImg = erode;
 
