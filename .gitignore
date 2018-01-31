@@ -14,3 +14,4 @@ out/
 *.iws
 *.iml
 *.ipr
+visionParams.properties
