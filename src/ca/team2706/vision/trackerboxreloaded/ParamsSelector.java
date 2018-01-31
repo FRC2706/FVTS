@@ -1,16 +1,18 @@
 package ca.team2706.vision.trackerboxreloaded;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.JSlider;
-import javax.swing.SwingConstants;
-import javax.swing.JTextField;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Properties;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 
 public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 
@@ -119,7 +121,21 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		textField_1.setBounds(288, 102, 86, 20);
 		contentPane.add(textField_1);
 		textField_1.setColumns(10);
-		
+		Properties properties = new Properties();
+		try {
+			properties.load(new FileInputStream(new File("visionParams.properties")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		slider.setValue(Integer.valueOf(properties.getProperty("minHue")));
+		slider_1.setValue(Integer.valueOf(properties.getProperty("maxHue")));
+		slider_2.setValue(Integer.valueOf(properties.getProperty("minSaturation")));
+		slider_3.setValue(Integer.valueOf(properties.getProperty("maxSaturation")));
+		slider_4.setValue(Integer.valueOf(properties.getProperty("minValue")));
+		slider_5.setValue(Integer.valueOf(properties.getProperty("maxValue")));
+		textField.setText(properties.getProperty("CameraSelect"));
+		textField_1.setText(properties.getProperty("erodeDilateIterations"));
 		setVisible(true);
 		
 		new Thread(this).start();
@@ -128,18 +144,23 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	@Override
 	public void run() {
 		while(true){
-			if(textField.getText() != ""){
-				Main.visionParams.CameraSelect = Integer.valueOf(Integer.valueOf(textField.getText()));
+			try{
+				if(isInt(textField.getText())){
+					Main.visionParams.CameraSelect = Integer.valueOf(Integer.valueOf(textField.getText()));
+				}
+				if(isInt(textField_1.getText())){
+					Main.visionParams.erodeDilateIterations = Integer.valueOf(textField_1.getText());
+				}
+				Main.visionParams.minHue = slider.getValue();
+				Main.visionParams.maxHue = slider_1.getValue();
+				Main.visionParams.minSaturation = slider_2.getValue();
+				Main.visionParams.maxSaturation = slider_3.getValue();
+				Main.visionParams.minValue = slider_4.getValue();
+				Main.visionParams.maxValue = slider_5.getValue();
+				Thread.sleep(5);
+			}catch(Exception e){
+				e.printStackTrace();
 			}
-			if(textField_1.getText() != ""){
-				Main.visionParams.erodeDilateIterations = slider.getValue();
-			}
-			Main.visionParams.minHue = slider.getValue();
-			Main.visionParams.maxHue = slider_1.getValue();
-			Main.visionParams.minSaturation = slider_2.getValue();
-			Main.visionParams.maxSaturation = slider_3.getValue();
-			Main.visionParams.minValue = slider_4.getValue();
-			Main.visionParams.maxValue = slider_5.getValue();
 		}
 	}
 
@@ -147,6 +168,15 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	public void actionPerformed(ActionEvent arg0) {
 		if(arg0.getSource() == btnSave){
 			Main.save();
+		}
+	}
+	private boolean isInt(String s){
+		try{
+			@SuppressWarnings("unused")
+			int i = Integer.valueOf(s);
+			return true;
+		}catch(NumberFormatException e){
+			return false;
 		}
 	}
 }
