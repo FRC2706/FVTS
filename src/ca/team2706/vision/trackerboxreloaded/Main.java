@@ -12,6 +12,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
+import org.opencv.videoio.Videoio;
 
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
@@ -42,6 +43,7 @@ public class Main {
 	 */
 	public static class VisionData {
 		public Mat outputImg = new Mat();
+		double fps;
 	}
 
 	/*** Helper Functions ***/
@@ -75,8 +77,6 @@ public class Main {
 		return bi;
 	}
 
-	/*** Main() ***/
-
 	public static void main(String[] args) {
 		boolean use_GUI = false;
 		if (System.getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
@@ -87,9 +87,9 @@ public class Main {
 	}
 
 	public Main(boolean loadParams) {
-		//Must be included!
+		// Must be included!
 		Pipeline.start();
-		
+
 		// Connect NetworkTables, and get access to the publishing table
 		NetworkTable.setClientMode();
 		// Set your team number here
@@ -102,23 +102,26 @@ public class Main {
 		// choice
 		// int streamPort = 1185;
 
-		
-
 		// read the vision calibration values from file.
 		if (loadParams) {
 			loadVisionParams();
-		}else{
+		} else {
 			loadVisionParams();
 			visionParams.erodeDilateIterations = 0;
-			visionParams.maxHue=0;
-			visionParams.maxSaturation=0;
-			visionParams.maxValue=0;
-			visionParams.minHue=0;
-			visionParams.minSaturation=0;
-			visionParams.minValue=0;
+			visionParams.maxHue = 0;
+			visionParams.maxSaturation = 0;
+			visionParams.maxValue = 0;
+			visionParams.minHue = 0;
+			visionParams.minSaturation = 0;
+			visionParams.minValue = 0;
 		}
 
+		// Open a connection to the camera
 		VideoCapture camera = new VideoCapture(visionParams.CameraSelect);
+
+		// Read the camera's supported frame-rate
+		double cameraFps = camera.get(Videoio.CAP_PROP_FPS);
+
 		Mat frame = new Mat();
 		camera.read(frame);
 
@@ -166,7 +169,7 @@ public class Main {
 					// Process the frame!
 					VisionData visionData;
 					try {
-						visionData = Pipeline.process(frame,visionParams);
+						visionData = Pipeline.process(frame, visionParams);
 					} catch (Exception e) {
 						// frame failed to process .... do nothing and go to
 						// next frame?
@@ -185,15 +188,18 @@ public class Main {
 							System.out.println("Window closed");
 							Runtime.getRuntime().halt(0);
 						}
+					} else {
+
+						// Display the frame rate
+						System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f\n", visionData.fps, cameraFps);
 					}
-				} else {
-					System.err.println("Error: Failed to get a frame from the camera");
-				}
-			} // end main video processing loop
+				} // end main video processing loop
+			}
 		}
 		camera.release();
 	}
-	public static void save(){
+
+	public static void save() {
 		Properties properties = new Properties();
 		try {
 			properties.setProperty("CameraSelect", String.valueOf(visionParams.CameraSelect));

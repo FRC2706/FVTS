@@ -10,16 +10,27 @@ import ca.team2706.vision.trackerboxreloaded.Main.VisionData;
 import ca.team2706.vision.trackerboxreloaded.Main.VisionParams;
 
 public class Pipeline {
-	public static void start(){
+	
+	/** Numerical Constants **/
+	private static final int NANOSECONDS_PER_SECOND = 1000000000;
+	
+	public static long fpsTimer = System.nanoTime();
+
+	public static void start() {
 		System.loadLibrary("opencv_java310");
 	}
-	
-	public static VisionData process(Mat src,VisionParams visionParams) throws Exception {
+	 /**
+     * The vision pipeline!
+     *
+     * @param src Raw source image to process
+     * @returns turn All the data!
+     */
+	public static VisionData process(Mat src, VisionParams visionParams) throws Exception {
 
-		// If there's any data or intermediate images that you want to return, add them to the VisionData class
+		// If there's any data or intermediate images that you want to return,
+		// add them to the VisionData class
 		// For example, any numbers that we want to return to the roboRIO.
 		VisionData visionData = new VisionData();
-
 
 		// Colour threshold
 		Mat hsvThreshold = new Mat();
@@ -29,13 +40,16 @@ public class Pipeline {
 		// Dilate - Erode
 		Mat dilatedImg = new Mat();
 		Mat erode = new Mat();
-		Imgproc.dilate(hsvThreshold, dilatedImg, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
-		Imgproc.erode(dilatedImg, erode, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
-
+		Imgproc.dilate(hsvThreshold, dilatedImg, new Mat(), new Point(), visionParams.erodeDilateIterations,
+				Core.BORDER_CONSTANT, new Scalar(0));
+		Imgproc.erode(dilatedImg, erode, new Mat(), new Point(), visionParams.erodeDilateIterations,
+				Core.BORDER_CONSTANT, new Scalar(0));
 
 		visionData.outputImg = erode;
-
+		long now = System.nanoTime();
+		visionData.fps = ((double) NANOSECONDS_PER_SECOND) / (now - fpsTimer);
+		fpsTimer = now;
 		return visionData;
 	}
-	
+
 }
