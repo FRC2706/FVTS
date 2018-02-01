@@ -29,9 +29,9 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JSlider slider_4; //Minimum Value
 	private JSlider slider_5; //Maximum Value
 	private JTextField txtIterations;
-	private JTextField textField_1;
+	private JTextField textField_1; //Erode Dilate Iterations
 	private JTextField txtMinimumArea;
-	private JTextField textField_2;
+	private JTextField textField_2; //Minimum Area
 	private JTextField txtHue;
 	private JTextField txtSaturation;
 	private JTextField txtValue;
