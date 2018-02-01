@@ -174,9 +174,10 @@ public class Main {
 							Runtime.getRuntime().halt(0);
 						}
 
-						// Display the frame rate
-						System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f\n", visionData.fps, cameraFps);
 					}
+					// Display the frame rate
+					System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f\n", visionData.fps, cameraFps);
+					
 				} // end main video processing loop
 			}
 		}
