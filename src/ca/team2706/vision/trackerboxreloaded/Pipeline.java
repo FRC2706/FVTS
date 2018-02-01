@@ -16,9 +16,6 @@ public class Pipeline {
 	
 	public static long fpsTimer = System.nanoTime();
 
-	public static void start() {
-		System.loadLibrary("opencv_java310");
-	}
 	 /**
      * The vision pipeline!
      *

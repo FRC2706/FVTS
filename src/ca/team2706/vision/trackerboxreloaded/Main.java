@@ -84,7 +84,7 @@ public class Main {
 
 	public Main() {
 		// Must be included!
-		Pipeline.start();
+		System.loadLibrary("opencv_java310");
 
 		// Connect NetworkTables, and get access to the publishing table
 		NetworkTable.setClientMode();
