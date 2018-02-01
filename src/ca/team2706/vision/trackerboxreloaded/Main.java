@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
 
+	public NetworkTable table;
+	
 	// Camera Type
 	// Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
 	// there is no webcam :/
@@ -45,6 +47,18 @@ public class Main {
 	public static class VisionData {
 		public Mat outputImg = new Mat();
 		double fps;
+		
+		/**
+		 * This method converts the vision data into a nice and tidy string
+		 * @return data
+		 */
+		@Override
+		public String toString(){
+			String s = "";
+			//TODO: return all the datas to send over network tables
+			//TODO: come up with syntax for seperating data, like s = "x:"+x+"#y:"+y
+			return s;
+		}
 	}
 
 	/*** Helper Functions ***/
@@ -78,26 +92,24 @@ public class Main {
 		return bi;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		new Main();
 	}
 
-	public Main() {
+	public Main() throws Exception {
 		// Must be included!
 		System.loadLibrary("opencv_java310");
 
 		// Connect NetworkTables, and get access to the publishing table
 		NetworkTable.setClientMode();
+		
 		// Set your team number here
 		NetworkTable.setTeam(2706);
 
 		NetworkTable.initialize();
-
-		// This is the network port you want to stream the raw received image to
-		// By rules, this has to be between 1180 and 1190, so 1185 is a good
-		// choice
-		// int streamPort = 1185;
-
+		
+		table = NetworkTable.getTable("vision");
+		
 		// read the vision calibration values from file.
 		loadVisionParams();
 
@@ -113,9 +125,10 @@ public class Main {
 		if (!camera.isOpened()) {
 			System.out.println("Error: Can not connect to camera");
 		} else {
-
+			
 			// Set up the camera feed
 			camera.read(frame);
+			
 			DisplayGui guiRawImg = null;
 			DisplayGui guiProcessedImg = null;
 			boolean use_GUI = false;
@@ -174,6 +187,8 @@ public class Main {
 							Runtime.getRuntime().halt(0);
 						}
 
+					}else{
+						table.putString("data", visionData.toString());
 					}
 					// Display the frame rate
 					System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f\n", visionData.fps, cameraFps);
