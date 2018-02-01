@@ -173,7 +173,6 @@ public class Main {
 							System.out.println("Window closed");
 							Runtime.getRuntime().halt(0);
 						}
-					} else {
 
 						// Display the frame rate
 						System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f\n", visionData.fps, cameraFps);
