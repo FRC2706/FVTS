@@ -45,6 +45,7 @@ public class Main {
 		public int maxValue;
 		public int erodeDilateIterations;
 		public int CameraSelect;
+		public int dBoxBuffer;
 	}
 
 	private static VisionParams visionParams = new VisionParams();
@@ -54,7 +55,7 @@ public class Main {
 	 */
 	private static class VisionData {
 
-		public class Target {
+		public static class Target {
 		 	int xCenter;
 		 	int yCenter;
 
@@ -63,7 +64,6 @@ public class Main {
 				yCenter = y;
 			}
 		}
-
 		Mat outputImg = new Mat();
 		double fps;
 
@@ -87,7 +87,8 @@ public class Main {
 			visionParams.maxSaturation = Integer.valueOf(properties.getProperty("maxSaturation"));
 			visionParams.minValue = Integer.valueOf(properties.getProperty("minValue"));
 			visionParams.maxValue = Integer.valueOf(properties.getProperty("maxValue"));
-			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));;
+			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
+			visionParams.dBoxBuffer = Integer.valueOf(properties.getProperty("dBoxBuffer"));
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.exit(1);
@@ -139,8 +140,6 @@ public class Main {
 		Imgproc.findContours(dilatedImg, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
 		//Make Bounding Box
-		boolean whichCube = true;
-
 		for (MatOfPoint contour : contours)
 		{
     	Rect rect = Imgproc.boundingRect(contour);
@@ -148,28 +147,25 @@ public class Main {
 			// height * width for area (easier and less CPU cycles than contour.area)
 			int area = rect.width * rect.height;
 
-			// TODO Matt to write an explanation of the fomula below
-			// TODO the 0.25 should come from the params file
-			int x,y;
-		if (rect.width <= ((rect.height*2) + (rect.height*0.25)) && rect.width >= ((rect.height*2) - (rect.height*0.25))) {
+			// TODO Matt to write an explanation of the formula below
+			int x,y,xt,yt;
+		if (rect.width <= ((rect.height*2) + (rect.height*visionParams.dBoxBuffer)) && rect.width >= ((rect.height*2) - (rect.height*visionParams.dBoxBuffer))) {
+			x = rect.x + (rect.width/4);
+			y = rect.y + (rect.height/2);
+			xt = rect.x + ((3*rect.width)/4);
+			yt = rect.y + (rect.height/2);
 
-			if (whichCube) {
-				x = rect.x + (rect.width/4);
-				y = rect.y + (rect.height/2);
-				whichCube = false;
-			} else {
-				x = rect.x + ((3*rect.width)/4);
-				y = rect.y + (rect.height/2);
-				whichCube = true;
-			}
+			visionData.targetsFound.add(new VisionData.Target(x,y));
+			visionData.targetsFound.add(new VisionData.Target(xt,yt));
 		} else {
 			x = rect.x + (rect.width/2);
 			y = rect.y + (rect.height/2);
+
+			visionData.targetsFound.add(new VisionData.Target(x,y));
 		}
 
-		visionData.targetsFound.add(new VisionData.Target(x,y));
 
-		//system.out.println("area: ", area, "xCenter: ", xCenter, "yCenter", yCenter);
+			//system.out.println("area: ", area, "xCenter: ", xCenter, "yCenter", yCenter);
 }
 
 		visionData.outputImg = erode;
