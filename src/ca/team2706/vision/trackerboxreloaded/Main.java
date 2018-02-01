@@ -34,6 +34,7 @@ public class Main {
 		public int maxValue;
 		public int erodeDilateIterations;
 		public int CameraSelect;
+		public int minArea;
 	}
 
 	public static VisionParams visionParams = new VisionParams();
@@ -78,15 +79,10 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		boolean use_GUI = false;
-		if (System.getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
-			use_GUI = true;
-			System.out.println(use_GUI);
-		}
-		new Main(!use_GUI);
+		new Main();
 	}
 
-	public Main(boolean loadParams) {
+	public Main() {
 		// Must be included!
 		Pipeline.start();
 
@@ -103,18 +99,7 @@ public class Main {
 		// int streamPort = 1185;
 
 		// read the vision calibration values from file.
-		if (loadParams) {
-			loadVisionParams();
-		} else {
-			loadVisionParams();
-			visionParams.erodeDilateIterations = 0;
-			visionParams.maxHue = 0;
-			visionParams.maxSaturation = 0;
-			visionParams.maxValue = 0;
-			visionParams.minHue = 0;
-			visionParams.minSaturation = 0;
-			visionParams.minValue = 0;
-		}
+		loadVisionParams();
 
 		// Open a connection to the camera
 		VideoCapture camera = new VideoCapture(visionParams.CameraSelect);
@@ -210,6 +195,7 @@ public class Main {
 			properties.setProperty("minValue", String.valueOf(visionParams.minValue));
 			properties.setProperty("maxValue", String.valueOf(visionParams.maxValue));
 			properties.setProperty("erodeDilateIterations", String.valueOf(visionParams.erodeDilateIterations));
+			properties.setProperty("minArea", String.valueOf(visionParams.minArea));
 			FileOutputStream out = new FileOutputStream("visionParams.properties");
 			properties.store(out, "");
 		} catch (Exception e1) {

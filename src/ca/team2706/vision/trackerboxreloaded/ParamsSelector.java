@@ -30,6 +30,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JSlider slider_5; //Maximum Value
 	private JTextField txtIterations;
 	private JTextField textField_1;
+	private JTextField txtMinimumArea;
+	private JTextField textField_2;
 	public ParamsSelector() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -93,7 +95,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		contentPane.add(slider_5);
 		
 		textField = new JTextField(String.valueOf(Main.visionParams.CameraSelect));
-		textField.setBounds(196, 44, 86, 20);
+		textField.setBounds(196, 49, 86, 20);
 		contentPane.add(textField);
 		textField.setColumns(10);
 		
@@ -121,6 +123,19 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		textField_1.setBounds(288, 102, 86, 20);
 		contentPane.add(textField_1);
 		textField_1.setColumns(10);
+		
+		txtMinimumArea = new JTextField();
+		txtMinimumArea.setText("Minimum Area:");
+		txtMinimumArea.setEditable(false);
+		txtMinimumArea.setBounds(151, 92, 86, 20);
+		contentPane.add(txtMinimumArea);
+		txtMinimumArea.setColumns(10);
+		
+		textField_2 = new JTextField();
+		textField_2.setBounds(151, 114, 86, 20);
+		contentPane.add(textField_2);
+		textField_2.setColumns(10);
+		
 		Properties properties = new Properties();
 		try {
 			properties.load(new FileInputStream(new File("visionParams.properties")));
@@ -136,6 +151,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		slider_5.setValue(Integer.valueOf(properties.getProperty("maxValue")));
 		textField.setText(properties.getProperty("CameraSelect"));
 		textField_1.setText(properties.getProperty("erodeDilateIterations"));
+		textField_2.setText(properties.getProperty("minArea"));
 		setVisible(true);
 		
 		new Thread(this).start();
@@ -150,6 +166,9 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				}
 				if(isInt(textField_1.getText())){
 					Main.visionParams.erodeDilateIterations = Integer.valueOf(textField_1.getText());
+				}
+				if(isInt(textField_2.getText())){
+					Main.visionParams.minArea = Integer.valueOf(textField_2.getText());
 				}
 				Main.visionParams.minHue = slider.getValue();
 				Main.visionParams.maxHue = slider_1.getValue();
