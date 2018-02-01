@@ -32,6 +32,9 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JTextField textField_1;
 	private JTextField txtMinimumArea;
 	private JTextField textField_2;
+	private JTextField txtHue;
+	private JTextField txtSaturation;
+	private JTextField txtValue;
 	public ParamsSelector() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -152,6 +155,27 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		textField.setText(properties.getProperty("CameraSelect"));
 		textField_1.setText(properties.getProperty("erodeDilateIterations"));
 		textField_2.setText(properties.getProperty("minArea"));
+		
+		txtHue = new JTextField();
+		txtHue.setText("Hue: ");
+		txtHue.setEditable(false);
+		txtHue.setBounds(4, 212, 123, 20);
+		contentPane.add(txtHue);
+		txtHue.setColumns(10);
+		
+		txtSaturation = new JTextField();
+		txtSaturation.setEditable(false);
+		txtSaturation.setText("Saturation:");
+		txtSaturation.setBounds(151, 212, 131, 20);
+		contentPane.add(txtSaturation);
+		txtSaturation.setColumns(10);
+		
+		txtValue = new JTextField();
+		txtValue.setEditable(false);
+		txtValue.setText("Value:");
+		txtValue.setBounds(288, 212, 123, 20);
+		contentPane.add(txtValue);
+		txtValue.setColumns(10);
 		setVisible(true);
 		
 		new Thread(this).start();
@@ -176,6 +200,11 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				Main.visionParams.maxSaturation = slider_3.getValue();
 				Main.visionParams.minValue = slider_4.getValue();
 				Main.visionParams.maxValue = slider_5.getValue();
+				
+				txtHue.setText("Hue: "+Main.visionParams.minHue+"-"+Main.visionParams.maxHue);
+				txtSaturation.setText("Saturation: "+Main.visionParams.minSaturation+"-"+Main.visionParams.maxSaturation);
+				txtValue.setText("Value: "+Main.visionParams.minValue+"-"+Main.visionParams.maxValue);
+				
 				Thread.sleep(5);
 			}catch(Exception e){
 				e.printStackTrace();
