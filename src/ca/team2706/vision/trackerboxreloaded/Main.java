@@ -53,8 +53,21 @@ public class Main {
 	 * A class to hold any vision data returned by process()
 	 */
 	private static class VisionData {
-		public Mat outputImg = new Mat();
+
+		public class Target {
+		 	int xCenter;
+		 	int yCenter;
+
+			public Target(int x, int y) {
+				xCenter = x;
+				yCenter = y;
+			}
+		}
+
+		Mat outputImg = new Mat();
 		double fps;
+
+		ArrayList<Target> targetsFound = new ArrayList<>();
 	}
 
 
@@ -74,7 +87,7 @@ public class Main {
 			visionParams.maxSaturation = Integer.valueOf(properties.getProperty("maxSaturation"));
 			visionParams.minValue = Integer.valueOf(properties.getProperty("minValue"));
 			visionParams.maxValue = Integer.valueOf(properties.getProperty("maxValue"));
-			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
+			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));;
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.exit(1);
@@ -115,7 +128,7 @@ public class Main {
 		Core.inRange(src, new Scalar(visionParams.minHue, visionParams.minSaturation, visionParams.minValue),
 				new Scalar(visionParams.maxHue, visionParams.maxSaturation, visionParams.maxValue), hsvThreshold);
 
-		// Dilate - Erode
+		// Erode - Dilate
 		Mat dilatedImg = new Mat();
 		Mat erode = new Mat();
 		Imgproc.erode(hsvThreshold, erode, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
@@ -123,14 +136,40 @@ public class Main {
 
 		//Find contours
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-		Imgproc.findContours(erode, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(dilatedImg, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
 		//Make Bounding Box
-
+		boolean whichCube = true;
 
 		for (MatOfPoint contour : contours)
-{
-    Rect rect = Imgproc.boundingRect(contour);
+		{
+    	Rect rect = Imgproc.boundingRect(contour);
+
+			// height * width for area (easier and less CPU cycles than contour.area)
+			int area = rect.width * rect.height;
+
+			// TODO Matt to write an explanation of the fomula below
+			// TODO the 0.25 should come from the params file
+			int x,y;
+		if (rect.width <= ((rect.height*2) + (rect.height*0.25)) && rect.width >= ((rect.height*2) - (rect.height*0.25))) {
+
+			if (whichCube) {
+				x = rect.x + (rect.width/4);
+				y = rect.y + (rect.height/2);
+				whichCube = false;
+			} else {
+				x = rect.x + ((3*rect.width)/4);
+				y = rect.y + (rect.height/2);
+				whichCube = true;
+			}
+		} else {
+			x = rect.x + (rect.width/2);
+			y = rect.y + (rect.height/2);
+		}
+
+		visionData.targetsFound.add(new VisionData.Target(x,y));
+
+		//system.out.println("area: ", area, "xCenter: ", xCenter, "yCenter", yCenter);
 }
 
 		visionData.outputImg = erode;
@@ -245,7 +284,7 @@ public class Main {
 					}
 
                     // Display the frame rate
-                    System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f\n", visionData.fps, cameraFps);
+                    System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f \n", visionData.fps, cameraFps, "");
 				}
 				else {
 					System.err.println("Error: Failed to get a frame from the camera");
