@@ -20,9 +20,10 @@ public class Pipeline {
      * The vision pipeline!
      *
      * @param src Raw source image to process
-     * @returns turn All the data!
+     * @param visionParams Parameters for vision
+     * @return All the data!
      */
-	public static VisionData process(Mat src, VisionParams visionParams) throws Exception {
+	public static VisionData process(Mat src, VisionParams visionParams) {
 
 		// If there's any data or intermediate images that you want to return,
 		// add them to the VisionData class
