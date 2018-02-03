@@ -1,7 +1,6 @@
 package ca.team2706.vision.trackerboxreloaded;
 
-import java.util.HashMap;
-
+import ca.team2706.vision.trackerboxreloaded.Main.VisionData;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
@@ -23,6 +22,7 @@ public class ExampleServer {
 	public static NetworkTable data;
 
 	
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		//Inits stuff
 		NetworkTableInstance instance = NetworkTableInstance.getDefault();
@@ -31,13 +31,7 @@ public class ExampleServer {
 		data = vision.getSubTable("data");
 		fps = vision.getSubTable("fps");
 		while (true) {
-			NetworkTableValue value = data.getEntry("data").getValue();
-			if (value.isString()) {
-				HashMap<String, String> data = DataUtils.decodeData(value.getString());
-				for (String key : data.keySet()) {
-					System.out.println(key + " : " + data.get(key));
-				}
-			}
+			VisionData visionData = Main.VisionData.decode(data);
 			NetworkTableValue fpsValue = fps.getEntry("fps").getValue();
 			if(fpsValue.isDouble()){
 				System.out.println("fps: "+fpsValue.getDouble());
