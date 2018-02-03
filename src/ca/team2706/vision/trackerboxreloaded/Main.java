@@ -92,6 +92,28 @@ public class Main {
 			visionParams.aspectRatioThresh = Double.valueOf(properties.getProperty("aspectRatioThresh"));
 		} catch (Exception e1) {
 			e1.printStackTrace();
+			System.err.println("\n\nError reading the params file, check if the file is corrupt?");
+			System.exit(1);
+		}
+	}
+
+	public static void saveVisionParams() {
+		Properties properties = new Properties();
+		try {
+			properties.setProperty("CameraSelect", String.valueOf(visionParams.CameraSelect));
+			properties.setProperty("minHue", String.valueOf(visionParams.minHue));
+			properties.setProperty("maxHue", String.valueOf(visionParams.maxHue));
+			properties.setProperty("minSaturation", String.valueOf(visionParams.minSaturation));
+			properties.setProperty("maxSaturation", String.valueOf(visionParams.maxSaturation));
+			properties.setProperty("minValue", String.valueOf(visionParams.minValue));
+			properties.setProperty("maxValue", String.valueOf(visionParams.maxValue));
+			properties.setProperty("erodeDilateIterations", String.valueOf(visionParams.erodeDilateIterations));
+			properties.setProperty("minArea", String.valueOf(visionParams.minArea));
+			properties.setProperty("aspectRatioThresh", String.valueOf(visionParams.aspectRatioThresh));
+			FileOutputStream out = new FileOutputStream("visionParams.properties");
+			properties.store(out, "");
+		} catch (Exception e1) {
+			e1.printStackTrace();
 			System.exit(1);
 		}
 	}
@@ -213,26 +235,7 @@ public class Main {
 		} // end main video processing loop
 	}
 
-	public static void save() {
-		Properties properties = new Properties();
-		try {
-			properties.setProperty("CameraSelect", String.valueOf(visionParams.CameraSelect));
-			properties.setProperty("minHue", String.valueOf(visionParams.minHue));
-			properties.setProperty("maxHue", String.valueOf(visionParams.maxHue));
-			properties.setProperty("minSaturation", String.valueOf(visionParams.minSaturation));
-			properties.setProperty("maxSaturation", String.valueOf(visionParams.maxSaturation));
-			properties.setProperty("minValue", String.valueOf(visionParams.minValue));
-			properties.setProperty("maxValue", String.valueOf(visionParams.maxValue));
-			properties.setProperty("erodeDilateIterations", String.valueOf(visionParams.erodeDilateIterations));
-			properties.setProperty("minArea", String.valueOf(visionParams.minArea));
-			properties.setProperty("aspectRatioThresh", String.valueOf(visionParams.aspectRatioThresh));
-			FileOutputStream out = new FileOutputStream("visionParams.properties");
-			properties.store(out, "");
-		} catch (Exception e1) {
-			e1.printStackTrace();
-			System.exit(1);
-		}
-	}
+
 	/**Normalises points from a frame from the camera to a value 
 	 * between -1,-1 and 1,1 where the center of the image is 0,0
 	 * this is very usefull
