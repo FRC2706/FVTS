@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.HashMap;
 import java.util.Properties;
 
 import javax.imageio.ImageIO;
@@ -14,7 +15,8 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Main {
 
@@ -46,18 +48,15 @@ public class Main {
 	 */
 	public static class VisionData {
 		public Mat outputImg = new Mat();
-		double fps;
-		
+		public double fps;
+		public HashMap<String,String> data = new HashMap<String,String>();
 		/**
 		 * This method converts the vision data into a nice and tidy string
 		 * @return data
 		 */
 		@Override
 		public String toString(){
-			String s = "";
-			//TODO: return all the datas to send over network tables
-			//TODO: come up with syntax for seperating data, like s = "x:"+x+"#y:"+y
-			s += "fps:"+fps;
+			String s = DataUtils.encodeData(data);
 			return s;
 		}
 	}
@@ -102,17 +101,8 @@ public class Main {
 		System.loadLibrary("opencv_java310");
 
 		// Connect NetworkTables, and get access to the publishing table
-		NetworkTable.setClientMode();
-		
-		// Set your team number here
-		NetworkTable.setTeam(2706);
-		
-		NetworkTable.setIPAddress("127.0.0.1");
-		
-		NetworkTable.initialize();
-		
-		table = NetworkTable.getTable("vision");
-		
+		NetworkTableInstance instance = NetworkTableInstance.getDefault();
+		table = instance.getTable("vision");
 		// read the vision calibration values from file.
 		loadVisionParams();
 
@@ -176,7 +166,7 @@ public class Main {
 						System.err.println("Error: Frame failed to process. Skipping frame.");
 						continue;
 					}
-					table.putValue("data", visionData.toString());
+					table.getEntry("data").forceSetString(visionData.toString());
 					// display the processed frame in the GUI
 					if (use_GUI) {
 						try {
@@ -189,8 +179,6 @@ public class Main {
 							Runtime.getRuntime().halt(0);
 						}
 
-					}else{
-						table.putString("data", visionData.toString());
 					}
 					// Display the frame rate
 					System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f\n", visionData.fps, cameraFps);

@@ -2,26 +2,18 @@ package ca.team2706.vision.trackerboxreloaded;
 
 import java.util.HashMap;
 
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class ExampleServer {
-	public static NetworkTable table;
+	static NetworkTable table;
 	public static void main(String[] args){
-		NetworkTable.setServerMode();
-		
-		// Sets the team number to 2706
-		NetworkTable.setTeam(2706);
-		
-		//Initilizes the NetworkTable! Very important!
-		NetworkTable.initialize();
-		
-		//Gets the vision NetworkTable
-		table = NetworkTable.getTable("vision");
-		table.putString("data", "start");
+		NetworkTableInstance instance = NetworkTableInstance.getDefault();
+		table = instance.getTable("vision");
 		while(true){
-			HashMap<String,String> values = DataDecoder.decodeMessage(table.getString("data"));
-			for(String key : values.keySet()){
-				System.out.println(key+" : "+values.get(key));
+			HashMap<String,String> data = DataUtils.decodeData(table.getEntry("data").getString(""));
+			for(String key : data.keySet()){
+				System.out.println(key+" : "+data.get(key));
 			}
 			try {
 				Thread.sleep(1);
