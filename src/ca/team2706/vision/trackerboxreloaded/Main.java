@@ -14,7 +14,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTable;
 
 public class Main {
 
@@ -57,6 +57,7 @@ public class Main {
 			String s = "";
 			//TODO: return all the datas to send over network tables
 			//TODO: come up with syntax for seperating data, like s = "x:"+x+"#y:"+y
+			s += "fps:"+fps;
 			return s;
 		}
 	}
@@ -177,7 +178,6 @@ public class Main {
 			// Main video processing loop
 			while (true) {
 				if (camera.read(frame)) {
-
 					// display the raw frame
 					if (use_GUI) {
 						try {
@@ -201,7 +201,7 @@ public class Main {
 						System.err.println("Error: Frame failed to process. Skipping frame.");
 						continue;
 					}
-
+					table.putString("data", visionData.toString());
 					// display the processed frame in the GUI
 					if (use_GUI) {
 						try {
