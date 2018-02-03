@@ -17,6 +17,7 @@ import org.opencv.videoio.Videoio;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableValue;
 
 public class Main {
 
@@ -61,9 +62,9 @@ public class Main {
 		 * :]
 		 * @return the data
 		 */
-		public String encode(NetworkTable table){
-			String s = DataUtils.encodeData(data);
-			return s;
+		public void encode(NetworkTable table){
+			//TODO: add code
+			//basic networktable code: table.getEntry("data").setString("foo);
 		}
 		
 		/**
@@ -72,6 +73,8 @@ public class Main {
 		 * @return the data
 		 */
 		public static VisionData decode(NetworkTable table){
+			//TODO: add code
+			//basic networktable code: table.getEntry("data").getValue().getString();
 			
 			return null;
 		}
