@@ -45,60 +45,60 @@ public class Main {
 	public static VisionParams visionParams = new VisionParams();
 
 	/**
-	 * A class to hold any vision data returned by process()
-	 * :)
-	 * :)
-	 * :}
-	 * :]
-	 * :]
+	 * A class to hold any vision data returned by process() :) :) :} :] :]
 	 */
 	public static class VisionData {
 		public Mat outputImg = new Mat();
 		public double fps;
-		public HashMap<String,String> data = new HashMap<String,String>();
+		public HashMap<String, String> data = new HashMap<String, String>();
+
 		/**
-		 * This method converts the vision data into a nice and tidy string
-		 * :]
+		 * This method converts the vision data into a nice and tidy string :]
+		 * 
 		 * @return the data
 		 */
-		public void encode(NetworkTable table){
-			//TODO: add code
-			//basic networktable code: table.getEntry("data").setString("foo);
+		public void encode(NetworkTable table) {
+			// TODO: add code
+			// basic networktable code: table.getEntry("data").setString("foo);
 			table.getEntry("data").setString(DataUtils.encodeData(data));
 		}
-		
+
 		/**
 		 * Decodes the NetworkTable stuff into a VisionData
-		 * @param the data table
+		 * 
+		 * @param the
+		 *            data table
 		 * @return the data
 		 */
 		@SuppressWarnings("unused")
-		public static VisionData decode(NetworkTable table){
-			//TODO: add code
-			//basic networktable code: table.getEntry("data").getValue().getString();
-			//dont forget: if(table.getEntry("data").getValue().isString())
-			if(table.getEntry("data").getValue().isString()){
-				HashMap<String,String> data = DataUtils.decodeData(table.getEntry("data").getValue().getString());
+		public static VisionData decode(NetworkTable table) {
+			// TODO: add code
+			// basic networktable code:
+			// table.getEntry("data").getValue().getString();
+			// dont forget: if(table.getEntry("data").getValue().isString())
+			if (table.getEntry("data").getValue().isString()) {
+				HashMap<String, String> data = DataUtils.decodeData(table.getEntry("data").getValue().getString());
 			}
 			return null;
 		}
 	}
+
 	/**
-	 * Initilizes the Network Tables
-	 * WARNING! Change 127.0.0.1 to the robot ip before it is on master or it will not be fun :)
+	 * Initilizes the Network Tables WARNING! Change 127.0.0.1 to the robot ip
+	 * before it is on master or it will not be fun :)
 	 */
-	private static void initNetworkTables(){
+	private static void initNetworkTables() {
 		NetworkTableInstance instance = NetworkTableInstance.getDefault();
 		instance.startClient("127.0.0.1");
 		vision = instance.getTable("vision");
 		fps = vision.getSubTable("fps");
 		data = vision.getSubTable("data");
 	}
+
 	/**
 	 * 
-	 * Loads the vision params!
-	 * :]
-	 *  
+	 * Loads the vision params! :]
+	 * 
 	 **/
 
 	private static void loadVisionParams() {
@@ -120,15 +120,16 @@ public class Main {
 			System.exit(1);
 		}
 	}
-	
+
 	/**
-	 * Converts a OpenCV Matrix to a BufferedImage 
-	 * :)
-	 * @param matrix Matrix to be converted
+	 * Converts a OpenCV Matrix to a BufferedImage :)
+	 * 
+	 * @param matrix
+	 *            Matrix to be converted
 	 * @return Generated from the matrix
 	 * @throws Exception
 	 */
-	private static BufferedImage Mat2BufferedImage(Mat matrix) throws Exception {
+	private static BufferedImage matToBufferedImage(Mat matrix) throws Exception {
 		MatOfByte mob = new MatOfByte();
 		Imgcodecs.imencode(".jpg", matrix, mob);
 		byte ba[] = mob.toArray();
@@ -146,15 +147,8 @@ public class Main {
 	 * @param args
 	 * @throws Exception
 	 */
-	public static void main(String[] args) throws Exception {
-		new Main();
-	}
-	/**
-	 * The constructor! all the code is in here!
-	 * :]
-	 * @throws Exception
-	 */
-	public Main() throws Exception {
+	public static void main(String[] args){
+		try{
 		// Must be included!
 		System.loadLibrary("opencv_java310");
 
@@ -189,8 +183,8 @@ public class Main {
 			// Set up the GUI display windows
 			if (use_GUI) {
 				try {
-					guiRawImg = new DisplayGui(Mat2BufferedImage(frame), "Raw Camera Image");
-					guiProcessedImg = new DisplayGui(Mat2BufferedImage(frame), "Processed Image");
+					guiRawImg = new DisplayGui(matToBufferedImage(frame), "Raw Camera Image");
+					guiProcessedImg = new DisplayGui(matToBufferedImage(frame), "Processed Image");
 					new ParamsSelector();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -205,7 +199,7 @@ public class Main {
 						try {
 							// May throw a NullPointerException if initializing
 							// the window failed
-							guiRawImg.updateImage(Mat2BufferedImage(frame));
+							guiRawImg.updateImage(matToBufferedImage(frame));
 						} catch (Exception e) {
 							e.printStackTrace();
 							System.out.println("Window closed");
@@ -233,7 +227,7 @@ public class Main {
 							
 							// May throw a NullPointerException if initializing
 							// the window failed
-							guiProcessedImg.updateImage(Mat2BufferedImage(visionData.outputImg));
+							guiProcessedImg.updateImage(matToBufferedImage(visionData.outputImg));
 							
 						} catch (Exception e) {
 							
@@ -250,12 +244,17 @@ public class Main {
 					
 				} // end main video processing loop
 			}
+		
 		}
 		camera.release();
+		}catch(Exception e){
+			System.err.println("Somthing bad is up :|");
+			e.printStackTrace();
+		}
 	}
+
 	/**
-	 * Saves the properties
-	 * :]
+	 * Saves the properties :]
 	 */
 	public static void save() {
 		Properties properties = new Properties();
