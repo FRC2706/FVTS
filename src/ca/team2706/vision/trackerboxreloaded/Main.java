@@ -45,7 +45,7 @@ public class Main {
 		public int maxValue;
 		public int erodeDilateIterations;
 		public int CameraSelect;
-		public int dBoxBuffer;
+		public double dBoxBuffer;
 	}
 
 	private static VisionParams visionParams = new VisionParams();
@@ -88,7 +88,7 @@ public class Main {
 			visionParams.minValue = Integer.valueOf(properties.getProperty("minValue"));
 			visionParams.maxValue = Integer.valueOf(properties.getProperty("maxValue"));
 			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
-			visionParams.dBoxBuffer = Integer.valueOf(properties.getProperty("dBoxBuffer"));
+			visionParams.dBoxBuffer = Double.valueOf(properties.getProperty("dBoxBuffer"));
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.exit(1);
