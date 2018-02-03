@@ -61,9 +61,19 @@ public class Main {
 		 * :]
 		 * @return the data
 		 */
-		public String encode(){
+		public String encode(NetworkTable table){
 			String s = DataUtils.encodeData(data);
 			return s;
+		}
+		
+		/**
+		 * Decodes the NetworkTable stuff into a VisionData
+		 * @param the data table
+		 * @return the data
+		 */
+		public static VisionData decode(NetworkTable table){
+			
+			return null;
 		}
 	}
 	/**
@@ -206,7 +216,7 @@ public class Main {
 						continue;
 					}
 					//Sends the data
-					data.getEntry("data").setString(visionData.encode());
+					visionData.encode(data);
 					fps.getEntry("fps").setDouble(visionData.fps);
 					
 					// display the processed frame in the GUI
