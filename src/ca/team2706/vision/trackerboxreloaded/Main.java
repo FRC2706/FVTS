@@ -2,8 +2,12 @@ package ca.team2706.vision.trackerboxreloaded;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Properties;
 
 import javax.imageio.ImageIO;
@@ -14,10 +18,11 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
-
 public class Main {
-
+	public static final int SECONDS_BETWEEN_DUMPS = 100;
+	public static int current_time_seconds = 0;
+	public static String outputPath;
+	public static final SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd-hh-mm-ss");
 	// Camera Type
 	// Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
 	// there is no webcam :/
@@ -63,6 +68,7 @@ public class Main {
 			visionParams.minValue = Integer.valueOf(properties.getProperty("minValue"));
 			visionParams.maxValue = Integer.valueOf(properties.getProperty("maxValue"));
 			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
+			outputPath = properties.getProperty("dumpPath");
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.exit(1);
@@ -85,18 +91,6 @@ public class Main {
 	public Main() {
 		// Must be included!
 		System.loadLibrary("opencv_java310");
-
-		// Connect NetworkTables, and get access to the publishing table
-		NetworkTable.setClientMode();
-		// Set your team number here
-		NetworkTable.setTeam(2706);
-
-		NetworkTable.initialize();
-
-		// This is the network port you want to stream the raw received image to
-		// By rules, this has to be between 1180 and 1190, so 1185 is a good
-		// choice
-		// int streamPort = 1185;
 
 		// read the vision calibration values from file.
 		loadVisionParams();
@@ -134,6 +128,9 @@ public class Main {
 				}
 			}
 
+			// Starts the timer
+			new Timer();
+			
 			// Main video processing loop
 			while (true) {
 				if (camera.read(frame)) {
@@ -141,9 +138,13 @@ public class Main {
 					// display the raw frame
 					if (use_GUI) {
 						try {
+							BufferedImage image = Mat2BufferedImage(frame);
+							if(current_time_seconds >= SECONDS_BETWEEN_DUMPS){
+								dump(image,true);
+							}
 							// May throw a NullPointerException if initializing
 							// the window failed
-							guiRawImg.updateImage(Mat2BufferedImage(frame));
+							guiRawImg.updateImage(image);
 						} catch (Exception e) {
 							e.printStackTrace();
 							System.out.println("Window closed");
@@ -165,9 +166,13 @@ public class Main {
 					// display the processed frame in the GUI
 					if (use_GUI) {
 						try {
+							BufferedImage image = Mat2BufferedImage(visionData.outputImg);
+							if(current_time_seconds >= SECONDS_BETWEEN_DUMPS){
+								dump(image,false);
+							}
 							// May throw a NullPointerException if initializing
 							// the window failed
-							guiProcessedImg.updateImage(Mat2BufferedImage(visionData.outputImg));
+							guiProcessedImg.updateImage(image);
 						} catch (Exception e) {
 							e.printStackTrace();
 							System.out.println("Window closed");
@@ -177,7 +182,7 @@ public class Main {
 					}
 					// Display the frame rate
 					System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f\n", visionData.fps, cameraFps);
-					
+
 				} // end main video processing loop
 			}
 		}
@@ -202,5 +207,27 @@ public class Main {
 			e1.printStackTrace();
 			System.exit(1);
 		}
+	}
+
+	public static void dump(BufferedImage image,boolean raw) {
+		File output;
+		if(raw){
+			output = new File(outputPath + "imageraw" + format.format(Calendar.getInstance().getTime()) + ".png");
+		}else{
+			output = new File(outputPath + "imageprocessed" + format.format(Calendar.getInstance().getTime()) + ".png");
+		}
+		if (!output.getParentFile().exists()) {
+			output.getParentFile().mkdirs();
+		}
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					ImageIO.write(image, "PNG", output);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 	}
 }
