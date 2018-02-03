@@ -12,7 +12,7 @@ import java.util.List;
 public class Pipeline {
 	
 	/** Numerical Constants **/
-	private static final int NANOSECONDS_PER_SECOND = 1000000000;
+	public static final int NANOSECONDS_PER_SECOND = 1000000000;
 	
 	public static long fpsTimer = System.nanoTime();
 
@@ -48,27 +48,30 @@ public class Pipeline {
 		//Make Bounding Box
 		for (MatOfPoint contour : contours)
 		{
-			Rect rect = Imgproc.boundingRect(contour);
+			Rect boundingRect = Imgproc.boundingRect(contour);
 
 			// height * width for area (easier and less CPU cycles than contour.area)
-			int area = rect.width * rect.height;
+			int area = boundingRect.width * boundingRect.height;
+
+			// TODO if < minArea, skip this contour: continue
+
 
 			// TODO Matt to write an explanation of the formula below
-			int x,y,xt,yt;
-			if ( (rect.width <= (2 + visionParams.aspectRatioThresh)*rect.height) && (rect.width >= (2 - visionParams.aspectRatioThresh)*rect.height) ) {
-//			if (rect.width <= ((rect.height*2) + (rect.height*visionParams.aspectRatioThresh)) && rect.width >= ((rect.height*2) - (rect.height*visionParams.aspectRatioThresh))) {
-				x = rect.x + (rect.width/4);
-				y = rect.y + (rect.height/2);
-				xt = rect.x + ((3*rect.width)/4);
-				yt = rect.y + (rect.height/2);
+			int target1CtrX,target1CtrY,target2CtrX,target2CtrY;
+			if ( (boundingRect.width <= (2 + visionParams.aspectRatioThresh)*boundingRect.height) && (boundingRect.width >= (2 - visionParams.aspectRatioThresh)*boundingRect.height) ) {
 
-				visionData.targetsFound.add(new VisionData.Target(x,y));
-				visionData.targetsFound.add(new VisionData.Target(xt,yt));
+				target1CtrX = boundingRect.x + (boundingRect.width/4);
+				target1CtrY = boundingRect.y + (boundingRect.height/2);
+				target2CtrX = boundingRect.x + ((3*boundingRect.width)/4);
+				target2CtrY = boundingRect.y + (boundingRect.height/2);
+
+				visionData.targetsFound.add(new VisionData.Target(target1CtrX,target1CtrY, boundingRect));
+				visionData.targetsFound.add(new VisionData.Target(target2CtrX,target2CtrY, boundingRect));
 			} else {
-				x = rect.x + (rect.width/2);
-				y = rect.y + (rect.height/2);
+				target1CtrX = boundingRect.x + (boundingRect.width/2);
+				target1CtrY = boundingRect.y + (boundingRect.height/2);
 
-				visionData.targetsFound.add(new VisionData.Target(x,y));
+				visionData.targetsFound.add(new VisionData.Target(target1CtrX,target1CtrY, boundingRect));
 			}
 
 
@@ -77,14 +80,19 @@ public class Pipeline {
 
 		visionData.outputImg = erode;
 
+
+
+
 		// DRAW STUFF ONTO THE OUTPUT IMAGE
 		// for each target found, draw the bounding box and centre
 
-		for (VisionData.Target targetCenter : visionData.targetsFound)
+		for (VisionData.Target target : visionData.targetsFound)
 		{
-			Point centerTarget = new Point(targetCenter.xCenter, targetCenter.yCenter);
+			Point centerTarget = new Point(target.xCenter, target.yCenter);
 			Scalar color = new Scalar(237, 19, 75);
-			Imgproc.circle(src, centerTarget, 8, color);
+			Imgproc.circle(src, centerTarget, 8, color, -1);
+			Imgproc.rectangle(src, new Point(target.boundingBox.x, target.boundingBox.y),
+					new Point(target.boundingBox.x + target.boundingBox.width, target.boundingBox.y + target.boundingBox.height), color, 5);
 		}
 
 		long now = System.nanoTime();

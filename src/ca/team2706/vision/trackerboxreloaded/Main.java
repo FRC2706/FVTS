@@ -55,12 +55,17 @@ public class Main {
 		public static class Target {
 			int xCenter;
 			int yCenter;
+			Rect boundingBox;
 
-			public Target(int x, int y) {
-				xCenter = x;
-				yCenter = y;
+			public Target(int xCenter, int yCenter, Rect boundingBox) {
+				this.xCenter = xCenter;
+				this.yCenter = yCenter;
+				this.boundingBox = boundingBox;
 			}
 		}
+
+
+		// VisionData variables
 		Mat outputImg = new Mat();
 
 		double fps;
@@ -142,6 +147,7 @@ public class Main {
 			use_GUI = true;
 			System.out.println(use_GUI);
 		}
+
 		// Set up the GUI display windows
 		if (use_GUI) {
 			try {
@@ -162,7 +168,7 @@ public class Main {
 					try {
 						// May throw a NullPointerException if initializing
 						// the window failed
-						guiRawImg.updateImage(Mat2BufferedImage(frame));
+						//guiRawImg.updateImage(Mat2BufferedImage(frame));
 					} catch (Exception e) {
 						e.printStackTrace();
 						System.out.println("Window closed");
@@ -172,6 +178,7 @@ public class Main {
 
 				// Process the frame!
 				VisionData visionData;
+				long pipelineStart = System.nanoTime();
 				try {
 					visionData = Pipeline.process(frame, visionParams);
 				} catch (Exception e) {
@@ -180,25 +187,28 @@ public class Main {
 					System.err.println("Error: Frame failed to process. Skipping frame.");
 					continue;
 				}
+				long pipelineEnd = System.nanoTime();
 
 				// display the processed frame in the GUI
 				if (use_GUI) {
 					try {
 						// May throw a NullPointerException if initializing
 						// the window failed
+						guiRawImg.updateImage(Mat2BufferedImage(frame));
 						guiProcessedImg.updateImage(Mat2BufferedImage(visionData.outputImg));
 					} catch (Exception e) {
 						e.printStackTrace();
 						System.out.println("Window closed");
 						Runtime.getRuntime().halt(0);
 					}
-
-					// Display the frame rate
-					System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f \n", visionData.fps, cameraFps, "");
 				}
 				else {
 					System.err.println("Error: Failed to get a frame from the camera");
 				}
+
+				// Display the frame rate ono the console
+				double pipelineTime = (((double)(pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND) * 1000;
+				System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime, "");
 			}
 		} // end main video processing loop
 	}
@@ -215,6 +225,7 @@ public class Main {
 			properties.setProperty("maxValue", String.valueOf(visionParams.maxValue));
 			properties.setProperty("erodeDilateIterations", String.valueOf(visionParams.erodeDilateIterations));
 			properties.setProperty("minArea", String.valueOf(visionParams.minArea));
+			properties.setProperty("aspectRatioThresh", String.valueOf(visionParams.aspectRatioThresh));
 			FileOutputStream out = new FileOutputStream("visionParams.properties");
 			properties.store(out, "");
 		} catch (Exception e1) {
