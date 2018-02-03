@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -127,9 +128,10 @@ public class Main {
 	 * @param matrix
 	 *            Matrix to be converted
 	 * @return Generated from the matrix
+	 * @throws IOException 
 	 * @throws Exception
 	 */
-	private static BufferedImage matToBufferedImage(Mat matrix) throws Exception {
+	private static BufferedImage matToBufferedImage(Mat matrix) throws IOException {
 		MatOfByte mob = new MatOfByte();
 		Imgcodecs.imencode(".jpg", matrix, mob);
 		byte ba[] = mob.toArray();
@@ -147,8 +149,7 @@ public class Main {
 	 * @param args
 	 * @throws Exception
 	 */
-	public static void main(String[] args){
-		try{
+	public static void main(String[] args) {
 		// Must be included!
 		System.loadLibrary("opencv_java310");
 
@@ -186,8 +187,9 @@ public class Main {
 					guiRawImg = new DisplayGui(matToBufferedImage(frame), "Raw Camera Image");
 					guiProcessedImg = new DisplayGui(matToBufferedImage(frame), "Processed Image");
 					new ParamsSelector();
-				} catch (Exception e) {
-					e.printStackTrace();
+				} catch (IOException e) {
+					// means mat2BufferedImage broke
+					// non-fatal error, let the program continue
 				}
 			}
 
@@ -200,7 +202,11 @@ public class Main {
 							// May throw a NullPointerException if initializing
 							// the window failed
 							guiRawImg.updateImage(matToBufferedImage(frame));
-						} catch (Exception e) {
+						} catch (IOException e) {
+							// means mat2BufferedImage broke
+							// non-fatal error, let the program continue
+							continue;
+						} catch (NullPointerException e) {
 							e.printStackTrace();
 							System.out.println("Window closed");
 							Runtime.getRuntime().halt(0);
@@ -208,15 +214,9 @@ public class Main {
 					}
 
 					// Process the frame!
-					VisionData visionData;
-					try {
-						visionData = Pipeline.process(frame, visionParams);
-					} catch (Exception e) {
-						// frame failed to process .... do nothing and go to
-						// next frame?
-						System.err.println("Error: Frame failed to process. Skipping frame.");
-						continue;
-					}
+					VisionData visionData = Pipeline.process(frame, visionParams);
+					
+					
 					//Sends the data
 					visionData.encode(data);
 					fps.getEntry("fps").setDouble(visionData.fps);
@@ -224,17 +224,17 @@ public class Main {
 					// display the processed frame in the GUI
 					if (use_GUI) {
 						try {
-							
 							// May throw a NullPointerException if initializing
 							// the window failed
 							guiProcessedImg.updateImage(matToBufferedImage(visionData.outputImg));
-							
-						} catch (Exception e) {
-							
+						} catch (IOException e) {
+							// means mat2BufferedImage broke
+							// non-fatal error, let the program continue
+							continue;
+						} catch (NullPointerException e) {
 							e.printStackTrace();
 							System.out.println("Window closed");
 							Runtime.getRuntime().halt(0);
-							
 						}
 
 					}
@@ -247,10 +247,6 @@ public class Main {
 		
 		}
 		camera.release();
-		}catch(Exception e){
-			System.err.println("Somthing bad is up :|");
-			e.printStackTrace();
-		}
 	}
 
 	/**
