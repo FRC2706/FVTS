@@ -53,26 +53,25 @@ public class Pipeline {
 			// height * width for area (easier and less CPU cycles than contour.area)
 			int area = boundingRect.width * boundingRect.height;
 
-			// TODO if < minArea, skip this contour: continue
+            if (area >= visionParams.minArea) {
+                // TODO Matt to write an explanation of the formula below
+                int target1CtrX, target1CtrY, target2CtrX, target2CtrY;
+                if ((boundingRect.width <= (2 + visionParams.aspectRatioThresh) * boundingRect.height) && (boundingRect.width >= (2 - visionParams.aspectRatioThresh) * boundingRect.height)) {
 
+                    target1CtrX = boundingRect.x + (boundingRect.width / 4);
+                    target1CtrY = boundingRect.y + (boundingRect.height / 2);
+                    target2CtrX = boundingRect.x + ((3 * boundingRect.width) / 4);
+                    target2CtrY = boundingRect.y + (boundingRect.height / 2);
 
-			// TODO Matt to write an explanation of the formula below
-			int target1CtrX,target1CtrY,target2CtrX,target2CtrY;
-			if ( (boundingRect.width <= (2 + visionParams.aspectRatioThresh)*boundingRect.height) && (boundingRect.width >= (2 - visionParams.aspectRatioThresh)*boundingRect.height) ) {
+                    visionData.targetsFound.add(new VisionData.Target(target1CtrX, target1CtrY, boundingRect));
+                    visionData.targetsFound.add(new VisionData.Target(target2CtrX, target2CtrY, boundingRect));
+                } else {
+                    target1CtrX = boundingRect.x + (boundingRect.width / 2);
+                    target1CtrY = boundingRect.y + (boundingRect.height / 2);
 
-				target1CtrX = boundingRect.x + (boundingRect.width/4);
-				target1CtrY = boundingRect.y + (boundingRect.height/2);
-				target2CtrX = boundingRect.x + ((3*boundingRect.width)/4);
-				target2CtrY = boundingRect.y + (boundingRect.height/2);
-
-				visionData.targetsFound.add(new VisionData.Target(target1CtrX,target1CtrY, boundingRect));
-				visionData.targetsFound.add(new VisionData.Target(target2CtrX,target2CtrY, boundingRect));
-			} else {
-				target1CtrX = boundingRect.x + (boundingRect.width/2);
-				target1CtrY = boundingRect.y + (boundingRect.height/2);
-
-				visionData.targetsFound.add(new VisionData.Target(target1CtrX,target1CtrY, boundingRect));
-			}
+                    visionData.targetsFound.add(new VisionData.Target(target1CtrX, target1CtrY, boundingRect));
+                }
+            }
 
 
 			//system.out.println("area: ", area, "xCenter: ", xCenter, "yCenter", yCenter);
