@@ -20,8 +20,9 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Main {
 
-	public NetworkTable table;
-	
+	public static NetworkTable vision;
+	public static NetworkTable fps;
+	public static NetworkTable data;
 	// Camera Type
 	// Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
 	// there is no webcam :/
@@ -45,6 +46,11 @@ public class Main {
 
 	/**
 	 * A class to hold any vision data returned by process()
+	 * :)
+	 * :)
+	 * :}
+	 * :]
+	 * :]
 	 */
 	public static class VisionData {
 		public Mat outputImg = new Mat();
@@ -52,16 +58,30 @@ public class Main {
 		public HashMap<String,String> data = new HashMap<String,String>();
 		/**
 		 * This method converts the vision data into a nice and tidy string
-		 * @return data
+		 * :]
+		 * @return the data
 		 */
-		@Override
-		public String toString(){
+		public String encode(){
 			String s = DataUtils.encodeData(data);
 			return s;
 		}
 	}
-
-	/*** Helper Functions ***/
+	/**
+	 * Initilizes the Network Tables
+	 */
+	private static void initNetworkTables(){
+		NetworkTableInstance instance = NetworkTableInstance.getDefault();
+		instance.startClient("127.0.0.1");
+		vision = instance.getTable("vision");
+		fps = vision.getSubTable("fps");
+		data = vision.getSubTable("data");
+	}
+	/**
+	 * 
+	 * Loads the vision params!
+	 * :]
+	 *  
+	 **/
 
 	private static void loadVisionParams() {
 		Properties properties = new Properties();
@@ -82,7 +102,14 @@ public class Main {
 			System.exit(1);
 		}
 	}
-
+	
+	/**
+	 * Converts a OpenCV Matrix to a BufferedImage 
+	 * :)
+	 * @param matrix Matrix to be converted
+	 * @return Generated from the matrix
+	 * @throws Exception
+	 */
 	private static BufferedImage Mat2BufferedImage(Mat matrix) throws Exception {
 		MatOfByte mob = new MatOfByte();
 		Imgcodecs.imencode(".jpg", matrix, mob);
@@ -92,17 +119,29 @@ public class Main {
 		return bi;
 	}
 
+	/**
+	 * The main method!
+	 * Very important
+	 * Do not delete!
+	 * :]
+	 * :]
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
 		new Main();
 	}
-
+	/**
+	 * The constructor! all the code is in here!
+	 * :]
+	 * @throws Exception
+	 */
 	public Main() throws Exception {
 		// Must be included!
 		System.loadLibrary("opencv_java310");
 
 		// Connect NetworkTables, and get access to the publishing table
-		NetworkTableInstance instance = NetworkTableInstance.getDefault();
-		table = instance.getTable("vision");
+		initNetworkTables();
 		// read the vision calibration values from file.
 		loadVisionParams();
 
@@ -166,20 +205,28 @@ public class Main {
 						System.err.println("Error: Frame failed to process. Skipping frame.");
 						continue;
 					}
-					table.getEntry("data").forceSetString(visionData.toString());
+					//Sends the data
+					data.getEntry("data").setString(visionData.encode());
+					fps.getEntry("fps").setDouble(visionData.fps);
+					
 					// display the processed frame in the GUI
 					if (use_GUI) {
 						try {
+							
 							// May throw a NullPointerException if initializing
 							// the window failed
 							guiProcessedImg.updateImage(Mat2BufferedImage(visionData.outputImg));
+							
 						} catch (Exception e) {
+							
 							e.printStackTrace();
 							System.out.println("Window closed");
 							Runtime.getRuntime().halt(0);
+							
 						}
 
 					}
+					
 					// Display the frame rate
 					System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f\n", visionData.fps, cameraFps);
 					
@@ -188,7 +235,10 @@ public class Main {
 		}
 		camera.release();
 	}
-
+	/**
+	 * Saves the properties
+	 * :]
+	 */
 	public static void save() {
 		Properties properties = new Properties();
 		try {
