@@ -84,12 +84,6 @@ public class Main {
 		}
 	}
 
-	/** Converts an OpenCV Matrix to a BufferedImage
-	 * 
-	 * @param The OpenCV Matrix
-	 * @return The image generated from the OpenCV Matrix
-	 * @throws Exception
-	 */
 	private static BufferedImage Mat2BufferedImage(Mat matrix) throws Exception {
 		MatOfByte mob = new MatOfByte();
 		Imgcodecs.imencode(".jpg", matrix, mob);
@@ -98,37 +92,23 @@ public class Main {
 		BufferedImage bi = ImageIO.read(new ByteArrayInputStream(ba));
 		return bi;
 	}
-	
-	/** The main method! :)
-	 * 
-	 * @param Command line arguments
-	 * @throws Somethings gone wrong :]
-	 */
+
 	public static void main(String[] args) throws Exception {
 		new Main();
 	}
-	
-	
-	/** The constructor! its cool, and everything is here
-	 * 
-	 * @throws Somethings up! :] Have fun debugging future self!
-	 */
+
 	public Main() throws Exception {
-		// Must be included! dont remove the next 5 lines of code ;}
-		// This loads opencv
+		// Must be included!
 		System.loadLibrary("opencv_java310");
 
 		// Connect NetworkTables, and get access to the publishing table
-		//
 		NetworkTable.setClientMode();
 		
-		// Sets the team number to 2706
+		// Set your team number here
 		NetworkTable.setTeam(2706);
 
-		//Initilizes the NetworkTable! Very important!
 		NetworkTable.initialize();
 		
-		//Gets the vision NetworkTable
 		table = NetworkTable.getTable("vision");
 		
 		// read the vision calibration values from file.
@@ -138,27 +118,20 @@ public class Main {
 		VideoCapture camera = new VideoCapture(visionParams.CameraSelect);
 
 		// Read the camera's supported frame-rate
-		// TODO: Get camera fps to read properly
 		double cameraFps = camera.get(Videoio.CAP_PROP_FPS);
 
-		//Gets the frame matrix ready to be written to
 		Mat frame = new Mat();
-		
-		//Reads the first frame
 		camera.read(frame);
 
-		//Make sure the camera is open!
 		if (!camera.isOpened()) {
 			System.out.println("Error: Can not connect to camera");
 		} else {
 			
 			// Set up the camera feed
 			camera.read(frame);
-			//Sets up the gui for the raw image
+			
 			DisplayGui guiRawImg = null;
-			//Sets up the gui for the processed image
 			DisplayGui guiProcessedImg = null;
-			//The next 5 lines of code check if the OS is windows
 			boolean use_GUI = false;
 			if (System.getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
 				use_GUI = true;
@@ -226,18 +199,9 @@ public class Main {
 		camera.release();
 	}
 
-	/**
-	 * Saves the current vision parameters!
-	 * Very important!
-	 * :]
-	 * :]
-	 * Should only be called on windows
-	 */
 	public static void save() {
-		//Saves params! Should only be called on Windows
 		Properties properties = new Properties();
 		try {
-			//Sets properties
 			properties.setProperty("CameraSelect", String.valueOf(visionParams.CameraSelect));
 			properties.setProperty("minHue", String.valueOf(visionParams.minHue));
 			properties.setProperty("maxHue", String.valueOf(visionParams.maxHue));
@@ -247,9 +211,7 @@ public class Main {
 			properties.setProperty("maxValue", String.valueOf(visionParams.maxValue));
 			properties.setProperty("erodeDilateIterations", String.valueOf(visionParams.erodeDilateIterations));
 			properties.setProperty("minArea", String.valueOf(visionParams.minArea));
-			//Creates output stream for properties file
 			FileOutputStream out = new FileOutputStream("visionParams.properties");
-			//Writes the properties data to the properties file
 			properties.store(out, "");
 		} catch (Exception e1) {
 			e1.printStackTrace();
