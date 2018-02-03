@@ -289,4 +289,28 @@ public class Main {
 		}
 		camera.release();
 	}
+	/**Normalises points from a frame from the camera to a value 
+	 * between -1,-1 and 1,1 where the center of the image is 0,0
+	 * this is very usefull
+	 * 
+	 * formula:
+	 * 
+	 * (x - width/2)/(width/2)
+	 * 
+	 * and the same with y but use height instead!
+	 * 
+	 * @param The point to be normalised
+	 * @return The normalised point
+	 */
+	public NormalisedPoint normalisePoint(ca.team2706.vision.trackerboxreloaded.Point point){
+		int midW = point.getFrameData().getWidth()/2;
+		int midH = point.getFrameData().getHeight()/2;
+		int x = Integer.valueOf(point.getX());
+		int y = Integer.valueOf(point.getY());
+		int newX;
+		int newY;
+		newX = (x - midW) / midW;
+		newY = (y - midH) / midH;
+		return new NormalisedPoint(newX,newY);
+	}
 }
