@@ -45,8 +45,9 @@ public class Main {
 		public int maxValue;
 		public int erodeDilateIterations;
 		public int CameraSelect;
-		public double dBoxBuffer;
+		public double aspectRatioThresh;
 	}
+
 
 	private static VisionParams visionParams = new VisionParams();
 
@@ -56,8 +57,8 @@ public class Main {
 	private static class VisionData {
 
 		public static class Target {
-		 	int xCenter;
-		 	int yCenter;
+			int xCenter;
+			int yCenter;
 
 			public Target(int x, int y) {
 				xCenter = x;
@@ -67,7 +68,7 @@ public class Main {
 		Mat outputImg = new Mat();
 		double fps;
 
-		ArrayList<Target> targetsFound = new ArrayList<>();
+		ArrayList<Target> targetsFound = new ArrayList<Target>();
 	}
 
 
@@ -88,7 +89,7 @@ public class Main {
 			visionParams.minValue = Integer.valueOf(properties.getProperty("minValue"));
 			visionParams.maxValue = Integer.valueOf(properties.getProperty("maxValue"));
 			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
-			visionParams.dBoxBuffer = Double.valueOf(properties.getProperty("dBoxBuffer"));
+			visionParams.aspectRatioThresh = Double.valueOf(properties.getProperty("aspectRatioThresh"));
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.exit(1);
@@ -109,14 +110,14 @@ public class Main {
 		return bi;
 	}
 
-    public static long fpsTimer = System.nanoTime();
+	public static long fpsTimer = System.nanoTime();
 
-    /**
-     * The vision pipeline!
-     *
-     * @param src Raw source image to process
-     * @return All the data!
-     */
+	/**
+	 * The vision pipeline!
+	 *
+	 * @param src Raw source image to process
+	 * @return All the data!
+	 */
 	public static VisionData process(Mat src) {
 
 		// If there's any data or intermediate images that you want to return, add them to the VisionData class
@@ -142,37 +143,48 @@ public class Main {
 		//Make Bounding Box
 		for (MatOfPoint contour : contours)
 		{
-    	Rect rect = Imgproc.boundingRect(contour);
+			Rect rect = Imgproc.boundingRect(contour);
 
 			// height * width for area (easier and less CPU cycles than contour.area)
 			int area = rect.width * rect.height;
 
 			// TODO Matt to write an explanation of the formula below
 			int x,y,xt,yt;
-		if (rect.width <= ((rect.height*2) + (rect.height*visionParams.dBoxBuffer)) && rect.width >= ((rect.height*2) - (rect.height*visionParams.dBoxBuffer))) {
-			x = rect.x + (rect.width/4);
-			y = rect.y + (rect.height/2);
-			xt = rect.x + ((3*rect.width)/4);
-			yt = rect.y + (rect.height/2);
+			if ( (rect.width <= (2 + visionParams.aspectRatioThresh)*rect.height) && (rect.width >= (2 - visionParams.aspectRatioThresh)*rect.height) ) {
+//			if (rect.width <= ((rect.height*2) + (rect.height*visionParams.aspectRatioThresh)) && rect.width >= ((rect.height*2) - (rect.height*visionParams.aspectRatioThresh))) {
+				x = rect.x + (rect.width/4);
+				y = rect.y + (rect.height/2);
+				xt = rect.x + ((3*rect.width)/4);
+				yt = rect.y + (rect.height/2);
 
-			visionData.targetsFound.add(new VisionData.Target(x,y));
-			visionData.targetsFound.add(new VisionData.Target(xt,yt));
-		} else {
-			x = rect.x + (rect.width/2);
-			y = rect.y + (rect.height/2);
+				visionData.targetsFound.add(new VisionData.Target(x,y));
+				visionData.targetsFound.add(new VisionData.Target(xt,yt));
+			} else {
+				x = rect.x + (rect.width/2);
+				y = rect.y + (rect.height/2);
 
-			visionData.targetsFound.add(new VisionData.Target(x,y));
-		}
+				visionData.targetsFound.add(new VisionData.Target(x,y));
+			}
 
 
 			//system.out.println("area: ", area, "xCenter: ", xCenter, "yCenter", yCenter);
-}
+		}
 
 		visionData.outputImg = erode;
 
-        long now = System.nanoTime();
+		// DRAW STUFF ONTO THE OUTPUT IMAGE
+		// for each target found, draw the bounding box and centre
+
+		for (VisionData.Target targetCenter : visionData.targetsFound)
+		{
+			Point centerTarget = new Point(targetCenter.xCenter, targetCenter.yCenter);
+			Scalar color = new Scalar(237, 19, 75);
+			Imgproc.circle(src, centerTarget, 8, color);
+		}
+
+		long now = System.nanoTime();
 		visionData.fps = ((double) NANOSECONDS_PER_SECOND) / (now - fpsTimer);
-        fpsTimer = now;
+		fpsTimer = now;
 
 		return visionData;
 	}
@@ -207,7 +219,7 @@ public class Main {
 		loadVisionParams();
 
 		// Open a connection to the camera
-        VideoCapture camera = new VideoCapture(visionParams.CameraSelect);
+		VideoCapture camera = new VideoCapture(visionParams.CameraSelect);
 
 		// Read the camera's supported frame-rate
 		double cameraFps = camera.get(Videoio.CAP_PROP_FPS);
@@ -279,8 +291,8 @@ public class Main {
 						}
 					}
 
-                    // Display the frame rate
-                    System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f \n", visionData.fps, cameraFps, "");
+					// Display the frame rate
+					System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f \n", visionData.fps, cameraFps, "");
 				}
 				else {
 					System.err.println("Error: Failed to get a frame from the camera");
