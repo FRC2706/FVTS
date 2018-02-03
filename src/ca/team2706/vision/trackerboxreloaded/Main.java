@@ -78,6 +78,7 @@ public class Main {
 	}
 	/**
 	 * Initilizes the Network Tables
+	 * WARNING! Change 127.0.0.1 to the robot ip before it is on master or it will not be fun :)
 	 */
 	private static void initNetworkTables(){
 		NetworkTableInstance instance = NetworkTableInstance.getDefault();
