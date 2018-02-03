@@ -14,7 +14,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
-import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
 
@@ -106,7 +106,9 @@ public class Main {
 		
 		// Set your team number here
 		NetworkTable.setTeam(2706);
-
+		
+		NetworkTable.setIPAddress("127.0.0.1");
+		
 		NetworkTable.initialize();
 		
 		table = NetworkTable.getTable("vision");
@@ -174,7 +176,7 @@ public class Main {
 						System.err.println("Error: Frame failed to process. Skipping frame.");
 						continue;
 					}
-					table.putString("data", visionData.toString());
+					table.putValue("data", visionData.toString());
 					// display the processed frame in the GUI
 					if (use_GUI) {
 						try {

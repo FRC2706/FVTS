@@ -9,16 +9,17 @@ public class Server {
 		
 		// Sets the team number to 2706
 		NetworkTable.setTeam(2706);
-
+		
+		NetworkTable.setIPAddress("127.0.0.1");
+		
 		//Initilizes the NetworkTable! Very important!
 		NetworkTable.initialize();
 		
 		//Gets the vision NetworkTable
 		table = NetworkTable.getTable("vision");
+		table.putString("data", "start");
 		while(true){
-			if(table.containsKey("data")){
-				
-			}
+			System.out.println((String) table.getValue("data"));
 		}
 	}
 }
