@@ -3,6 +3,7 @@ package ca.team2706.vision.trackerboxreloaded;
 import ca.team2706.vision.trackerboxreloaded.Main.VisionData;
 import ca.team2706.vision.trackerboxreloaded.Main.VisionParams;
 import org.opencv.core.*;
+import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
