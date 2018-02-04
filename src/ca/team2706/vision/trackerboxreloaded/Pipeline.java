@@ -54,8 +54,12 @@ public class Pipeline {
 			int area = boundingRect.width * boundingRect.height;
 
             if (area >= visionParams.minArea) {
-                // TODO Matt to write an explanation of the formula below
-                int target1CtrX, target1CtrY, target2CtrX, target2CtrY;
+				/**
+				 * This code basically checks if the bounding box given corresponds to double boxes or a single box.
+				 * if the x length of the rectangle is 2 times the Y length then it is safe to say there are 2 cubes
+				 * this code also gives a 25% range for error (still detect if X length is 2.25 / 1.75 times the Y length)
+				 */
+				int target1CtrX, target1CtrY, target2CtrX, target2CtrY;
                 if ((boundingRect.width <= (2 + visionParams.aspectRatioThresh) * boundingRect.height) && (boundingRect.width >= (2 - visionParams.aspectRatioThresh) * boundingRect.height)) {
 
                     target1CtrX = boundingRect.x + (boundingRect.width / 4);
@@ -72,6 +76,8 @@ public class Pipeline {
                     visionData.targetsFound.add(new VisionData.Target(target1CtrX, target1CtrY, boundingRect));
                 }
             }
+            // else
+			// skip this contour because it's too small
 
 
 			//system.out.println("area: ", area, "xCenter: ", xCenter, "yCenter", yCenter);
