@@ -23,7 +23,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Main {
-	public static final int SECONDS_BETWEEN_DUMPS = 100;
+	public static int seconds_between_dumps = 10;
 	public static int current_time_seconds = 0;
 	public static String outputPath;
 	public static final SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd-hh-mm-ss");
@@ -124,6 +124,7 @@ public class Main {
 			visionParams.maxValue = Integer.valueOf(properties.getProperty("maxValue"));
 			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
 			outputPath = properties.getProperty("dumpPath");
+			seconds_between_dumps = Integer.valueOf(properties.getProperty("dumpWait"));
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.exit(1);
@@ -212,7 +213,7 @@ public class Main {
 					if (use_GUI) {
 						try {
 							BufferedImage image = matToBufferedImage(frame);
-							if(current_time_seconds >= SECONDS_BETWEEN_DUMPS){
+							if(current_time_seconds >= seconds_between_dumps){
 								dump(image,true);
 							}
 							// May throw a NullPointerException if initializing
@@ -241,8 +242,9 @@ public class Main {
 					if (use_GUI) {
 						try {
 							BufferedImage image = matToBufferedImage(visionData.outputImg);
-							if(current_time_seconds >= SECONDS_BETWEEN_DUMPS){
+							if(current_time_seconds >= seconds_between_dumps){
 								dump(image,false);
+								current_time_seconds = 0;
 							}
 							// May throw a NullPointerException if initializing
 							// the window failed
@@ -284,6 +286,8 @@ public class Main {
 			properties.setProperty("maxValue", String.valueOf(visionParams.maxValue));
 			properties.setProperty("erodeDilateIterations", String.valueOf(visionParams.erodeDilateIterations));
 			properties.setProperty("minArea", String.valueOf(visionParams.minArea));
+			properties.setProperty("dumpPath", outputPath);
+			properties.setProperty("dumpWait", String.valueOf(seconds_between_dumps));
 			FileOutputStream out = new FileOutputStream("visionParams.properties");
 			properties.store(out, "");
 		} catch (Exception e1) {

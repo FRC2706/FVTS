@@ -35,11 +35,15 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JTextField txtHue;
 	private JTextField txtSaturation;
 	private JTextField txtValue;
+	private JTextField txtOutputPath;
+	private JTextField textField_3;
+	private JTextField txtTimeBetweenCaptures;
+	private JTextField textField_4;
 	
 	
 	public ParamsSelector() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 600, 300);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(null);
@@ -178,6 +182,32 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		txtValue.setBounds(288, 212, 123, 20);
 		contentPane.add(txtValue);
 		txtValue.setColumns(10);
+		
+		txtOutputPath = new JTextField();
+		txtOutputPath.setEditable(false);
+		txtOutputPath.setText("Output Path:");
+		txtOutputPath.setBounds(310, 11, 86, 20);
+		contentPane.add(txtOutputPath);
+		txtOutputPath.setColumns(10);
+		
+		textField_3 = new JTextField();
+		textField_3.setBounds(310, 44, 86, 20);
+		contentPane.add(textField_3);
+		textField_3.setColumns(10);
+		textField_3.setText(properties.getProperty("dumpPath"));
+		
+		txtTimeBetweenCaptures = new JTextField();
+		txtTimeBetweenCaptures.setEditable(false);
+		txtTimeBetweenCaptures.setText("Time Between Captures:");
+		txtTimeBetweenCaptures.setBounds(384, 75, 131, 20);
+		contentPane.add(txtTimeBetweenCaptures);
+		txtTimeBetweenCaptures.setColumns(10);
+		
+		textField_4 = new JTextField();
+		textField_4.setBounds(405, 106, 86, 20);
+		contentPane.add(textField_4);
+		textField_4.setColumns(10);
+		textField_4.setText(properties.getProperty("dumpWait"));
 		setVisible(true);
 		
 		new Thread(this).start();
@@ -202,11 +232,15 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				Main.visionParams.maxSaturation = slider_3.getValue();
 				Main.visionParams.minValue = slider_4.getValue();
 				Main.visionParams.maxValue = slider_5.getValue();
-				
+				if(!textField_3.getText().equals("")){
+					Main.outputPath = textField_3.getText();
+				}
+				if(isInt(textField_4.getText())){
+					Main.seconds_between_dumps = Integer.valueOf(textField_4.getText());
+				}
 				txtHue.setText("Hue: "+Main.visionParams.minHue+"-"+Main.visionParams.maxHue);
 				txtSaturation.setText("Saturation: "+Main.visionParams.minSaturation+"-"+Main.visionParams.maxSaturation);
 				txtValue.setText("Value: "+Main.visionParams.minValue+"-"+Main.visionParams.maxValue);
-				
 				Thread.sleep(5);
 			}catch(Exception e){
 				e.printStackTrace();
