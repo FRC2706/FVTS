@@ -35,15 +35,22 @@ public class Pipeline {
 		Core.inRange(src, new Scalar(visionParams.minHue, visionParams.minSaturation, visionParams.minValue),
 				new Scalar(visionParams.maxHue, visionParams.maxSaturation, visionParams.maxValue), hsvThreshold);
 
-		// Erode - Dilate
-		Mat dilatedImg = new Mat();
-		Mat erode = new Mat();
-		Imgproc.erode(hsvThreshold, erode, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
-		Imgproc.dilate(erode, dilatedImg, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
+		// Erode - Dilate - Dilate - Erode
+		Mat dilated = new Mat();
+		Mat erodeOne = new Mat();
+		Mat erodeTwo = new Mat();
+		Imgproc.erode(hsvThreshold, erodeOne, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
+		Imgproc.dilate(erodeOne, dilated, new Mat(), new Point(), 2*visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
+		Imgproc.erode(dilated, erodeTwo, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
+
+
+		visionData.outputImg = erodeTwo.clone();
 
 		//Find contours
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-		Imgproc.findContours(dilatedImg, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(erodeTwo, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+
+
 
 		//Make Bounding Box
 		for (MatOfPoint contour : contours)
@@ -82,8 +89,6 @@ public class Pipeline {
 
 			//system.out.println("area: ", area, "xCenter: ", xCenter, "yCenter", yCenter);
 		}
-
-		visionData.outputImg = erode;
 
 
 
