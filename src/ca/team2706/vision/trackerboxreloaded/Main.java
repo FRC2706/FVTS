@@ -90,6 +90,8 @@ public class Main {
 	 */
 	private static void initNetworkTables() {
 		NetworkTableInstance instance = NetworkTableInstance.getDefault();
+		//TODO: Test this on plyboy
+		//instance.startClientTeam(2706);
 		instance.startClient("127.0.0.1");
 		vision = instance.getTable("vision");
 		fps = vision.getSubTable("fps");
