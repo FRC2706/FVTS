@@ -26,6 +26,7 @@ public class ExampleServer {
 	public static void main(String[] args) {
 		//Inits stuff
 		NetworkTableInstance instance = NetworkTableInstance.getDefault();
+		instance.setUpdateRate(0.02);
 		instance.startServer();
 		vision = instance.getTable("vision");
 		data = vision.getSubTable("data");

@@ -90,6 +90,7 @@ public class Main {
 	 */
 	private static void initNetworkTables() {
 		NetworkTableInstance instance = NetworkTableInstance.getDefault();
+		instance.setUpdateRate(0.02);
 		//TODO: Test this on plyboy
 		instance.startClientTeam(2706); //Comment this for non robot use
 		//instance.startClient("127.0.0.1"); //Comment this for use on a robot / plyboy
