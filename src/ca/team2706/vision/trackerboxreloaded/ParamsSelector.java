@@ -35,6 +35,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JTextField txtHue;
 	private JTextField txtSaturation;
 	private JTextField txtValue;
+	
+	
 	public ParamsSelector() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);

@@ -16,13 +16,13 @@ public class Pipeline {
 	
 	public static long fpsTimer = System.nanoTime();
 
-
-	/**
-	 * The vision pipeline!
-	 *
-	 * @param src Raw source image to process
-	 * @return All the data!
-	 */
+	 /**
+     * The vision pipeline!
+     *
+     * @param src Raw source image to process
+     * @param visionParams Parameters for vision
+     * @return All the data!
+     */
 	public static VisionData process(Mat src, VisionParams visionParams) {
 
 		// If there's any data or intermediate images that you want to return, add them to the VisionData class

@@ -19,7 +19,10 @@ ext.buildType = "windows"
 //ext.buildType = "armhf"
 
 // Change the line below if you change the name of your main Java class
+//Comment this line and uncomment the line after it to build/run the Server, and vice versa to run the main vision program
 mainClassName = 'ca.team2706.vision.trackerboxreloaded.Main'
+//mainClassName = 'ca.team2706.vision.trackerboxreloaded.ExampleServer'
+
 // Change the line below to change the name of the output jar
 def projectName = 'CameraVision'
 
@@ -42,8 +45,9 @@ repositories {
 }
 
 dependencies {
-  compile ntcoreDep()
-  compile cscoreDep()
+  compile group: "edu.wpi.first.ntcore", name: "ntcore-java", version: "4.+"
+  runtime group: "edu.wpi.first.ntcore", name: "ntcore-jni", version: "4.+", classifier: "all"
+  runtime group: "edu.wpi.first.wpiutil", name: "wpiutil-java", version: "3.+"
   compile 'org.opencv:opencv-java:3.1.0'
 }
 
