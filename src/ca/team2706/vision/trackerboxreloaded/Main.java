@@ -28,8 +28,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 public class Main {
 
     public static NetworkTable vision;
-    public static NetworkTable fps;
-    public static NetworkTable data;
 
     // Camera Type
     // Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
@@ -54,7 +52,7 @@ public class Main {
     public static VisionParams visionParams = new VisionParams();
 
     /**
-     * A class to hold any vision data returned by process() :) :) :} :] :]
+     * A class to hold any visionTable data returned by process() :) :) :} :] :]
      */
 
     public static class VisionData {
@@ -74,36 +72,6 @@ public class Main {
         ArrayList<Target> targetsFound = new ArrayList<Target>();
         public Mat outputImg = new Mat();
         public double fps;
-        public HashMap<String, String> data = new HashMap<String, String>();
-
-        /**
-         * This method converts the vision data into a nice and tidy string :]
-         *
-         * @return the data
-         */
-        public void encode(NetworkTable table) {
-            // TODO: add code
-            // basic networktable code: table.getEntry("data").setString("foo);
-            table.getEntry("data").setString(DataUtils.encodeData(data));
-        }
-
-        /**
-         * Decodes the NetworkTable stuff into a VisionData
-         *
-         * @param the data table
-         * @return the data
-         */
-        @SuppressWarnings("unused")
-        public static VisionData decode(NetworkTable table) {
-            // TODO: add code
-            // basic networktable code:
-            // table.getEntry("data").getValue().getString();
-            // dont forget: if(table.getEntry("data").getValue().isString())
-            if (table.getEntry("data").getValue().isString()) {
-                HashMap<String, String> data = DataUtils.decodeData(table.getEntry("data").getValue().getString());
-            }
-            return null;
-        }
     }
 
     /**
@@ -114,15 +82,13 @@ public class Main {
         NetworkTableInstance instance = NetworkTableInstance.getDefault();
         instance.setUpdateRate(0.02);
         //TODO: Test this on plyboy
-        instance.startClientTeam(2706); //Comment this for non robot use
-        //instance.startClient("127.0.0.1"); //Comment this for use on a robot / plyboy
+//        instance.startClientTeam(2706); //Comment this for non robot use
+        instance.startClient("127.0.0.1"); //Comment this for use on a robot / plyboy
         vision = instance.getTable("vision");
-        fps = vision.getSubTable("fps");
-        data = vision.getSubTable("data");
     }
 
     /**
-     * Loads the vision params! :]
+     * Loads the visionTable params! :]
      **/
 
     private static void loadVisionParams() {
@@ -174,10 +140,20 @@ public class Main {
      * @param visionData
      */
     private static void sendVisionDataOverNetworkTables(VisionData visionData) {
+        int highestArea = 0, highestAreaXval = 0; // note: don't do this if the array could be empty
+        //TODO also make it use closest to centerscreenX for criteria in prioritization
+        //sorts for highest area Value
+        for (VisionData.Target target : visionData.targetsFound) {
+            if(highestArea < (target.boundingBox.height * target.boundingBox.width)) {
+                highestArea = (target.boundingBox.height * target.boundingBox.width);
+                highestAreaXval = target.xCenter;
+            }
+        }
 
         //Sends the data
-        visionData.encode(data);
-        fps.getEntry("fps").setDouble(visionData.fps);
+        vision.getEntry("fps").setDouble(visionData.fps);
+        vision.getEntry("ctrX").setDouble(highestAreaXval);
+        vision.getEntry("numTargetsFound").setNumber(visionData.targetsFound.size());
     }
 
     /**
@@ -213,7 +189,7 @@ public class Main {
 
         // Connect NetworkTables, and get access to the publishing table
         initNetworkTables();
-        // read the vision calibration values from file.
+        // read the visionTable calibration values from file.
         loadVisionParams();
 
         // Open a connection to the camera

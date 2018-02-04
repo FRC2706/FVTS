@@ -17,10 +17,10 @@ public class Pipeline {
 	public static long fpsTimer = System.nanoTime();
 
 	 /**
-     * The vision pipeline!
+     * The visionTable pipeline!
      *
      * @param src Raw source image to process
-     * @param visionParams Parameters for vision
+     * @param visionParams Parameters for visionTable
      * @return All the data!
      */
 	public static VisionData process(Mat src, VisionParams visionParams) {
@@ -73,7 +73,7 @@ public class Pipeline {
                     target1CtrY = boundingRect.y + (boundingRect.height / 2);
                     target2CtrX = boundingRect.x + ((3 * boundingRect.width) / 4);
                     target2CtrY = boundingRect.y + (boundingRect.height / 2);
-
+					// TODO change bounding box to 2 targets rather than 1 big bounding box to help with area stuff in networking
                     visionData.targetsFound.add(new VisionData.Target(target1CtrX, target1CtrY, boundingRect));
                     visionData.targetsFound.add(new VisionData.Target(target2CtrX, target2CtrY, boundingRect));
                 } else {
