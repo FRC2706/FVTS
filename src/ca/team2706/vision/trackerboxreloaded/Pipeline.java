@@ -134,16 +134,29 @@ public class Pipeline {
 			return;
 		}
 
-		double bestFitness = Double.NEGATIVE_INFINITY;
+		// loop over the targets to find the largest area of any target found.
+		// 	this is so we can give the largest a score of 1.0, and each other target a score that is a
+		// 	percentage of the area of the largest.
+		double largestAreaNorm = Double.NEGATIVE_INFINITY;
+		for (VisionData.Target target : visionData.targetsFound) {
+			if (target.areaNorm > largestAreaNorm)
+				largestAreaNorm = target.areaNorm;
+		}
+
+		double bestScore = Double.NEGATIVE_INFINITY;
 		for (VisionData.Target target : visionData.targetsFound) {
 
-			// The "Fitness Function" to determine how good a candidate a particular target is.
-			double fitness = ((1 - visionParams.distToCentreImportance) * target.areaNorm)
-					- (visionParams.distToCentreImportance * Math.abs(target.xCentreNorm));
+			// Give each target a score, and select the one with the highest score.
 
-			if(bestFitness < fitness) {
+			double areaScore = target.areaNorm / largestAreaNorm;
+			double distFromCentrePenalty = Math.abs(target.xCentreNorm);
+
+			double score = (1 - visionParams.distToCentreImportance) * areaScore
+							-  visionParams.distToCentreImportance * distFromCentrePenalty;
+
+			if(bestScore < score) {
 				visionData.preferredTarget = target;
-				bestFitness = fitness;
+				bestScore = score;
 			}
 		}
 	}
