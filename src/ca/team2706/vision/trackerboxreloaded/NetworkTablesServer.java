@@ -1,6 +1,5 @@
 package ca.team2706.vision.trackerboxreloaded;
 
-import ca.team2706.vision.trackerboxreloaded.Main.VisionData;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;

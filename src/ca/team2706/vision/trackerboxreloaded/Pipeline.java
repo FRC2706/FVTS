@@ -25,6 +25,8 @@ public class Pipeline {
      */
 	public static VisionData process(Mat src, VisionParams visionParams) {
 
+		int imgArea = src.height() * src.width();
+
 		// If there's any data or intermediate images that you want to return, add them to the VisionData class
 		// For example, any numbers that we want to return to the roboRIO.
 		VisionData visionData = new VisionData();
@@ -39,16 +41,19 @@ public class Pipeline {
 		Mat dilated = new Mat();
 		Mat erodeOne = new Mat();
 		Mat erodeTwo = new Mat();
-		Imgproc.erode(hsvThreshold, erodeOne, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
-		Imgproc.dilate(erodeOne, dilated, new Mat(), new Point(), 2*visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
-		Imgproc.erode(dilated, erodeTwo, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
+//		Imgproc.erode(hsvThreshold, erodeOne, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
+//		Imgproc.dilate(erodeOne, dilated, new Mat(), new Point(), 2*visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
+//		Imgproc.erode(dilated, erodeTwo, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
+
+		// just for testing in my crappy house lighting
+		Imgproc.dilate(hsvThreshold, dilated, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
 
 
-		visionData.outputImg = erodeTwo.clone();
+		visionData.outputImg = dilated.clone();
 
 		//Find contours
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-		Imgproc.findContours(erodeTwo, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(dilated, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
 
 
@@ -58,51 +63,56 @@ public class Pipeline {
 			Rect boundingRect = Imgproc.boundingRect(contour);
 
 			// height * width for area (easier and less CPU cycles than contour.area)
-			int area = boundingRect.width * boundingRect.height;
+			double areaNorm = ((double) boundingRect.width * boundingRect.height) / imgArea;
 
-            if (area >= visionParams.minArea) {
+            if (areaNorm >= visionParams.minArea) {
 				/**
 				 * This code basically checks if the bounding box given corresponds to double boxes or a single box.
 				 * if the x length of the rectangle is 2 times the Y length then it is safe to say there are 2 cubes
 				 * this code also gives a 25% range for error (still detect if X length is 2.25 / 1.75 times the Y length)
 				 */
 				int target1CtrX, target1CtrY, target2CtrX, target2CtrY;
+				double target1AreaNorm, target2AreaNorm;
                 if ((boundingRect.width <= (2 + visionParams.aspectRatioThresh) * boundingRect.height) && (boundingRect.width >= (2 - visionParams.aspectRatioThresh) * boundingRect.height)) {
 
-                    target1CtrX = boundingRect.x + (boundingRect.width / 4);
-                    target1CtrY = boundingRect.y + (boundingRect.height / 2);
-                    target2CtrX = boundingRect.x + ((3 * boundingRect.width) / 4);
-                    target2CtrY = boundingRect.y + (boundingRect.height / 2);
-					// TODO change bounding box to 2 targets rather than 1 big bounding box to help with area stuff in networking
-                    visionData.targetsFound.add(new VisionData.Target(target1CtrX, target1CtrY, boundingRect));
-                    visionData.targetsFound.add(new VisionData.Target(target2CtrX, target2CtrY, boundingRect));
-                } else {
-                    target1CtrX = boundingRect.x + (boundingRect.width / 2);
-                    target1CtrY = boundingRect.y + (boundingRect.height / 2);
+					// Detect 2 targets rather than 1 big bounding box
 
-                    visionData.targetsFound.add(new VisionData.Target(target1CtrX, target1CtrY, boundingRect));
+					// target1 is the left half of this contour
+					VisionData.Target target1 = new VisionData.Target();
+                	target1.boundingBox = new Rect(boundingRect.x, boundingRect.y,
+							boundingRect.width/2, boundingRect.height);
+                    target1.xCentre = target1.boundingBox.x + (target1.boundingBox.width / 2);
+					target1.xCentreNorm = ((double) target1.xCentre - (src.width()/2)) / (src.width()/2);
+                    target1.yCentre = target1.boundingBox.y + (target1.boundingBox.height / 2);
+                    target1.yCentreNorm = ((double) target1.yCentre - (src.height()/2)) / (src.height()/2);
+                    target1.areaNorm = (target1.boundingBox.height * target1.boundingBox.width) / ((double) imgArea);
+                    visionData.targetsFound.add(target1);
+
+
+                    // target2 is the right half of this contour
+                    VisionData.Target target2 = new VisionData.Target();
+					target2.boundingBox = new Rect(boundingRect.x + (boundingRect.width/2), boundingRect.y,
+							boundingRect.width/2, boundingRect.height);
+					target2.xCentre = target2.boundingBox.x + (target2.boundingBox.width / 2);
+					target2.xCentreNorm = ((double) target2.xCentre - (src.width()/2)) / (src.width()/2);
+                    target2.yCentre = target2.boundingBox.y + (target2.boundingBox.height / 2);
+					target2.yCentreNorm = ((double) target2.yCentre - (src.height()/2)) / (src.height()/2);
+					target2.areaNorm = (target2.boundingBox.height * target2.boundingBox.width) / ((double) imgArea);
+					visionData.targetsFound.add(target2);
+
+                } else {
+					VisionData.Target target = new VisionData.Target();
+					target.boundingBox = boundingRect;
+					target.xCentre = target.boundingBox.x + (target.boundingBox.width / 2);
+					target.xCentreNorm = ((double) target.xCentre - (src.width()/2)) / (src.width()/2);
+					target.yCentre = target.boundingBox.y + (target.boundingBox.height / 2);
+					target.yCentreNorm = ((double) target.yCentre - (src.height()/2)) / (src.height()/2);
+					target.areaNorm = (target.boundingBox.height * target.boundingBox.width) / ((double) imgArea);
+					visionData.targetsFound.add(target);
                 }
             }
             // else
 			// skip this contour because it's too small
-
-
-			//system.out.println("area: ", area, "xCenter: ", xCenter, "yCenter", yCenter);
-		}
-
-
-
-
-		// DRAW STUFF ONTO THE OUTPUT IMAGE
-		// for each target found, draw the bounding box and centre
-
-		for (VisionData.Target target : visionData.targetsFound)
-		{
-			Point centerTarget = new Point(target.xCenter, target.yCenter);
-			Scalar color = new Scalar(237, 19, 75);
-			Imgproc.circle(src, centerTarget, 8, color, -1);
-			Imgproc.rectangle(src, new Point(target.boundingBox.x, target.boundingBox.y),
-					new Point(target.boundingBox.x + target.boundingBox.width, target.boundingBox.y + target.boundingBox.height), color, 5);
 		}
 
 		long now = System.nanoTime();
@@ -110,6 +120,62 @@ public class Pipeline {
 		fpsTimer = now;
 
 		return visionData;
+	}
+
+
+	/**
+	 * From all the targets found in visionData.targetsFound, select the one that we're going to send to the roboRIO.
+	 *
+	 * @param visionData
+	 */
+	public static void selectPreferredTarget(VisionData visionData, VisionParams visionParams) {
+
+		if (visionData.targetsFound.size() == 0) {
+			return;
+		}
+
+		double bestFitness = Double.NEGATIVE_INFINITY;
+		for (VisionData.Target target : visionData.targetsFound) {
+
+			// The "Fitness Function" to determine how good a candidate a particular target is.
+			double fitness = ((1 - visionParams.distToCentreImportance) * target.areaNorm)
+					- (visionParams.distToCentreImportance * Math.abs(target.xCentreNorm));
+
+			if(bestFitness < fitness) {
+				visionData.preferredTarget = target;
+				bestFitness = fitness;
+			}
+		}
+	}
+
+
+	private static final Scalar BACKGROUND_TARGET_COLOUR = new Scalar(237, 19, 75);
+	private static final Scalar PREFERRED_TARGET_COLOUR = new Scalar(30, 180, 30);
+
+	public static void drawPreferredTarget(Mat src, VisionData visionData) {
+
+		// DRAW STUFF ONTO THE OUTPUT IMAGE
+		// for each target found, draw the bounding box and centre
+
+		for (VisionData.Target target : visionData.targetsFound)
+		{
+			Point centerTarget = new Point(target.xCentre, target.yCentre);
+			Imgproc.circle(src, centerTarget, 6, BACKGROUND_TARGET_COLOUR, -1);
+			Imgproc.rectangle(src, new Point(target.boundingBox.x, target.boundingBox.y),
+					new Point(target.boundingBox.x + target.boundingBox.width,
+							target.boundingBox.y + target.boundingBox.height), BACKGROUND_TARGET_COLOUR, 3);
+		}
+
+		// Draw the preferred target over it
+        if (visionData.preferredTarget != null) {
+
+            Point centerTarget = new Point(visionData.preferredTarget.xCentre, visionData.preferredTarget.yCentre);
+            Imgproc.circle(src, centerTarget, 10, PREFERRED_TARGET_COLOUR, -1);
+            Imgproc.rectangle(src, new Point(visionData.preferredTarget.boundingBox.x, visionData.preferredTarget.boundingBox.y),
+                    new Point(visionData.preferredTarget.boundingBox.x + visionData.preferredTarget.boundingBox.width,
+                            visionData.preferredTarget.boundingBox.y + visionData.preferredTarget.boundingBox.height),
+                    PREFERRED_TARGET_COLOUR, 7);
+        }
 	}
 
 }

@@ -31,7 +31,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JTextField txtIterations;
 	private JTextField textField_1; //Erode Dilate Iterations
 	private JTextField txtMinimumArea;
-	private JTextField textField_2; //Minimum Area
+	private JTextField minArea; //Minimum Area
 	private JTextField txtHue;
 	private JTextField txtSaturation;
 	private JTextField txtValue;
@@ -136,10 +136,10 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		contentPane.add(txtMinimumArea);
 		txtMinimumArea.setColumns(10);
 		
-		textField_2 = new JTextField();
-		textField_2.setBounds(151, 114, 86, 20);
-		contentPane.add(textField_2);
-		textField_2.setColumns(10);
+		minArea = new JTextField();
+		minArea.setBounds(151, 114, 86, 20);
+		contentPane.add(minArea);
+		minArea.setColumns(10);
 		
 		Properties properties = new Properties();
 		try {
@@ -156,7 +156,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		sMaxVal.setValue(Integer.valueOf(properties.getProperty("maxValue")));
 		textField.setText(properties.getProperty("CameraSelect"));
 		textField_1.setText(properties.getProperty("erodeDilateIterations"));
-		textField_2.setText(properties.getProperty("minArea"));
+		minArea.setText(properties.getProperty("minArea"));
 		
 		txtHue = new JTextField();
 		txtHue.setText("Hue: ");
@@ -193,8 +193,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				if(isInt(textField_1.getText())){
 					Main.visionParams.erodeDilateIterations = Integer.valueOf(textField_1.getText());
 				}
-				if(isInt(textField_2.getText())){
-					Main.visionParams.minArea = Integer.valueOf(textField_2.getText());
+				if(isDouble(minArea.getText())){
+					Main.visionParams.minArea = Double.valueOf(minArea.getText());
 				}
 				Main.visionParams.minHue = sMinHue.getValue();
 				Main.visionParams.maxHue = sMaxHue.getValue();
@@ -220,10 +220,19 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 			Main.saveVisionParams();
 		}
 	}
+
 	private boolean isInt(String s){
 		try{
-			@SuppressWarnings("unused")
-			int i = Integer.valueOf(s);
+			Integer.valueOf(s);
+			return true;
+		}catch(NumberFormatException e){
+			return false;
+		}
+	}
+
+	private boolean isDouble(String s){
+		try{
+			Double.valueOf(s);
 			return true;
 		}catch(NumberFormatException e){
 			return false;

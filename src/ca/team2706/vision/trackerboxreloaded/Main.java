@@ -5,29 +5,23 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Properties;
-import java.util.List;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
-import org.opencv.videoio.Videoio;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Main {
 
-    public static NetworkTable vision;
+    public static NetworkTable visionTable;
 
     // Camera Type
     // Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
@@ -37,16 +31,17 @@ public class Main {
      * A class to hold calibration parameters for the image processing algorithm
      */
     public static class VisionParams {
-        public int minHue;
-        public int maxHue;
-        public int minSaturation;
-        public int maxSaturation;
-        public int minValue;
-        public int maxValue;
-        public int erodeDilateIterations;
-        public int CameraSelect;
-        public double aspectRatioThresh;
-        public int minArea;
+        int minHue;
+        int maxHue;
+        int minSaturation;
+        int maxSaturation;
+        int minValue;
+        int maxValue;
+        int erodeDilateIterations;
+        int CameraSelect;
+        double aspectRatioThresh;
+        double minArea;
+        double distToCentreImportance;
     }
 
     public static VisionParams visionParams = new VisionParams();
@@ -58,18 +53,29 @@ public class Main {
     public static class VisionData {
 
         public static class Target {
-            int xCenter;
-            int yCenter;
+            int xCentre;
+            double xCentreNorm;
+            int yCentre;
+            double yCentreNorm;
+            double areaNorm; // [0,1] representing how much of the screen it occupies
             Rect boundingBox;
 
-            public Target(int xCenter, int yCenter, Rect boundingBox) {
-                this.xCenter = xCenter;
-                this.yCenter = yCenter;
-                this.boundingBox = boundingBox;
+            public Target clone() {
+                Target toRet = new Target();
+
+                toRet.xCentre = this.xCentre;
+                toRet.xCentreNorm = this.xCentreNorm;
+                toRet.yCentre = this.yCentre;
+                toRet.yCentreNorm = this.yCentreNorm;
+                toRet.areaNorm = this.areaNorm;
+                toRet.boundingBox = this.boundingBox;
+
+                return toRet;
             }
         }
 
         ArrayList<Target> targetsFound = new ArrayList<Target>();
+        Target preferredTarget;
         public Mat outputImg = new Mat();
         public double fps;
     }
@@ -84,7 +90,7 @@ public class Main {
         //TODO: Test this on plyboy
 //        instance.startClientTeam(2706); //Comment this for non robot use
         instance.startClient("127.0.0.1"); //Comment this for use on a robot / plyboy
-        vision = instance.getTable("vision");
+        visionTable = instance.getTable("vision");
     }
 
     /**
@@ -104,8 +110,10 @@ public class Main {
             visionParams.maxSaturation = Integer.valueOf(properties.getProperty("maxSaturation"));
             visionParams.minValue = Integer.valueOf(properties.getProperty("minValue"));
             visionParams.maxValue = Integer.valueOf(properties.getProperty("maxValue"));
+            visionParams.minArea = Double.valueOf(properties.getProperty("minArea"));
             visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
             visionParams.aspectRatioThresh = Double.valueOf(properties.getProperty("aspectRatioThresh"));
+            visionParams.distToCentreImportance = Double.valueOf(properties.getProperty("distToCentreImportance"));
         } catch (Exception e1) {
             e1.printStackTrace();
             System.err.println("\n\nError reading the params file, check if the file is corrupt?");
@@ -126,6 +134,8 @@ public class Main {
             properties.setProperty("erodeDilateIterations", String.valueOf(visionParams.erodeDilateIterations));
             properties.setProperty("minArea", String.valueOf(visionParams.minArea));
             properties.setProperty("aspectRatioThresh", String.valueOf(visionParams.aspectRatioThresh));
+            properties.setProperty("distToCentreImportance", String.valueOf(visionParams.distToCentreImportance));
+
             FileOutputStream out = new FileOutputStream("visionParams.properties");
             properties.store(out, "");
         } catch (Exception e1) {
@@ -140,20 +150,13 @@ public class Main {
      * @param visionData
      */
     private static void sendVisionDataOverNetworkTables(VisionData visionData) {
-        int highestArea = 0, highestAreaXval = 0; // note: don't do this if the array could be empty
-        //TODO also make it use closest to centerscreenX for criteria in prioritization
-        //sorts for highest area Value
-        for (VisionData.Target target : visionData.targetsFound) {
-            if(highestArea < (target.boundingBox.height * target.boundingBox.width)) {
-                highestArea = (target.boundingBox.height * target.boundingBox.width);
-                highestAreaXval = target.xCenter;
-            }
-        }
 
         //Sends the data
-        vision.getEntry("fps").setDouble(visionData.fps);
-        vision.getEntry("ctrX").setDouble(highestAreaXval);
-        vision.getEntry("numTargetsFound").setNumber(visionData.targetsFound.size());
+        visionTable.getEntry("fps").setDouble(visionData.fps);
+        visionTable.getEntry("numTargetsFound").setNumber(visionData.targetsFound.size());
+
+        if (visionData.preferredTarget != null)
+            visionTable.getEntry("ctrX").setDouble(visionData.preferredTarget.xCentreNorm);
     }
 
     /**
@@ -181,7 +184,6 @@ public class Main {
      * :]
      *
      * @param args
-     * @throws Exception
      */
     public static void main(String[] args) {
         // Must be included!
@@ -227,27 +229,21 @@ public class Main {
         // Main video processing loop
         while (true) {
             if (camera.read(frame)) {
-                // display the raw frame
-                if (use_GUI) {
-                    try {
-                        // May throw a NullPointerException if initializing
-                        // the window failed
-                        guiRawImg.updateImage(matToBufferedImage(frame));
-                    } catch (IOException e) {
-                        // means mat2BufferedImage broke
-                        // non-fatal error, let the program continue
-                        continue;
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                        System.out.println("Window closed");
-                        Runtime.getRuntime().halt(0);
-                    }
-                }
+//                if (use_GUI) {
+//                    // So we can dynamically update the file and see the changes
+//                    loadVisionParams();
+//                }
+
 
                 // Process the frame!
                 long pipelineStart = System.nanoTime();
                 VisionData visionData = Pipeline.process(frame, visionParams);
                 long pipelineEnd = System.nanoTime();
+
+                Pipeline.selectPreferredTarget(visionData, visionParams);
+
+                if (use_GUI)
+                    Pipeline.drawPreferredTarget(frame, visionData);
 
                 sendVisionDataOverNetworkTables(visionData);
 
@@ -261,10 +257,18 @@ public class Main {
                             // the window failed
                             guiRawImg.updateImage(matToBufferedImage(frame));
                             guiProcessedImg.updateImage(matToBufferedImage(visionData.outputImg));
-                        } catch (Exception e) {
+                        } catch (IOException e) {
+                            // means mat2BufferedImage broke
+                            // non-fatal error, let the program continue
+                            continue;
+                        } catch (NullPointerException e) {
                             e.printStackTrace();
                             System.out.println("Window closed");
                             Runtime.getRuntime().halt(0);
+                        } catch (Exception e) {
+                            // just in case
+                            e.printStackTrace();
+                            continue;
                         }
                     } else {
                         System.err.println("Error: Failed to get a frame from the camera");
@@ -276,32 +280,5 @@ public class Main {
                 }
             }
         } // end main video processing loop
-    }
-
-
-    /**
-     * Normalises points from a frame from the camera to a value
-     * between -1,-1 and 1,1 where the center of the image is 0,0
-     * this is very usefull
-     * <p>
-     * formula:
-     * <p>
-     * (x - width/2)/(width/2)
-     * <p>
-     * and the same with y but use height instead!
-     *
-     * @param The point to be normalised
-     * @return The normalised point
-     */
-    public NormalisedPoint normalisePoint(ca.team2706.vision.trackerboxreloaded.Point point) {
-        int midW = point.getFrameData().getWidth() / 2;
-        int midH = point.getFrameData().getHeight() / 2;
-        int x = Integer.valueOf(point.getX());
-        int y = Integer.valueOf(point.getY());
-        int newX;
-        int newY;
-        newX = (x - midW) / midW;
-        newY = (y - midH) / midH;
-        return new NormalisedPoint(newX, newY);
     }
 }
