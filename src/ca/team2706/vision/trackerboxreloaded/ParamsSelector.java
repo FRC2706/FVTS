@@ -191,6 +191,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		txtDtci = new JTextField();
 		txtDtci.setText("Distance To Center Importance:");
 		txtDtci.setBounds(4, 230, 278, 20);
+		txtDtci.setEditable(false);
 		contentPane.add(txtDtci);
 		txtDtci.setColumns(10);
 		setVisible(true);
@@ -217,11 +218,11 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				Main.visionParams.maxSaturation = sMaxSat.getValue();
 				Main.visionParams.minValue = sMinVal.getValue();
 				Main.visionParams.maxValue = sMaxVal.getValue();
-				Main.visionParams.distToCentreImportance = slider.getValue()/100;
+				Main.visionParams.distToCentreImportance = ((double) slider.getValue())/100;
 				txtHue.setText("Hue: "+Main.visionParams.minHue+"-"+Main.visionParams.maxHue);
 				txtSaturation.setText("Saturation: "+Main.visionParams.minSaturation+"-"+Main.visionParams.maxSaturation);
 				txtValue.setText("Value: "+Main.visionParams.minValue+"-"+Main.visionParams.maxValue);
-				txtDtci.setText("Distance To Center Importance: "+Main.visionParams.distToCentreImportance);
+				txtDtci.setText("Distance To Center Importance: "+(Main.visionParams.distToCentreImportance*100)+"%");
 				Thread.sleep(5);
 			}catch(Exception e){
 				e.printStackTrace();
