@@ -38,17 +38,13 @@ public class Pipeline {
 		Core.inRange(src, new Scalar(visionParams.minHue, visionParams.minSaturation, visionParams.minValue),
 				new Scalar(visionParams.maxHue, visionParams.maxSaturation, visionParams.maxValue), hsvThreshold);
 
-		// Erode - Dilate - Dilate - Erode
+		// Erode - Dilate*2 - Erode
 		Mat dilated = new Mat();
 		Mat erodeOne = new Mat();
 		Mat erodeTwo = new Mat();
 		Imgproc.erode(hsvThreshold, erodeOne, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
 		Imgproc.dilate(erodeOne, dilated, new Mat(), new Point(), 2*visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
 	    Imgproc.erode(dilated, erodeTwo, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
-
-		// just for testing in my crappy house lighting
-		Imgproc.dilate(hsvThreshold, dilated, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
-
 
 		visionData.outputImg = erodeTwo.clone();
 
