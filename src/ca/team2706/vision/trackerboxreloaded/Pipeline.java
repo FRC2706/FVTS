@@ -23,6 +23,7 @@ public class Pipeline {
      * @param visionParams Parameters for visionTable
      * @return All the data!
      */
+	@SuppressWarnings("unused")
 	public static VisionData process(Mat src, VisionParams visionParams) {
 
 		int imgArea = src.height() * src.width();
