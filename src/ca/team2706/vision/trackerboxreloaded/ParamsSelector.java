@@ -181,7 +181,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		txtValue.setColumns(10);
 		
 		slider = new JSlider();
-		slider.setValue(Integer.valueOf(properties.getProperty("distToCentreImportance"))*100);
+		slider.setValue((int) (Double.valueOf(properties.getProperty("distToCentreImportance"))*100));
 		slider.setOrientation(SwingConstants.VERTICAL);
 		slider.setToolTipText("Distance to center importance");
 		slider.setBounds(400, 24, 24, 143);
