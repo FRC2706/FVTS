@@ -158,9 +158,9 @@ public class Pipeline {
 		}
 	}
 
-
-	private static final Scalar BACKGROUND_TARGET_COLOUR = new Scalar(237, 19, 75);
-	private static final Scalar PREFERRED_TARGET_COLOUR = new Scalar(30, 180, 30);
+	//Create Colour Values
+	private static final Scalar BACKGROUND_TARGET_COLOUR = new Scalar(237, 19, 75); //Purple (Non-Preffered Target)
+	private static final Scalar PREFERRED_TARGET_COLOUR = new Scalar(30, 180, 30);  //Green (Preffered Target)
 
 	public static void drawPreferredTarget(Mat src, VisionData visionData) {
 
