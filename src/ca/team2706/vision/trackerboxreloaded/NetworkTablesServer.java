@@ -7,7 +7,6 @@ import edu.wpi.first.networktables.NetworkTableValue;
 public class NetworkTablesServer {
 
 	
-	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		//Inits stuff
 		NetworkTableInstance instance = NetworkTableInstance.getDefault();

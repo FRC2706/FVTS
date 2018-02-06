@@ -28,6 +28,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JSlider sMaxSat; //Maximum Saturation
 	private JSlider sMinVal; //Minimum Value
 	private JSlider sMaxVal; //Maximum Value
+	private JSlider slider;
 	private JTextField txtIterations;
 	private JTextField textField_1; //Erode Dilate Iterations
 	private JTextField txtMinimumArea;
@@ -35,6 +36,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JTextField txtHue;
 	private JTextField txtSaturation;
 	private JTextField txtValue;
+	private JTextField txtDtci;
 	
 	
 	public ParamsSelector() {
@@ -178,6 +180,20 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		txtValue.setBounds(288, 212, 123, 20);
 		contentPane.add(txtValue);
 		txtValue.setColumns(10);
+		
+		slider = new JSlider();
+		slider.setValue((int) (Double.valueOf(properties.getProperty("distToCentreImportance"))*100));
+		slider.setOrientation(SwingConstants.VERTICAL);
+		slider.setToolTipText("Distance to center importance");
+		slider.setBounds(400, 24, 24, 143);
+		contentPane.add(slider);
+		
+		txtDtci = new JTextField();
+		txtDtci.setText("Distance To Center Importance:");
+		txtDtci.setBounds(4, 230, 278, 20);
+		txtDtci.setEditable(false);
+		contentPane.add(txtDtci);
+		txtDtci.setColumns(10);
 		setVisible(true);
 		
 		new Thread(this).start();
@@ -202,11 +218,11 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				Main.visionParams.maxSaturation = sMaxSat.getValue();
 				Main.visionParams.minValue = sMinVal.getValue();
 				Main.visionParams.maxValue = sMaxVal.getValue();
-				
+				Main.visionParams.distToCentreImportance = ((double) slider.getValue())/100;
 				txtHue.setText("Hue: "+Main.visionParams.minHue+"-"+Main.visionParams.maxHue);
 				txtSaturation.setText("Saturation: "+Main.visionParams.minSaturation+"-"+Main.visionParams.maxSaturation);
 				txtValue.setText("Value: "+Main.visionParams.minValue+"-"+Main.visionParams.maxValue);
-				
+				txtDtci.setText("Distance To Center Importance: "+(Main.visionParams.distToCentreImportance*100)+"%");
 				Thread.sleep(5);
 			}catch(Exception e){
 				e.printStackTrace();
