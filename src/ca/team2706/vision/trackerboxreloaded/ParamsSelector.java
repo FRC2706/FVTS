@@ -36,6 +36,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JTextField txtHue;
 	private JTextField txtSaturation;
 	private JTextField txtValue;
+	private JTextField txtDtci;
 	
 	
 	public ParamsSelector() {
@@ -186,6 +187,12 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		slider.setToolTipText("Distance to center importance");
 		slider.setBounds(400, 24, 24, 143);
 		contentPane.add(slider);
+		
+		txtDtci = new JTextField();
+		txtDtci.setText("Distance To Center Importance:");
+		txtDtci.setBounds(4, 230, 278, 20);
+		contentPane.add(txtDtci);
+		txtDtci.setColumns(10);
 		setVisible(true);
 		
 		new Thread(this).start();
@@ -214,7 +221,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				txtHue.setText("Hue: "+Main.visionParams.minHue+"-"+Main.visionParams.maxHue);
 				txtSaturation.setText("Saturation: "+Main.visionParams.minSaturation+"-"+Main.visionParams.maxSaturation);
 				txtValue.setText("Value: "+Main.visionParams.minValue+"-"+Main.visionParams.maxValue);
-				
+				txtDtci.setText("Distance To Center Importance: "+Main.visionParams.distToCentreImportance);
 				Thread.sleep(5);
 			}catch(Exception e){
 				e.printStackTrace();
