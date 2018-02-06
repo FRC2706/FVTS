@@ -101,7 +101,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		sMaxVal.setBounds(110, 106, 31, 95);
 		contentPane.add(sMaxVal);
 		
-		textField = new JTextField(String.valueOf(Main.visionParams.CameraSelect));
+		textField = new JTextField(String.valueOf(Main.visionParams.cameraSelect));
 		textField.setBounds(196, 49, 86, 20);
 		contentPane.add(textField);
 		textField.setColumns(10);
@@ -204,7 +204,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		while(true){
 			try{
 				if(isInt(textField.getText())){
-					Main.visionParams.CameraSelect = Integer.valueOf(Integer.valueOf(textField.getText()));
+					Main.visionParams.cameraSelect = Integer.valueOf(Integer.valueOf(textField.getText()));
 				}
 				if(isInt(textField_1.getText())){
 					Main.visionParams.erodeDilateIterations = Integer.valueOf(textField_1.getText());

@@ -26,11 +26,6 @@ public class Main {
 
 	public static NetworkTable visionTable;
 
-	// Camera Type
-	// Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
-	// there is no webcam :/
-	private static Properties properties;
-
 	/**
 	 * A class to hold calibration parameters for the image processing algorithm
 	 */
@@ -42,10 +37,11 @@ public class Main {
 		int minValue;
 		int maxValue;
 		int erodeDilateIterations;
-		int CameraSelect;
+		int cameraSelect;
 		double aspectRatioThresh;
 		double minArea;
 		double distToCentreImportance;
+		String imageFile;
 	}
 
 	public static VisionParams visionParams = new VisionParams();
@@ -64,19 +60,6 @@ public class Main {
 			double areaNorm; // [0,1] representing how much of the screen it
 								// occupies
 			Rect boundingBox;
-
-			public Target clone() {
-				Target toRet = new Target();
-
-				toRet.xCentre = this.xCentre;
-				toRet.xCentreNorm = this.xCentreNorm;
-				toRet.yCentre = this.yCentre;
-				toRet.yCentreNorm = this.yCentreNorm;
-				toRet.areaNorm = this.areaNorm;
-				toRet.boundingBox = this.boundingBox;
-
-				return toRet;
-			}
 		}
 
 		ArrayList<Target> targetsFound = new ArrayList<Target>();
@@ -108,7 +91,7 @@ public class Main {
 			FileInputStream in = new FileInputStream("visionParams.properties");
 			properties.load(in);
 
-			visionParams.CameraSelect = Integer.valueOf(properties.getProperty("CameraSelect"));
+			visionParams.cameraSelect = Integer.valueOf(properties.getProperty("CameraSelect"));
 			visionParams.minHue = Integer.valueOf(properties.getProperty("minHue"));
 			visionParams.maxHue = Integer.valueOf(properties.getProperty("maxHue"));
 			visionParams.minSaturation = Integer.valueOf(properties.getProperty("minSaturation"));
@@ -119,6 +102,7 @@ public class Main {
 			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
 			visionParams.aspectRatioThresh = Double.valueOf(properties.getProperty("aspectRatioThresh"));
 			visionParams.distToCentreImportance = Double.valueOf(properties.getProperty("distToCentreImportance"));
+			visionParams.imageFile = properties.getProperty("imageFile");
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.err.println("\n\nError reading the params file, check if the file is corrupt?");
@@ -127,9 +111,9 @@ public class Main {
 	}
 
 	public static void saveVisionParams() {
-		properties = new Properties();
+		Properties properties = new Properties();
 		try {
-			properties.setProperty("CameraSelect", String.valueOf(visionParams.CameraSelect));
+			properties.setProperty("CameraSelect", String.valueOf(visionParams.cameraSelect));
 			properties.setProperty("minHue", String.valueOf(visionParams.minHue));
 			properties.setProperty("maxHue", String.valueOf(visionParams.maxHue));
 			properties.setProperty("minSaturation", String.valueOf(visionParams.minSaturation));
@@ -140,6 +124,7 @@ public class Main {
 			properties.setProperty("minArea", String.valueOf(visionParams.minArea));
 			properties.setProperty("aspectRatioThresh", String.valueOf(visionParams.aspectRatioThresh));
 			properties.setProperty("distToCentreImportance", String.valueOf(visionParams.distToCentreImportance));
+			properties.setProperty("imageFile", visionParams.imageFile);
 
 			FileOutputStream out = new FileOutputStream("visionParams.properties");
 			properties.store(out, "");
@@ -199,8 +184,15 @@ public class Main {
 		Mat frame = new Mat();
 		// Open a connection to the camera
 		VideoCapture camera = null;
-		if (!(visionParams.CameraSelect == -1)) {
-			camera = new VideoCapture(visionParams.CameraSelect);
+
+		// Whether to use a camera, or load an image file from disk.
+		boolean useCamera = true;
+		if (visionParams.cameraSelect == -1) {
+			useCamera = false;
+		}
+
+		if (useCamera) {
+			camera = new VideoCapture(visionParams.cameraSelect);
 			camera.read(frame);
 
 			if (!camera.isOpened()) {
@@ -210,6 +202,14 @@ public class Main {
 
 			// Set up the camera feed
 			camera.read(frame);
+		} else {
+			// load the image from file.
+			try {
+				frame = bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
 		}
 
 		DisplayGui guiRawImg = null;
@@ -230,82 +230,70 @@ public class Main {
 			}
 		}
 		// Main video processing loop
-		boolean useCamera = true;
-		if (visionParams.CameraSelect == -1) {
-			useCamera = false;
-		}
-		BufferedImage image = null;
-		if (!useCamera) {
-			try {
-				image = ImageIO.read(new File(properties.getProperty("image")));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+
 		while (true) {
-			if (useCamera && camera.read(frame)) {
-				// if (use_GUI) {
-				// // So we can dynamically update the file and see the changes
-				// loadVisionParams();
-				// }
-
-				// Process the frame!
-				long pipelineStart = System.nanoTime();
-				VisionData visionData = Pipeline.process(frame, visionParams);
-				long pipelineEnd = System.nanoTime();
-
-				Pipeline.selectPreferredTarget(visionData, visionParams);
-
-				if (use_GUI)
-					Pipeline.drawPreferredTarget(frame, visionData);
-
-				sendVisionDataOverNetworkTables(visionData);
-
-				// display the processed frame in the GUI
-				if (use_GUI) {
-
-					// display the processed frame in the GUI
-					if (use_GUI) {
-						try {
-							// May throw a NullPointerException if initializing
-							// the window failed
-							guiRawImg.updateImage(matToBufferedImage(frame));
-							guiProcessedImg.updateImage(matToBufferedImage(visionData.outputImg));
-						} catch (IOException e) {
-							// means mat2BufferedImage broke
-							// non-fatal error, let the program continue
-							continue;
-						} catch (NullPointerException e) {
-							e.printStackTrace();
-							System.out.println("Window closed");
-							Runtime.getRuntime().halt(0);
-						} catch (Exception e) {
-							// just in case
-							e.printStackTrace();
-							continue;
-						}
-					} else {
-						System.err.println("Error: Failed to get a frame from the camera");
-					}
-
-					// Display the frame rate ono the console
-					double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND)
-							* 1000;
-					System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime, "");
+			if (useCamera) {
+				if (!camera.read(frame)) {
+					System.err.println("Error: Failed to get a frame from the camera");
+					continue;
 				}
+			} // else use the image from disk that we loaded above
+
+			// Process the frame!
+			long pipelineStart = System.nanoTime();
+			VisionData visionData = Pipeline.process(frame, visionParams);
+			long pipelineEnd = System.nanoTime();
+
+			Pipeline.selectPreferredTarget(visionData, visionParams);
+
+			Mat rawOutputImg;
+			if (use_GUI) {
+				rawOutputImg = frame.clone();
+				Pipeline.drawPreferredTarget(rawOutputImg, visionData);
 			} else {
-				Mat mat = bufferedImageToMat(image);
-				VisionData data = Pipeline.process(mat, visionParams);
-				Pipeline.selectPreferredTarget(data, visionParams);
-				Pipeline.drawPreferredTarget(mat, data);
-				sendVisionDataOverNetworkTables(data);
-				guiRawImg.updateImage(image);
-				try {
-					guiProcessedImg.updateImage(matToBufferedImage(data.outputImg));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				rawOutputImg = frame;
 			}
+
+			sendVisionDataOverNetworkTables(visionData);
+
+			// display the processed frame in the GUI
+			if (use_GUI) {
+				try {
+					// May throw a NullPointerException if initializing
+					// the window failed
+					guiRawImg.updateImage(matToBufferedImage(rawOutputImg));
+					guiProcessedImg.updateImage(matToBufferedImage(visionData.outputImg));
+				} catch (IOException e) {
+					// means mat2BufferedImage broke
+					// non-fatal error, let the program continue
+					continue;
+				} catch (NullPointerException e) {
+					e.printStackTrace();
+					System.out.println("Window closed");
+					Runtime.getRuntime().halt(0);
+				} catch (Exception e) {
+					// just in case
+					e.printStackTrace();
+					continue;
+				}
+
+				// Display the frame rate ono the console
+				double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND)
+						* 1000;
+				System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime, "");
+			}
+//			} else {
+//				VisionData data = Pipeline.process(frame, visionParams);
+//				Pipeline.selectPreferredTarget(data, visionParams);
+//				Pipeline.drawPreferredTarget(frame, data);
+//				sendVisionDataOverNetworkTables(data);
+//				try {
+//					guiRawImg.updateImage(matToBufferedImage(frame));
+//					guiProcessedImg.updateImage(matToBufferedImage(data.outputImg));
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
 		} // end main video processing loop
 	}
 
