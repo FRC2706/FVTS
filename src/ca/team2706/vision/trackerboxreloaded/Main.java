@@ -88,8 +88,8 @@ public class Main {
         NetworkTableInstance instance = NetworkTableInstance.getDefault();
         instance.setUpdateRate(0.02);
         //TODO: Test this on plyboy
-//        instance.startClientTeam(2706); //Comment this for non robot use
-        instance.startClient("127.0.0.1"); //Comment this for use on a robot / plyboy
+        instance.startClientTeam(2706); //Comment this for non robot use
+        //instance.startClient("127.0.0.1"); //Comment this for use on a robot / plyboy
         visionTable = instance.getTable("vision");
     }
 
@@ -145,7 +145,8 @@ public class Main {
     }
 
     /**
-     * TODO: fill in comment
+     * Turns all the vision data into packets that kno da wae to get to the roborio
+     * :]
      *
      * @param visionData
      */
