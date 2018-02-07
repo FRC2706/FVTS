@@ -37,6 +37,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JTextField txtSaturation;
 	private JTextField txtValue;
 	private JTextField txtDtci;
+	private JSlider slider_1;
+	private JTextField txtDoubleCubeDetection;
 	
 	
 	public ParamsSelector() {
@@ -114,7 +116,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		txtCamera.setColumns(10);
 		
 		btnSave = new JButton("Save");
-		btnSave.setBounds(196, 178, 89, 23);
+		btnSave.setBounds(151, 178, 89, 23);
 		btnSave.addActionListener(this);
 		contentPane.add(btnSave);
 		
@@ -194,6 +196,20 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		txtDtci.setEditable(false);
 		contentPane.add(txtDtci);
 		txtDtci.setColumns(10);
+		
+		slider_1 = new JSlider();
+		slider_1.setValue(0);
+		slider_1.setToolTipText("Double cube detection range");
+		slider_1.setValue((int) (Double.valueOf(properties.getProperty("aspectRatioThresh"))*100));
+		slider_1.setBounds(161, 145, 200, 26);
+		contentPane.add(slider_1);
+		
+		txtDoubleCubeDetection = new JTextField();
+		txtDoubleCubeDetection.setEditable(false);
+		txtDoubleCubeDetection.setText("Double Cube Detection: "+slider_1.getValue()+"%");
+		txtDoubleCubeDetection.setBounds(245, 179, 179, 20);
+		contentPane.add(txtDoubleCubeDetection);
+		txtDoubleCubeDetection.setColumns(10);
 		setVisible(true);
 		
 		new Thread(this).start();
@@ -219,6 +235,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				Main.visionParams.minValue = sMinVal.getValue();
 				Main.visionParams.maxValue = sMaxVal.getValue();
 				Main.visionParams.distToCentreImportance = ((double) slider.getValue())/100;
+				Main.visionParams.aspectRatioThresh = ((double) slider_1.getValue())/100;
 				txtHue.setText("Hue: "+Main.visionParams.minHue+"-"+Main.visionParams.maxHue);
 				txtSaturation.setText("Saturation: "+Main.visionParams.minSaturation+"-"+Main.visionParams.maxSaturation);
 				txtValue.setText("Value: "+Main.visionParams.minValue+"-"+Main.visionParams.maxValue);
