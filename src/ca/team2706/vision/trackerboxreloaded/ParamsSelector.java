@@ -52,7 +52,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		sMinHue.setPaintTicks(true);
 		sMinHue.setValue(0);
 		sMinHue.setOrientation(SwingConstants.VERTICAL);
-		sMinHue.setMaximum(180);
+		sMinHue.setMaximum(255);
 		sMinHue.setBounds(10, 0, 31, 95);
 		contentPane.add(sMinHue);
 		
@@ -61,7 +61,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		sMaxHue.setToolTipText("Maximum Hue");
 		sMaxHue.setPaintTicks(true);
 		sMaxHue.setOrientation(SwingConstants.VERTICAL);
-		sMaxHue.setMaximum(180);
+		sMaxHue.setMaximum(255);
 		sMaxHue.setBounds(10, 106, 31, 95);
 		contentPane.add(sMaxHue);
 		
