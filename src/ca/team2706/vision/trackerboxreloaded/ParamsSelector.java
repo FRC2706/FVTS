@@ -285,7 +285,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 					Main.visionParams.minArea = Double.valueOf(minArea.getText());
 				}
 				if(!textField_5.getText().equals("")){
-					Main.outputPath = textField_3.getText();
+					Main.outputPath = textField_5.getText();
 				}
 				if(isInt(textField_4.getText())) {
 					Main.seconds_between_img_dumps = Integer.valueOf(textField_4.getText());
