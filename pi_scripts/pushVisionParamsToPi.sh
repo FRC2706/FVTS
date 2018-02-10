@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Args: [PI_IP]
+# Args: [PI_ADDR]
 
 PI_USER=pi
-PI_IP="10.27.6.55"
+PI_ADDR="10.27.6.55"
 PI_DIR='/home/pi/TrackerboxReloaded'
 
 # Error Handling: check if the current folder is the root of the TrackerboxReloaded git repo.
@@ -17,8 +17,8 @@ else
     echo "The file you are looking for exists"
 fi
 
-echo "Copying visionParams.properties to $PI_USER@$PI_IP"
-scp visionParams.properties $PI_USER@$PI_IP:$PI_DIR
+echo "Copying visionParams.properties to ${PI_USER}@${PI_ADDR}"
+scp visionParams.properties ${PI_USER}@${PI_ADDR}:${PI_DIR}
 
 
 
@@ -30,4 +30,4 @@ if [[ $? ]]; then
 fi
 
 # Restart the vision process on the pi
-sh ./pi_scripts/restartVisionProcessOnPi.sh $PI_IP
+source ./pi_scripts/restartVisionProcessOnPi.sh ${PI_ADDR}
