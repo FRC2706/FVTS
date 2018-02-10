@@ -11,9 +11,9 @@ PI_DIR='/home/pi/TrackerboxReloaded'
 # TODO
 
 if [ ! -e "$file" ]; then
-    echo "Parameter File does not exist"
+    echo "It looks like the file your looking for does not exist! Are you sure you are in the root trackerboxReloaded Dir?"
 else
-    echo "Parameter File exists"
+    echo "The file you are looking for exists"
 fi
 
 echo "Copying visionParams.properties to $PI_USER@$PI_IP"
