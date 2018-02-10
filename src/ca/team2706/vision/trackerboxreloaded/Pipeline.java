@@ -37,6 +37,18 @@ public class Pipeline {
 			erodeTwo = dilated;
 		}
 
+		// As a memory footprint optimization, when running on a Pi, re-use one working image in memory
+		Mat dilated, erodeOne, erodeTwo, workingImg;
+		if (Main.use_GUI) {
+			dilated = new Mat();
+			erodeOne = new Mat();
+			erodeTwo = new Mat();
+		} else {
+			dilated = new Mat();
+			erodeOne = dilated;
+			erodeTwo = dilated;
+		}
+
 		int imgArea = src.height() * src.width();
 
 		// If there's any data or intermediate images that you want to return, add them to the VisionData class
