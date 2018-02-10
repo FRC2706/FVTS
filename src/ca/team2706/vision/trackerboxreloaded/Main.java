@@ -1,6 +1,22 @@
 package ca.team2706.vision.trackerboxreloaded;
 
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Properties;
+
+import javax.imageio.ImageIO;
+
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
@@ -10,17 +26,8 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Properties;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
+
 
 public class Main {
 
@@ -93,7 +100,6 @@ public class Main {
 	/**
 	 * Loads the visionTable params! :]
 	 **/
-
 	private static void loadVisionParams() {
 		Properties properties = new Properties();
 		try {
@@ -109,25 +115,34 @@ public class Main {
 			visionParams.maxValue = Integer.valueOf(properties.getProperty("maxValue"));
 			visionParams.minArea = Double.valueOf(properties.getProperty("minArea"));
 			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
-            outputPath = properties.getProperty("imgDumpPath");
-            seconds_between_img_dumps = Integer.valueOf(properties.getProperty("imgDumpWait"));
             visionParams.aspectRatioThresh = Double.valueOf(properties.getProperty("aspectRatioThresh"));
 			visionParams.distToCentreImportance = Double.valueOf(properties.getProperty("distToCentreImportance"));
-			visionParams.imageFile = properties.getProperty("imageFile");
-			if(properties.getProperty("resolution").equals("320x240")){
-				visionParams.width = 320;
-				visionParams.height = 240;
-			}else if(properties.getProperty("resolution").equals("640x480")){
-				visionParams.width = 640;
-				visionParams.height = 480;
-			}else{
-				throw new Exception("sometings up with the config!");
-			}
-		} catch (Exception e1) {
-			e1.printStackTrace();
-			System.err.println("\n\nError reading the params file, check if the file is corrupt?");
-			System.exit(1);
-		}
+            outputPath = properties.getProperty("imgDumpPath");
+            seconds_between_img_dumps = Integer.valueOf(properties.getProperty("imgDumpWait"));
+            visionParams.imageFile = properties.getProperty("imageFile");
+            if(properties.getProperty("resolution").equals("320x240")){
+                visionParams.width = 320;
+                visionParams.height = 240;
+            }else if(properties.getProperty("resolution").equals("640x480")){
+                visionParams.width = 640;
+                visionParams.height = 480;
+            }else if(properties.getProperty("resolution").equals("160x120")){
+                visionParams.width = 160;
+                visionParams.height = 120;
+            }else{
+                throw new IllegalArgumentException("Error: "+properties.getProperty("resolution")+" is not a supported resolution.\n"+
+                        "Allowed: 160x120, 320x240, 640x480.");
+            }
+
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+
+        } catch (Exception e1) {
+            e1.printStackTrace();
+            System.err.println("\n\nError reading the params file, check if the file is corrupt?");
+            System.exit(1);
+        }
 	}
 
 	public static void saveVisionParams() {
@@ -191,6 +206,27 @@ public class Main {
         BufferedImage bi = ImageIO.read(new ByteArrayInputStream(ba));
         return bi;
     }
+    
+    public static Mat bufferedImageToMat(BufferedImage bi) {
+        Mat mat = new Mat(bi.getHeight(), bi.getWidth(), CvType.CV_8UC3);
+        byte[] data = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
+        mat.put(0, 0, data);
+        return mat;
+    }
+
+    public static void imgDump(BufferedImage image, boolean raw) throws IOException {
+        File output;
+        if (raw) {
+            output = new File(outputPath + "imageraw" + format.format(Calendar.getInstance().getTime()) + ".png");
+        } else {
+            output = new File(outputPath + "imageprocessed" + format.format(Calendar.getInstance().getTime()) + ".png");
+        }
+        try {
+            ImageIO.write(image, "PNG", output);
+        } catch (IOException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
 
     /**
      * The main method! Very important Do not delete! :] :]
@@ -251,6 +287,9 @@ public class Main {
         if (System.getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
             use_GUI = true;
         }
+        Size sz = new Size(visionParams.width,visionParams.height);
+        Imgproc.resize( frame, frame, sz );
+
         // Set up the GUI display windows
         if (use_GUI) {
             try {
@@ -270,6 +309,8 @@ public class Main {
                     continue;
                 }
             } // else use the image from disk that we loaded above
+            Imgproc.resize( frame, frame, sz );
+
 
             // Process the frame!
             long pipelineStart = System.nanoTime();
@@ -337,50 +378,4 @@ public class Main {
             System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime, "");
         }
     } // end main video processing loop
-
-    /**
-     * Saves the properties :]
-     */
-    public static void save() {
-        Properties properties = new Properties();
-        try {
-            properties.setProperty("CameraSelect", String.valueOf(visionParams.cameraSelect));
-            properties.setProperty("minHue", String.valueOf(visionParams.minHue));
-            properties.setProperty("maxHue", String.valueOf(visionParams.maxHue));
-            properties.setProperty("minSaturation", String.valueOf(visionParams.minSaturation));
-            properties.setProperty("maxSaturation", String.valueOf(visionParams.maxSaturation));
-            properties.setProperty("minValue", String.valueOf(visionParams.minValue));
-            properties.setProperty("maxValue", String.valueOf(visionParams.maxValue));
-            properties.setProperty("erodeDilateIterations", String.valueOf(visionParams.erodeDilateIterations));
-            properties.setProperty("minArea", String.valueOf(visionParams.minArea));
-            properties.setProperty("imgDumpPath", outputPath);
-            properties.setProperty("imgDumpWait", String.valueOf(seconds_between_img_dumps));
-            FileOutputStream out = new FileOutputStream("visionParams.properties");
-            properties.store(out, "");
-        } catch (Exception e1) {
-            e1.printStackTrace();
-            System.exit(1);
-        }
-    }
-
-    public static Mat bufferedImageToMat(BufferedImage bi) {
-        Mat mat = new Mat(bi.getHeight(), bi.getWidth(), CvType.CV_8UC3);
-        byte[] data = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
-        mat.put(0, 0, data);
-        return mat;
-    }
-
-    public static void imgDump(BufferedImage image, boolean raw) throws IOException {
-        File output;
-        if (raw) {
-            output = new File(outputPath + "imageraw" + format.format(Calendar.getInstance().getTime()) + ".png");
-        } else {
-            output = new File(outputPath + "imageprocessed" + format.format(Calendar.getInstance().getTime()) + ".png");
-        }
-        try {
-            ImageIO.write(image, "PNG", output);
-        } catch (IOException e) {
-            throw new IOException(e.getMessage());
-        }
-    }
 }
