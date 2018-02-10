@@ -5,7 +5,9 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.Rect;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
 import javax.imageio.ImageIO;
@@ -64,6 +66,80 @@ public class Main {
 			visionTable.putNumber("ctrX", visionData.preferredTarget.xCentreNorm);
 			visionTable.putNumber("area", visionData.preferredTarget.areaNorm);
 		}
+
+		DisplayGui guiRawImg = null;
+		DisplayGui guiProcessedImg = null;
+		boolean use_GUI = false;
+		if (System.getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
+			use_GUI = true;
+		}
+		Size sz = new Size(320,240);
+		Imgproc.resize( frame, frame, sz );
+		// Set up the GUI display windows
+		if (use_GUI) {
+			try {
+				guiRawImg = new DisplayGui(matToBufferedImage(frame), "Raw Camera Image");
+				guiProcessedImg = new DisplayGui(matToBufferedImage(frame), "Processed Image");
+				new ParamsSelector();
+			} catch (IOException e) {
+				// means mat2BufferedImage broke
+				// non-fatal error, let the program continue
+			}
+		}
+		// Main video processing loop
+
+		while (true) {
+            if (useCamera) {
+                if (!camera.read(frame)) {
+                    System.err.println("Error: Failed to get a frame from the camera");
+                    continue;
+                }
+            } // else use the image from disk that we loaded above
+            Imgproc.resize(frame, frame, sz);
+            // Process the frame!
+            long pipelineStart = System.nanoTime();
+            VisionData visionData = Pipeline.process(frame, visionParams);
+            long pipelineEnd = System.nanoTime();
+
+            Pipeline.selectPreferredTarget(visionData, visionParams);
+
+            Mat rawOutputImg;
+            if (use_GUI) {
+                rawOutputImg = frame.clone();
+                Pipeline.drawPreferredTarget(rawOutputImg, visionData);
+            } else {
+                rawOutputImg = frame;
+            }
+
+            sendVisionDataOverNetworkTables(visionData);
+
+            // display the processed frame in the GUI
+            if (use_GUI) {
+                try {
+                    // May throw a NullPointerException if initializing
+                    // the window failed
+                    guiRawImg.updateImage(matToBufferedImage(rawOutputImg));
+                    guiProcessedImg.updateImage(matToBufferedImage(visionData.outputImg));
+                } catch (IOException e) {
+                    // means mat2BufferedImage broke
+                    // non-fatal error, let the program continue
+                    continue;
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    System.out.println("Window closed");
+                    Runtime.getRuntime().halt(0);
+                } catch (Exception e) {
+                    // just in case
+                    e.printStackTrace();
+                    continue;
+                }
+
+                // Display the frame rate ono the console
+                double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND)
+                        * 1000;
+                System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime, "");
+            }
+        }
 	}
 	
 
