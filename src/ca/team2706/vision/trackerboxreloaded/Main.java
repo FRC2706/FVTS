@@ -19,8 +19,8 @@ import org.opencv.core.Rect;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
 
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
+
 
 public class Main {
 
@@ -73,12 +73,13 @@ public class Main {
 	 * before it is on master or it will not be fun :)
 	 */
 	private static void initNetworkTables() {
-		NetworkTableInstance instance = NetworkTableInstance.getDefault();
-		instance.setUpdateRate(0.02);
-		instance.startClientTeam(2706); // Comment this for non robot use
-		// instance.startClient("127.0.0.1"); //Comment this for use on a robot
-		// / plyboy
-		visionTable = instance.getTable("vision");
+		NetworkTable.setClientMode();
+		NetworkTable.setUpdateRate(0.2);
+		NetworkTable.setTeam(2706); // Use this for the robit
+		NetworkTable.setDSClientEnabled(true); // and this for the robit
+		//NetworkTable.setIPAddress("127.0.0.1"); //Use this for testing
+		NetworkTable.initialize();
+		visionTable = NetworkTable.getTable("vision");
 	}
 
 	/**
@@ -136,19 +137,20 @@ public class Main {
 
 	/**
 	 * Turns all the vision data into packets that kno da wae to get to the
-	 * roborio :]
+	 * robo rio :]
 	 *
 	 * @param visionData
 	 */
 	private static void sendVisionDataOverNetworkTables(VisionData visionData) {
 
 		// Sends the data
-		visionTable.getEntry("fps").setDouble(visionData.fps);
-		visionTable.getEntry("numTargetsFound").setNumber(visionData.targetsFound.size());
+		visionTable.putNumber("fps", visionData.fps);
+		visionTable.putNumber("numTargetsFound",visionData.targetsFound.size());
 
 		if (visionData.preferredTarget != null)
-			visionTable.getEntry("ctrX").setDouble(visionData.preferredTarget.xCentreNorm);
+			visionTable.putNumber("ctrX", visionData.preferredTarget.xCentreNorm);
 	}
+	
 
 	/**
 	 * Converts a OpenCV Matrix to a BufferedImage :)
