@@ -34,7 +34,7 @@ fi
 # Make sure the target folder exists and copy the newly built jar to the pi
 echo "Copying newly build jar to $PI_USER@$PI_IP"
 ssh $PI_USER@$PI_IP "mkdir -p $PI_DIR"
-rsync $LOCAL_JAR_PATH $PI_USER@$PI_IP:$PI_DIR
+scp $LOCAL_JAR_PATH $PI_USER@$PI_IP:$PI_DIR
 
 # ERROR HANDLING: if the rsync failed, abort
 if [[ $? ]]; then
