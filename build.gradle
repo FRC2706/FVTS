@@ -45,9 +45,7 @@ repositories {
 }
 
 dependencies {
-
   compile ntcoreDep()
-  compile cscoreDep()
   compile 'org.opencv:opencv-java:3.1.0'
 }
 
