@@ -25,6 +25,18 @@ public class Pipeline {
 	@SuppressWarnings("unused")
 	public static VisionData process(Mat src, VisionParams visionParams) {
 
+		// As a memory footprint optimization, when running on a Pi, re-use one working image in memory
+		Mat dilated, erodeOne, erodeTwo, workingImg;
+		if (Main.use_GUI) {
+			dilated = new Mat();
+			erodeOne = new Mat();
+			erodeTwo = new Mat();
+		} else {
+			dilated = new Mat();
+			erodeOne = dilated;
+			erodeTwo = dilated;
+		}
+
 		int imgArea = src.height() * src.width();
 
 		// If there's any data or intermediate images that you want to return, add them to the VisionData class
@@ -38,14 +50,11 @@ public class Pipeline {
 				new Scalar(visionParams.maxHue, visionParams.maxSaturation, visionParams.maxValue), hsvThreshold);
 
 		// Erode - Dilate*2 - Erode
-		Mat dilated = new Mat();
-		Mat erodeOne = new Mat();
-		Mat erodeTwo = new Mat();
 		Imgproc.erode(hsvThreshold, erodeOne, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
 		Imgproc.dilate(erodeOne, dilated, new Mat(), new Point(), 2*visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
 	    Imgproc.erode(dilated, erodeTwo, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
 
-		visionData.outputImg = erodeTwo.clone();
+		visionData.outputImg = erodeTwo;
 
 		//Find contours
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();

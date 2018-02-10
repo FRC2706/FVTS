@@ -13,6 +13,7 @@ import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.imageio.ImageIO;
@@ -170,7 +171,7 @@ public class Main {
 		}
 	}
 
-    /**
+	/**
      * Turns all the vision data into packets that kno da wae to get to the
      * robo rio :]
      *
@@ -286,6 +287,7 @@ public class Main {
         if (System.getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
             use_GUI = true;
         }
+
         Size sz = new Size(visionParams.width,visionParams.height);
         Imgproc.resize( frame, frame, sz );
 
@@ -309,8 +311,8 @@ public class Main {
                     continue;
                 }
             } // else use the image from disk that we loaded above
-            Imgproc.resize( frame, frame, sz );
 
+            Imgproc.resize( frame, frame, sz );
 
             // Process the frame!
             long pipelineStart = System.nanoTime();
