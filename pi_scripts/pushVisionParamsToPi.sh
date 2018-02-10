@@ -10,8 +10,9 @@ PI_DIR='/home/pi/TrackerboxReloaded'
 #   Quit with an error message if not.
 # TODO
 
-if [ ! -e "$file" ]; then
+if [ ! -e "visionParams.properties" ]; then
     echo "It looks like the file your looking for does not exist! Are you sure you are in the root trackerboxReloaded Dir?"
+    exit 1
 else
     echo "The file you are looking for exists"
 fi
@@ -25,7 +26,7 @@ scp visionParams.properties $PI_USER@$PI_IP:$PI_DIR
 if [[ $? ]]; then
   # output to stderr
   >&2 echo "Error: Copy failed! Aborting."
-  exit()
+  exit 0
 fi
 
 # Restart the vision process on the pi
