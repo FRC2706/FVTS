@@ -162,7 +162,6 @@ public class Main {
 	}
 
 	/**
-<<<<<<< HEAD
      * Turns all the vision data into packets that kno da wae to get to the
      * robo rio :]
      *
