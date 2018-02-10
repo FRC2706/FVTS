@@ -34,9 +34,13 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JTextField textField_3;
 	private JTextField txtTimeBetweenCaptures;
 	private JTextField textField_4;
+	private JTextField textField_5;
 	private JTextField txtDtci;
 	private JSlider slider_1;
 	private JTextField txtDoubleCubeDetection;
+	private JTextField txtResolutionWidth;
+	private JTextField textField_2;
+	private JTextField txtHeight;
 	
 	
 	public ParamsSelector() {
@@ -71,7 +75,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		sMinSat.setPaintTicks(true);
 		sMinSat.setOrientation(SwingConstants.VERTICAL);
 		sMinSat.setMaximum(255);
-		sMinSat.setBounds(59, 0, 31, 95);
+		sMinSat.setBounds(42, 0, 31, 95);
 		contentPane.add(sMinSat);
 		
 		sMaxSat = new JSlider();
@@ -80,7 +84,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		sMaxSat.setPaintTicks(true);
 		sMaxSat.setOrientation(SwingConstants.VERTICAL);
 		sMaxSat.setMaximum(255);
-		sMaxSat.setBounds(59, 106, 31, 95);
+		sMaxSat.setBounds(42, 106, 31, 95);
 		contentPane.add(sMaxSat);
 		
 		sMinVal = new JSlider();
@@ -89,7 +93,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		sMinVal.setPaintTicks(true);
 		sMinVal.setOrientation(SwingConstants.VERTICAL);
 		sMinVal.setMaximum(255);
-		sMinVal.setBounds(110, 0, 31, 95);
+		sMinVal.setBounds(74, 0, 31, 95);
 		contentPane.add(sMinVal);
 		
 		sMaxVal = new JSlider();
@@ -98,17 +102,17 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		sMaxVal.setPaintTicks(true);
 		sMaxVal.setOrientation(SwingConstants.VERTICAL);
 		sMaxVal.setMaximum(255);
-		sMaxVal.setBounds(110, 106, 31, 95);
+		sMaxVal.setBounds(74, 106, 31, 95);
 		contentPane.add(sMaxVal);
 		
 		textField = new JTextField(String.valueOf(Main.visionParams.cameraSelect));
-		textField.setBounds(196, 49, 86, 20);
+		textField.setBounds(115, 32, 86, 20);
 		contentPane.add(textField);
 		textField.setColumns(10);
 		
 		txtCamera = new JTextField();
 		txtCamera.setText("Camera #:");
-		txtCamera.setBounds(196, 24, 86, 20);
+		txtCamera.setBounds(115, 10, 86, 20);
 		txtCamera.setEditable(false);
 		contentPane.add(txtCamera);
 		txtCamera.setColumns(10);
@@ -120,26 +124,26 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		
 		txtIterations = new JTextField();
 		txtIterations.setText("Iterations:");
-		txtIterations.setBounds(288, 75, 86, 20);
+		txtIterations.setBounds(115, 102, 86, 20);
 		txtIterations.setEditable(false);
 		contentPane.add(txtIterations);
 		txtIterations.setColumns(10);
 		
 		textField_1 = new JTextField();
 		textField_1.setText("0");
-		textField_1.setBounds(288, 102, 86, 20);
+		textField_1.setBounds(115, 119, 86, 20);
 		contentPane.add(textField_1);
 		textField_1.setColumns(10);
 		
 		txtMinimumArea = new JTextField();
 		txtMinimumArea.setText("Minimum Area:");
 		txtMinimumArea.setEditable(false);
-		txtMinimumArea.setBounds(151, 92, 86, 20);
+		txtMinimumArea.setBounds(115, 55, 86, 20);
 		contentPane.add(txtMinimumArea);
 		txtMinimumArea.setColumns(10);
 		
 		minArea = new JTextField();
-		minArea.setBounds(151, 114, 86, 20);
+		minArea.setBounds(115, 75, 86, 20);
 		contentPane.add(minArea);
 		minArea.setColumns(10);
 		
@@ -188,11 +192,11 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		contentPane.add(txtOutputPath);
 		txtOutputPath.setColumns(10);
 		
-		textField_3 = new JTextField();
-		textField_3.setBounds(310, 44, 86, 20);
-		contentPane.add(textField_3);
-		textField_3.setColumns(10);
-		textField_3.setText(properties.getProperty("imgDumpPath"));
+		textField_5 = new JTextField();
+		textField_5.setBounds(310, 44, 86, 20);
+		contentPane.add(textField_5);
+		textField_5.setColumns(10);
+		textField_5.setText(properties.getProperty("imgDumpPath"));
 		
 		txtTimeBetweenCaptures = new JTextField();
 		txtTimeBetweenCaptures.setEditable(false);
@@ -210,7 +214,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		slider.setValue((int) (Double.valueOf(properties.getProperty("distToCentreImportance"))*100));
 		slider.setOrientation(SwingConstants.VERTICAL);
 		slider.setToolTipText("Distance to center importance");
-		slider.setBounds(400, 24, 24, 143);
+		slider.setBounds(211, 32, 31, 143);
 		contentPane.add(slider);
 		
 		txtDtci = new JTextField();
@@ -224,7 +228,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		slider_1.setValue(0);
 		slider_1.setToolTipText("Double cube detection range");
 		slider_1.setValue((int) (Double.valueOf(properties.getProperty("aspectRatioThresh"))*100));
-		slider_1.setBounds(161, 145, 200, 26);
+		slider_1.setBounds(211, 0, 200, 26);
 		contentPane.add(slider_1);
 		
 		txtDoubleCubeDetection = new JTextField();
@@ -233,6 +237,33 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		txtDoubleCubeDetection.setBounds(245, 179, 179, 20);
 		contentPane.add(txtDoubleCubeDetection);
 		txtDoubleCubeDetection.setColumns(10);
+		
+		txtResolutionWidth = new JTextField();
+		txtResolutionWidth.setToolTipText("The width the program resizes the frame to");
+		txtResolutionWidth.setEditable(false);
+		txtResolutionWidth.setText("Width");
+		txtResolutionWidth.setBounds(252, 37, 86, 20);
+		contentPane.add(txtResolutionWidth);
+		txtResolutionWidth.setColumns(10);
+		
+		textField_2 = new JTextField();
+		textField_2.setBounds(252, 55, 86, 20);
+		contentPane.add(textField_2);
+		textField_2.setColumns(10);
+		textField_2.setText(String.valueOf(Main.visionParams.width));
+		txtHeight = new JTextField();
+		txtHeight.setToolTipText("Sets the height for the frame in the program");
+		txtHeight.setEditable(false);
+		txtHeight.setText("Height");
+		txtHeight.setBounds(252, 92, 86, 20);
+		contentPane.add(txtHeight);
+		txtHeight.setColumns(10);
+		
+		textField_3 = new JTextField();
+		textField_3.setBounds(252, 119, 86, 20);
+		contentPane.add(textField_3);
+		textField_3.setColumns(10);
+		textField_3.setText(String.valueOf(Main.visionParams.height));
 		setVisible(true);
 		
 		new Thread(this).start();
@@ -251,11 +282,17 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				if(isDouble(minArea.getText())){
 					Main.visionParams.minArea = Double.valueOf(minArea.getText());
 				}
-				if(!textField_3.getText().equals("")){
+				if(!textField_5.getText().equals("")){
 					Main.outputPath = textField_3.getText();
 				}
-				if(isInt(textField_4.getText())){
+				if(isInt(textField_4.getText())) {
 					Main.seconds_between_img_dumps = Integer.valueOf(textField_4.getText());
+				}
+				if(isInt(textField_2.getText())){
+					Main.visionParams.width = Integer.valueOf(textField_2.getText());
+				}
+				if(isInt(textField_3.getText())){
+					Main.visionParams.height = Integer.valueOf(textField_3.getText());
 				}
 				Main.visionParams.minHue = sMinHue.getValue();
 				Main.visionParams.maxHue = sMaxHue.getValue();
