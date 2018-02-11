@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Pipeline {
-	
+
 	/** Numerical Constants **/
 	public static final int NANOSECONDS_PER_SECOND = 1000000000;
-	
+
 	public static long fpsTimer = System.nanoTime();
 
 	 /**
@@ -113,6 +113,7 @@ public class Pipeline {
 
 		long now = System.nanoTime();
 		visionData.fps = ((double) NANOSECONDS_PER_SECOND) / (now - fpsTimer);
+		visionData.fps = ((int)visionData.fps*10)/10.0; // round to 1 decimal place
 		fpsTimer = now;
 
 		return visionData;

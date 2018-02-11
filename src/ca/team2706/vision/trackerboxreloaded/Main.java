@@ -133,7 +133,6 @@ public class Main {
                 throw new IllegalArgumentException("Error: "+properties.getProperty("resolution")+" is not a supported resolution.\n"+
                         "Allowed: 160x120, 320x240, 640x480.");
             }
-
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
             System.exit(1);
@@ -206,7 +205,7 @@ public class Main {
         BufferedImage bi = ImageIO.read(new ByteArrayInputStream(ba));
         return bi;
     }
-    
+
     public static Mat bufferedImageToMat(BufferedImage bi) {
         Mat mat = new Mat(bi.getHeight(), bi.getWidth(), CvType.CV_8UC3);
         byte[] data = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
@@ -301,6 +300,7 @@ public class Main {
                 // non-fatal error, let the program continue
             }
         }
+
         // Main video processing loop
         while (true) {
             if (useCamera) {
