@@ -46,7 +46,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Make sure the target folder exists and copy the newly built jar to the pi
-echo "Copying newly build jar to $PI_USER@$PI_ADDR"
+echo "Copying newly built jar to $PI_USER@$PI_ADDR"
 ssh ${PI_USER}@${PI_ADDR} "mkdir -p ${PI_DIR}"
 scp ${LOCAL_JAR_PATH} ${PI_USER}@${PI_ADDR}:${PI_DIR}
 
