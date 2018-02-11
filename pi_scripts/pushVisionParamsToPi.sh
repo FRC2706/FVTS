@@ -23,7 +23,7 @@ scp visionParams.properties ${PI_USER}@${PI_ADDR}:${PI_DIR}
 
 
 # ERROR HANDLING: if the rsync failed, abort
-if [[ $? ]]; then
+if [ $? -ne 0 ]; then
   # output to stderr
   >&2 echo "Error: Copy failed! Aborting."
   exit 0
