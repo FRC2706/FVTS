@@ -5,7 +5,7 @@
 PI_USER=pi
 PI_ADDR="10.27.6.55"
 PI_DIR='/home/pi/TrackerboxReloaded'
-LOCAL_JAR_PATH="output/CameraVision-all.jar"
+LOCAL_ZIP_PATH="output/CameraVision.zip"
 
 # ERROR HANDLING: check if the current folder is the root of the TrackerboxReloaded git repo.
 #   Quit with an error message if not.
@@ -45,12 +45,13 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Make sure the target folder exists and copy the newly built jar to the pi
+# Make sure the target folder exists and copy the newly built zip to the pi
 echo "Copying newly built jar to $PI_USER@$PI_ADDR"
 ssh ${PI_USER}@${PI_ADDR} "mkdir -p ${PI_DIR}"
-scp ${LOCAL_JAR_PATH} ${PI_USER}@${PI_ADDR}:${PI_DIR}
+scp ${LOCAL_ZIP_PATH} ${PI_USER}@${PI_ADDR}:${PI_DIR}
+ssh ${PI_USER}@${PI_ADDR} "yes | unzip ${PI_DIR}/$(basename ${LOCAL_ZIP_PATH}) -d ${PI_DIR}"
 
-# ERROR HANDLING: if the rsync failed, abort
+# ERROR HANDLING: if the copy failed, abort
 if [ $? -ne ]; then
   # output to stderr
   >&2 echo "Error: Copy failed! Aborting."
@@ -58,7 +59,7 @@ if [ $? -ne ]; then
 fi
 
 # Push the vision params file too
-source ./pi_scripts/pushvisionParamsToPi.sh
+source pi_scripts/pushvisionParamsToPi.sh
 
 # Restart the vision process on the pi
-source ./pi_scripts/restartVisionProcessOnPi.sh ${PI_ADDR}
+source pi_scripts/restartVisionProcessOnPi.sh ${PI_ADDR}
