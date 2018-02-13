@@ -6,10 +6,14 @@ PI_USER=pi
 PI_ADDR="10.27.6.55"
 PI_DIR='/home/pi/TrackerboxReloaded'
 LOCAL_ZIP_PATH="output/CameraVision.zip"
+PARAMS_FILE="visionParams.properties"
 
-# ERROR HANDLING: check if the current folder is the root of the TrackerboxReloaded git repo.
+# Error Handling: check if the current folder is the root of the TrackerboxReloaded git repo.
 #   Quit with an error message if not.
-# TODO
+if [ ! -e $PARAMS_FILE ]; then
+    echo "It looks like ${PARAMS_FILE} does not exist! Are you sure you are in the root trackerboxReloaded Dir?"
+    exit 1
+fi
 
 # If user provided an IP address on the command line, use that
 if [[ $1 != "" ]]; then

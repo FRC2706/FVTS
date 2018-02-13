@@ -1,0 +1,10 @@
+[Unit]
+Description=FRC2706 Vision TrackerboxReloaded
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/home/pi/TrackerboxReloaded/runCameraVision
+
+[Install]
+WantedBy=multi-user.target
