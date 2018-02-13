@@ -14,3 +14,6 @@ out/
 *.iws
 *.iml
 *.ipr
+
+# Java Gui Stuff
+*.log

@@ -1,87 +1,71 @@
 package ca.team2706.vision.trackerboxreloaded;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.imageio.ImageIO;
 
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
+import org.opencv.core.Rect;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
-import org.opencv.videoio.Videoio;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Main {
 
-	public static NetworkTable vision;
-	public static NetworkTable fps;
-	public static NetworkTable data;
-	// Camera Type
-	// Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
-	// there is no webcam :/
+	public static NetworkTable visionTable;
 
 	/**
 	 * A class to hold calibration parameters for the image processing algorithm
 	 */
 	public static class VisionParams {
-		public int minHue;
-		public int maxHue;
-		public int minSaturation;
-		public int maxSaturation;
-		public int minValue;
-		public int maxValue;
-		public int erodeDilateIterations;
-		public int CameraSelect;
-		public int minArea;
+		int minHue;
+		int maxHue;
+		int minSaturation;
+		int maxSaturation;
+		int minValue;
+		int maxValue;
+		int erodeDilateIterations;
+		int cameraSelect;
+		double aspectRatioThresh;
+		double minArea;
+		double distToCentreImportance;
+		String imageFile;
 	}
 
 	public static VisionParams visionParams = new VisionParams();
 
 	/**
-	 * A class to hold any vision data returned by process() :) :) :} :] :]
+	 * A class to hold any visionTable data returned by process() :) :) :} :] :]
 	 */
+
 	public static class VisionData {
+
+		public static class Target {
+			int xCentre;
+			double xCentreNorm;
+			int yCentre;
+			double yCentreNorm;
+			double areaNorm; // [0,1] representing how much of the screen it
+								// occupies
+			Rect boundingBox;
+		}
+
+		ArrayList<Target> targetsFound = new ArrayList<Target>();
+		Target preferredTarget;
 		public Mat outputImg = new Mat();
 		public double fps;
-		public HashMap<String, String> data = new HashMap<String, String>();
-
-		/**
-		 * This method converts the vision data into a nice and tidy string :]
-		 * 
-		 * @return the data
-		 */
-		public void encode(NetworkTable table) {
-			// TODO: add code
-			// basic networktable code: table.getEntry("data").setString("foo);
-			table.getEntry("data").setString(DataUtils.encodeData(data));
-		}
-
-		/**
-		 * Decodes the NetworkTable stuff into a VisionData
-		 * 
-		 * @param the
-		 *            data table
-		 * @return the data
-		 */
-		@SuppressWarnings("unused")
-		public static VisionData decode(NetworkTable table) {
-			// TODO: add code
-			// basic networktable code:
-			// table.getEntry("data").getValue().getString();
-			// dont forget: if(table.getEntry("data").getValue().isString())
-			if (table.getEntry("data").getValue().isString()) {
-				HashMap<String, String> data = DataUtils.decodeData(table.getEntry("data").getValue().getString());
-			}
-			return null;
-		}
 	}
 
 	/**
@@ -90,16 +74,15 @@ public class Main {
 	 */
 	private static void initNetworkTables() {
 		NetworkTableInstance instance = NetworkTableInstance.getDefault();
-		instance.startClient("127.0.0.1");
-		vision = instance.getTable("vision");
-		fps = vision.getSubTable("fps");
-		data = vision.getSubTable("data");
+		instance.setUpdateRate(0.02);
+		instance.startClientTeam(2706); // Comment this for non robot use
+		// instance.startClient("127.0.0.1"); //Comment this for use on a robot
+		// / plyboy
+		visionTable = instance.getTable("vision");
 	}
 
 	/**
-	 * 
-	 * Loads the vision params! :]
-	 * 
+	 * Loads the visionTable params! :]
 	 **/
 
 	private static void loadVisionParams() {
@@ -108,14 +91,43 @@ public class Main {
 			FileInputStream in = new FileInputStream("visionParams.properties");
 			properties.load(in);
 
-			visionParams.CameraSelect = Integer.valueOf(properties.getProperty("CameraSelect"));
+			visionParams.cameraSelect = Integer.valueOf(properties.getProperty("CameraSelect"));
 			visionParams.minHue = Integer.valueOf(properties.getProperty("minHue"));
 			visionParams.maxHue = Integer.valueOf(properties.getProperty("maxHue"));
 			visionParams.minSaturation = Integer.valueOf(properties.getProperty("minSaturation"));
 			visionParams.maxSaturation = Integer.valueOf(properties.getProperty("maxSaturation"));
 			visionParams.minValue = Integer.valueOf(properties.getProperty("minValue"));
 			visionParams.maxValue = Integer.valueOf(properties.getProperty("maxValue"));
+			visionParams.minArea = Double.valueOf(properties.getProperty("minArea"));
 			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
+			visionParams.aspectRatioThresh = Double.valueOf(properties.getProperty("aspectRatioThresh"));
+			visionParams.distToCentreImportance = Double.valueOf(properties.getProperty("distToCentreImportance"));
+			visionParams.imageFile = properties.getProperty("imageFile");
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			System.err.println("\n\nError reading the params file, check if the file is corrupt?");
+			System.exit(1);
+		}
+	}
+
+	public static void saveVisionParams() {
+		Properties properties = new Properties();
+		try {
+			properties.setProperty("CameraSelect", String.valueOf(visionParams.cameraSelect));
+			properties.setProperty("minHue", String.valueOf(visionParams.minHue));
+			properties.setProperty("maxHue", String.valueOf(visionParams.maxHue));
+			properties.setProperty("minSaturation", String.valueOf(visionParams.minSaturation));
+			properties.setProperty("maxSaturation", String.valueOf(visionParams.maxSaturation));
+			properties.setProperty("minValue", String.valueOf(visionParams.minValue));
+			properties.setProperty("maxValue", String.valueOf(visionParams.maxValue));
+			properties.setProperty("erodeDilateIterations", String.valueOf(visionParams.erodeDilateIterations));
+			properties.setProperty("minArea", String.valueOf(visionParams.minArea));
+			properties.setProperty("aspectRatioThresh", String.valueOf(visionParams.aspectRatioThresh));
+			properties.setProperty("distToCentreImportance", String.valueOf(visionParams.distToCentreImportance));
+			properties.setProperty("imageFile", visionParams.imageFile);
+
+			FileOutputStream out = new FileOutputStream("visionParams.properties");
+			properties.store(out, "");
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.exit(1);
@@ -123,12 +135,28 @@ public class Main {
 	}
 
 	/**
+	 * Turns all the vision data into packets that kno da wae to get to the
+	 * roborio :]
+	 *
+	 * @param visionData
+	 */
+	private static void sendVisionDataOverNetworkTables(VisionData visionData) {
+
+		// Sends the data
+		visionTable.getEntry("fps").setDouble(visionData.fps);
+		visionTable.getEntry("numTargetsFound").setNumber(visionData.targetsFound.size());
+
+		if (visionData.preferredTarget != null)
+			visionTable.getEntry("ctrX").setDouble(visionData.preferredTarget.xCentreNorm);
+	}
+
+	/**
 	 * Converts a OpenCV Matrix to a BufferedImage :)
-	 * 
+	 *
 	 * @param matrix
 	 *            Matrix to be converted
 	 * @return Generated from the matrix
-	 * @throws IOException 
+	 * @throws IOException
 	 * @throws Exception
 	 */
 	private static BufferedImage matToBufferedImage(Mat matrix) throws IOException {
@@ -141,13 +169,9 @@ public class Main {
 	}
 
 	/**
-	 * The main method!
-	 * Very important
-	 * Do not delete!
-	 * :]
-	 * :]
+	 * The main method! Very important Do not delete! :] :]
+	 *
 	 * @param args
-	 * @throws Exception
 	 */
 	public static void main(String[] args) {
 		// Must be included!
@@ -155,120 +179,128 @@ public class Main {
 
 		// Connect NetworkTables, and get access to the publishing table
 		initNetworkTables();
-		// read the vision calibration values from file.
+		// read the visionTable calibration values from file.
 		loadVisionParams();
-
-		// Open a connection to the camera
-		VideoCapture camera = new VideoCapture(visionParams.CameraSelect);
-
-		// Read the camera's supported frame-rate
-		double cameraFps = camera.get(Videoio.CAP_PROP_FPS);
-
 		Mat frame = new Mat();
-		camera.read(frame);
+		// Open a connection to the camera
+		VideoCapture camera = null;
 
-		if (!camera.isOpened()) {
-			System.out.println("Error: Can not connect to camera");
-		} else {
-			
+		// Whether to use a camera, or load an image file from disk.
+		boolean useCamera = true;
+		if (visionParams.cameraSelect == -1) {
+			useCamera = false;
+		}
+
+		if (useCamera) {
+			camera = new VideoCapture(visionParams.cameraSelect);
+			camera.read(frame);
+
+			if (!camera.isOpened()) {
+				System.err.println("Error: Can not connect to camera");
+				System.exit(1);
+			}
+
 			// Set up the camera feed
 			camera.read(frame);
-			
-			DisplayGui guiRawImg = null;
-			DisplayGui guiProcessedImg = null;
-			boolean use_GUI = false;
-			if (System.getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
-				use_GUI = true;
-				System.out.println(use_GUI);
+		} else {
+			// load the image from file.
+			try {
+				frame = bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
 			}
-			// Set up the GUI display windows
+		}
+
+		DisplayGui guiRawImg = null;
+		DisplayGui guiProcessedImg = null;
+		boolean use_GUI = false;
+		if (System.getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
+			use_GUI = true;
+		}
+		// Set up the GUI display windows
+		if (use_GUI) {
+			try {
+				guiRawImg = new DisplayGui(matToBufferedImage(frame), "Raw Camera Image");
+				guiProcessedImg = new DisplayGui(matToBufferedImage(frame), "Processed Image");
+				new ParamsSelector();
+			} catch (IOException e) {
+				// means mat2BufferedImage broke
+				// non-fatal error, let the program continue
+			}
+		}
+		// Main video processing loop
+
+		while (true) {
+			if (useCamera) {
+				if (!camera.read(frame)) {
+					System.err.println("Error: Failed to get a frame from the camera");
+					continue;
+				}
+			} // else use the image from disk that we loaded above
+
+			// Process the frame!
+			long pipelineStart = System.nanoTime();
+			VisionData visionData = Pipeline.process(frame, visionParams);
+			long pipelineEnd = System.nanoTime();
+
+			Pipeline.selectPreferredTarget(visionData, visionParams);
+
+			Mat rawOutputImg;
+			if (use_GUI) {
+				rawOutputImg = frame.clone();
+				Pipeline.drawPreferredTarget(rawOutputImg, visionData);
+			} else {
+				rawOutputImg = frame;
+			}
+
+			sendVisionDataOverNetworkTables(visionData);
+
+			// display the processed frame in the GUI
 			if (use_GUI) {
 				try {
-					guiRawImg = new DisplayGui(matToBufferedImage(frame), "Raw Camera Image");
-					guiProcessedImg = new DisplayGui(matToBufferedImage(frame), "Processed Image");
-					new ParamsSelector();
+					// May throw a NullPointerException if initializing
+					// the window failed
+					guiRawImg.updateImage(matToBufferedImage(rawOutputImg));
+					guiProcessedImg.updateImage(matToBufferedImage(visionData.outputImg));
 				} catch (IOException e) {
 					// means mat2BufferedImage broke
 					// non-fatal error, let the program continue
+					continue;
+				} catch (NullPointerException e) {
+					e.printStackTrace();
+					System.out.println("Window closed");
+					Runtime.getRuntime().halt(0);
+				} catch (Exception e) {
+					// just in case
+					e.printStackTrace();
+					continue;
 				}
+
+				// Display the frame rate ono the console
+				double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND)
+						* 1000;
+				System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime, "");
 			}
-
-			// Main video processing loop
-			while (true) {
-				if (camera.read(frame)) {
-					// display the raw frame
-					if (use_GUI) {
-						try {
-							// May throw a NullPointerException if initializing
-							// the window failed
-							guiRawImg.updateImage(matToBufferedImage(frame));
-						} catch (IOException e) {
-							// means mat2BufferedImage broke
-							// non-fatal error, let the program continue
-							continue;
-						} catch (NullPointerException e) {
-							e.printStackTrace();
-							System.out.println("Window closed");
-							Runtime.getRuntime().halt(0);
-						}
-					}
-
-					// Process the frame!
-					VisionData visionData = Pipeline.process(frame, visionParams);
-					
-					
-					//Sends the data
-					visionData.encode(data);
-					fps.getEntry("fps").setDouble(visionData.fps);
-					
-					// display the processed frame in the GUI
-					if (use_GUI) {
-						try {
-							// May throw a NullPointerException if initializing
-							// the window failed
-							guiProcessedImg.updateImage(matToBufferedImage(visionData.outputImg));
-						} catch (IOException e) {
-							// means mat2BufferedImage broke
-							// non-fatal error, let the program continue
-							continue;
-						} catch (NullPointerException e) {
-							e.printStackTrace();
-							System.out.println("Window closed");
-							Runtime.getRuntime().halt(0);
-						}
-
-					}
-					
-					// Display the frame rate
-					System.out.printf("Vision FPS: %3.2f, camera FPS: %3.2f\n", visionData.fps, cameraFps);
-					
-				} // end main video processing loop
-			}
-		
-		}
-		camera.release();
+//			} else {
+//				VisionData data = Pipeline.process(frame, visionParams);
+//				Pipeline.selectPreferredTarget(data, visionParams);
+//				Pipeline.drawPreferredTarget(frame, data);
+//				sendVisionDataOverNetworkTables(data);
+//				try {
+//					guiRawImg.updateImage(matToBufferedImage(frame));
+//					guiProcessedImg.updateImage(matToBufferedImage(data.outputImg));
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
+		} // end main video processing loop
 	}
 
-	/**
-	 * Saves the properties :]
-	 */
-	public static void save() {
-		Properties properties = new Properties();
-		try {
-			properties.setProperty("CameraSelect", String.valueOf(visionParams.CameraSelect));
-			properties.setProperty("minHue", String.valueOf(visionParams.minHue));
-			properties.setProperty("maxHue", String.valueOf(visionParams.maxHue));
-			properties.setProperty("minSaturation", String.valueOf(visionParams.minSaturation));
-			properties.setProperty("maxSaturation", String.valueOf(visionParams.maxSaturation));
-			properties.setProperty("minValue", String.valueOf(visionParams.minValue));
-			properties.setProperty("maxValue", String.valueOf(visionParams.maxValue));
-			properties.setProperty("erodeDilateIterations", String.valueOf(visionParams.erodeDilateIterations));
-			properties.setProperty("minArea", String.valueOf(visionParams.minArea));
-			FileOutputStream out = new FileOutputStream("visionParams.properties");
-			properties.store(out, "");
-		} catch (Exception e1) {
-			e1.printStackTrace();
-			System.exit(1);
-		}
+	public static Mat bufferedImageToMat(BufferedImage bi) {
+		Mat mat = new Mat(bi.getHeight(), bi.getWidth(), CvType.CV_8UC3);
+		byte[] data = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
+		mat.put(0, 0, data);
+		return mat;
 	}
 }
