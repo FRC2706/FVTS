@@ -5,25 +5,21 @@
 PI_USER=pi
 PI_ADDR="10.27.6.55"
 PI_DIR='/home/pi/TrackerboxReloaded'
+PARAMS_FILE="visionParams.properties"
 
 # Error Handling: check if the current folder is the root of the TrackerboxReloaded git repo.
 #   Quit with an error message if not.
-# TODO
-
-if [ ! -e "visionParams.properties" ]; then
-    echo "It looks like the file your looking for does not exist! Are you sure you are in the root trackerboxReloaded Dir?"
+if [ ! -e $PARAMS_FILE ]; then
+    echo "It looks like ${PARAMS_FILE} does not exist! Are you sure you are in the root trackerboxReloaded Dir?"
     exit 1
-else
-    echo "The file you are looking for exists"
 fi
 
 echo "Copying visionParams.properties to ${PI_USER}@${PI_ADDR}"
+ssh ${PI_USER}@${PI_ADDR} "mkdir -p ${PI_DIR}"
 scp visionParams.properties ${PI_USER}@${PI_ADDR}:${PI_DIR}
 
-
-
 # ERROR HANDLING: if the rsync failed, abort
-if [[ $? ]]; then
+if [[ $? -ne 0 ]]; then
   # output to stderr
   >&2 echo "Error: Copy failed! Aborting."
   exit 0
