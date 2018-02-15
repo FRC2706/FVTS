@@ -14,6 +14,11 @@ if [ ! -e $PARAMS_FILE ]; then
     exit 1
 fi
 
+# If user provided an IP address on the command line, use that
+if [[ $1 != "" ]]; then
+  PI_ADDR=$1
+fi
+
 echo "Copying visionParams.properties to ${PI_USER}@${PI_ADDR}"
 ssh ${PI_USER}@${PI_ADDR} "mkdir -p ${PI_DIR}"
 scp visionParams.properties ${PI_USER}@${PI_ADDR}:${PI_DIR}
