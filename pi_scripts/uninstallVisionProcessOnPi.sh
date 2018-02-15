@@ -6,7 +6,7 @@
 # Configure the target pi to run TrackerboxReloaded on boot as a system service
 
 PI_USER=pi
-PI_ADDR="10.27.6.55"
+PI_ADDR="10.27.6.61"
 
 # If user provided an IP address on the command line, use that
 if [[ $1 != "" ]]; then

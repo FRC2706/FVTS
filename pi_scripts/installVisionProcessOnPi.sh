@@ -6,7 +6,7 @@
 # Configure the target pi to run TrackerboxReloaded on boot as a system service
 
 PI_USER=pi
-PI_ADDR="10.27.6.55"
+PI_ADDR="10.27.6.61"
 PARAMS_FILE="visionParams.properties"
 
 # Error Handling: check if the current folder is the root of the TrackerboxReloaded git repo.
