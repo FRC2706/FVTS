@@ -1,23 +1,13 @@
 ext.ntcoreDep = { ->
     def classifier
     if (buildType == "windows") {
-      classifier = "windows2015"
+        classifier = "windows2015"
     } else if (buildType == "linux") {
-      classifier = "desktop"
+        classifier = "desktop"
     } else {
-      classifier = buildType
+        classifier = buildType
     }
     return "edu.wpi.first.wpilib.networktables.java:NetworkTables:+:$classifier"
-}
-
-ext.cscoreDep = { ->
-    def classifier
-    if (buildType == "windows") {
-      classifier = "windows2015"
-    } else {
-      classifier = buildType
-    }
-    return "edu.wpi.cscore.java:cscore:+:$classifier"
 }
 
 ext.getOpenCvPlatformPackage = { ->

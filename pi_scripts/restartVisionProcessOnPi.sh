@@ -6,7 +6,7 @@
 # restart it using systemd
 
 PI_USER=pi
-PI_ADDR="10.27.6.55"
+PI_ADDR="10.27.6.61"
 PARAMS_FILE="visionParams.properties"
 
 # Error Handling: check if the current folder is the root of the TrackerboxReloaded git repo.
@@ -25,7 +25,5 @@ fi
 # SSH to the pi and restart the vision process
 echo "Restarting vision process on ${PI_USER}@${PI_ADDR}"
 ssh ${PI_USER}@${PI_ADDR} "sudo systemctl stop vision.service"
-ssh ${PI_USER}@${PI_ADDR} "sudo systemctl disable vision.service"
 ssh ${PI_USER}@${PI_ADDR} "sudo systemctl daemon-reload"
-ssh ${PI_USER}@${PI_ADDR} "sudo systemctl enable vision.service"
 ssh ${PI_USER}@${PI_ADDR} "sudo systemctl start vision.service"

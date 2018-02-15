@@ -45,9 +45,7 @@ repositories {
 }
 
 dependencies {
-  compile group: "edu.wpi.first.ntcore", name: "ntcore-java", version: "4.+"
-  runtime group: "edu.wpi.first.ntcore", name: "ntcore-jni", version: "4.+", classifier: "all"
-  runtime group: "edu.wpi.first.wpiutil", name: "wpiutil-java", version: "3.+"
+  compile ntcoreDep()
   compile 'org.opencv:opencv-java:3.1.0'
 }
 
@@ -82,7 +80,7 @@ task writeExecuteScript() {
       runFile.write "java -Djava.library.path=. -jar ${projectName}-all.jar"
     } else {
       def runFile = new File("${buildDir}/run${projectName}")
-      runFile.write "java -Djava.library.path=. -jar ${projectName}-all.jar"
+      runFile.write "#!/bin/bash\njava -Djava.library.path=. -jar ${projectName}-all.jar"
     }
   }
 }

@@ -5,6 +5,7 @@ After=multi-user.target
 [Service]
 Type=idle
 ExecStart=/home/pi/TrackerboxReloaded/runCameraVision
+WorkingDirectory=/home/pi/TrackerboxReloaded/
 
 [Install]
 WantedBy=multi-user.target

@@ -3,7 +3,7 @@
 # Args: [PI_ADDR]
 
 PI_USER=pi
-PI_ADDR="10.27.6.55"
+PI_ADDR="10.27.6.61"
 PI_DIR='/home/pi/TrackerboxReloaded'
 LOCAL_ZIP_PATH="output/CameraVision.zip"
 PARAMS_FILE="visionParams.properties"
