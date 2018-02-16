@@ -22,16 +22,17 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JTextField textField;
 	private JTextField txtCamera;
 	private JButton btnSave;
-	private JSlider slider; //Minimum Hue
-	private JSlider slider_1; //Maximum Hue
-	private JSlider slider_2; //Minimum Saturation
-	private JSlider slider_3; //Maximum Saturation
-	private JSlider slider_4; //Minimum Value
-	private JSlider slider_5; //Maximum Value
+	private JSlider sMinHue; //Minimum Hue
+	private JSlider sMaxHue; //Maximum Hue
+	private JSlider sMinSat; //Minimum Saturation
+	private JSlider sMaxSat; //Maximum Saturation
+	private JSlider sMinVal; //Minimum Value
+	private JSlider sMaxVal; //Maximum Value
+	private JSlider slider;
 	private JTextField txtIterations;
 	private JTextField textField_1; //Erode Dilate Iterations
 	private JTextField txtMinimumArea;
-	private JTextField textField_2; //Minimum Area
+	private JTextField minArea; //Minimum Area
 	private JTextField txtHue;
 	private JTextField txtSaturation;
 	private JTextField txtValue;
@@ -39,6 +40,9 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JTextField textField_3;
 	private JTextField txtTimeBetweenCaptures;
 	private JTextField textField_4;
+	private JTextField txtDtci;
+	private JSlider slider_1;
+	private JTextField txtDoubleCubeDetection;
 	
 	
 	public ParamsSelector() {
@@ -49,61 +53,61 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		contentPane.setLayout(null);
 		setContentPane(contentPane);
 		
-		slider = new JSlider();
-		slider.setToolTipText("Minimum Hue");
-		slider.setPaintTicks(true);
-		slider.setValue(0);
-		slider.setOrientation(SwingConstants.VERTICAL);
-		slider.setMaximum(256);
-		slider.setBounds(10, 0, 31, 95);
-		contentPane.add(slider);
+		sMinHue = new JSlider();
+		sMinHue.setToolTipText("Minimum Hue");
+		sMinHue.setPaintTicks(true);
+		sMinHue.setValue(0);
+		sMinHue.setOrientation(SwingConstants.VERTICAL);
+		sMinHue.setMaximum(255);
+		sMinHue.setBounds(10, 0, 31, 95);
+		contentPane.add(sMinHue);
 		
-		slider_1 = new JSlider();
-		slider_1.setValue(0);
-		slider_1.setToolTipText("Maximum Hue");
-		slider_1.setPaintTicks(true);
-		slider_1.setOrientation(SwingConstants.VERTICAL);
-		slider_1.setMaximum(256);
-		slider_1.setBounds(10, 106, 31, 95);
-		contentPane.add(slider_1);
+		sMaxHue = new JSlider();
+		sMaxHue.setValue(0);
+		sMaxHue.setToolTipText("Maximum Hue");
+		sMaxHue.setPaintTicks(true);
+		sMaxHue.setOrientation(SwingConstants.VERTICAL);
+		sMaxHue.setMaximum(255);
+		sMaxHue.setBounds(10, 106, 31, 95);
+		contentPane.add(sMaxHue);
 		
-		slider_2 = new JSlider();
-		slider_2.setValue(0);
-		slider_2.setToolTipText("Minimum Saturation");
-		slider_2.setPaintTicks(true);
-		slider_2.setOrientation(SwingConstants.VERTICAL);
-		slider_2.setMaximum(256);
-		slider_2.setBounds(59, 0, 31, 95);
-		contentPane.add(slider_2);
+		sMinSat = new JSlider();
+		sMinSat.setValue(0);
+		sMinSat.setToolTipText("Minimum Saturation");
+		sMinSat.setPaintTicks(true);
+		sMinSat.setOrientation(SwingConstants.VERTICAL);
+		sMinSat.setMaximum(255);
+		sMinSat.setBounds(59, 0, 31, 95);
+		contentPane.add(sMinSat);
 		
-		slider_3 = new JSlider();
-		slider_3.setValue(0);
-		slider_3.setToolTipText("Maximum Saturation");
-		slider_3.setPaintTicks(true);
-		slider_3.setOrientation(SwingConstants.VERTICAL);
-		slider_3.setMaximum(256);
-		slider_3.setBounds(59, 106, 31, 95);
-		contentPane.add(slider_3);
+		sMaxSat = new JSlider();
+		sMaxSat.setValue(0);
+		sMaxSat.setToolTipText("Maximum Saturation");
+		sMaxSat.setPaintTicks(true);
+		sMaxSat.setOrientation(SwingConstants.VERTICAL);
+		sMaxSat.setMaximum(255);
+		sMaxSat.setBounds(59, 106, 31, 95);
+		contentPane.add(sMaxSat);
 		
-		slider_4 = new JSlider();
-		slider_4.setValue(0);
-		slider_4.setToolTipText("Minimum Value");
-		slider_4.setPaintTicks(true);
-		slider_4.setOrientation(SwingConstants.VERTICAL);
-		slider_4.setMaximum(256);
-		slider_4.setBounds(110, 0, 31, 95);
-		contentPane.add(slider_4);
+		sMinVal = new JSlider();
+		sMinVal.setValue(0);
+		sMinVal.setToolTipText("Minimum Value");
+		sMinVal.setPaintTicks(true);
+		sMinVal.setOrientation(SwingConstants.VERTICAL);
+		sMinVal.setMaximum(255);
+		sMinVal.setBounds(110, 0, 31, 95);
+		contentPane.add(sMinVal);
 		
-		slider_5 = new JSlider();
-		slider_5.setValue(0);
-		slider_5.setToolTipText("Maximum Value");
-		slider_5.setPaintTicks(true);
-		slider_5.setOrientation(SwingConstants.VERTICAL);
-		slider_5.setMaximum(256);
-		slider_5.setBounds(110, 106, 31, 95);
-		contentPane.add(slider_5);
+		sMaxVal = new JSlider();
+		sMaxVal.setValue(0);
+		sMaxVal.setToolTipText("Maximum Value");
+		sMaxVal.setPaintTicks(true);
+		sMaxVal.setOrientation(SwingConstants.VERTICAL);
+		sMaxVal.setMaximum(255);
+		sMaxVal.setBounds(110, 106, 31, 95);
+		contentPane.add(sMaxVal);
 		
-		textField = new JTextField(String.valueOf(Main.visionParams.CameraSelect));
+		textField = new JTextField(String.valueOf(Main.visionParams.cameraSelect));
 		textField.setBounds(196, 49, 86, 20);
 		contentPane.add(textField);
 		textField.setColumns(10);
@@ -116,7 +120,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		txtCamera.setColumns(10);
 		
 		btnSave = new JButton("Save");
-		btnSave.setBounds(196, 178, 89, 23);
+		btnSave.setBounds(151, 178, 89, 23);
 		btnSave.addActionListener(this);
 		contentPane.add(btnSave);
 		
@@ -140,10 +144,10 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		contentPane.add(txtMinimumArea);
 		txtMinimumArea.setColumns(10);
 		
-		textField_2 = new JTextField();
-		textField_2.setBounds(151, 114, 86, 20);
-		contentPane.add(textField_2);
-		textField_2.setColumns(10);
+		minArea = new JTextField();
+		minArea.setBounds(151, 114, 86, 20);
+		contentPane.add(minArea);
+		minArea.setColumns(10);
 		
 		Properties properties = new Properties();
 		try {
@@ -152,15 +156,15 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		slider.setValue(Integer.valueOf(properties.getProperty("minHue")));
-		slider_1.setValue(Integer.valueOf(properties.getProperty("maxHue")));
-		slider_2.setValue(Integer.valueOf(properties.getProperty("minSaturation")));
-		slider_3.setValue(Integer.valueOf(properties.getProperty("maxSaturation")));
-		slider_4.setValue(Integer.valueOf(properties.getProperty("minValue")));
-		slider_5.setValue(Integer.valueOf(properties.getProperty("maxValue")));
+		sMinHue.setValue(Integer.valueOf(properties.getProperty("minHue")));
+		sMaxHue.setValue(Integer.valueOf(properties.getProperty("maxHue")));
+		sMinSat.setValue(Integer.valueOf(properties.getProperty("minSaturation")));
+		sMaxSat.setValue(Integer.valueOf(properties.getProperty("maxSaturation")));
+		sMinVal.setValue(Integer.valueOf(properties.getProperty("minValue")));
+		sMaxVal.setValue(Integer.valueOf(properties.getProperty("maxValue")));
 		textField.setText(properties.getProperty("CameraSelect"));
 		textField_1.setText(properties.getProperty("erodeDilateIterations"));
-		textField_2.setText(properties.getProperty("minArea"));
+		minArea.setText(properties.getProperty("minArea"));
 		
 		txtHue = new JTextField();
 		txtHue.setText("Hue: ");
@@ -208,6 +212,33 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		contentPane.add(textField_4);
 		textField_4.setColumns(10);
 		textField_4.setText(properties.getProperty("dumpWait"));
+		slider = new JSlider();
+		slider.setValue((int) (Double.valueOf(properties.getProperty("distToCentreImportance"))*100));
+		slider.setOrientation(SwingConstants.VERTICAL);
+		slider.setToolTipText("Distance to center importance");
+		slider.setBounds(400, 24, 24, 143);
+		contentPane.add(slider);
+		
+		txtDtci = new JTextField();
+		txtDtci.setText("Distance To Center Importance:");
+		txtDtci.setBounds(4, 230, 278, 20);
+		txtDtci.setEditable(false);
+		contentPane.add(txtDtci);
+		txtDtci.setColumns(10);
+		
+		slider_1 = new JSlider();
+		slider_1.setValue(0);
+		slider_1.setToolTipText("Double cube detection range");
+		slider_1.setValue((int) (Double.valueOf(properties.getProperty("aspectRatioThresh"))*100));
+		slider_1.setBounds(161, 145, 200, 26);
+		contentPane.add(slider_1);
+		
+		txtDoubleCubeDetection = new JTextField();
+		txtDoubleCubeDetection.setEditable(false);
+		txtDoubleCubeDetection.setText("Double Cube Detection: "+slider_1.getValue()+"%");
+		txtDoubleCubeDetection.setBounds(245, 179, 179, 20);
+		contentPane.add(txtDoubleCubeDetection);
+		txtDoubleCubeDetection.setColumns(10);
 		setVisible(true);
 		
 		new Thread(this).start();
@@ -218,29 +249,32 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		while(true){
 			try{
 				if(isInt(textField.getText())){
-					Main.visionParams.CameraSelect = Integer.valueOf(Integer.valueOf(textField.getText()));
+					Main.visionParams.cameraSelect = Integer.valueOf(Integer.valueOf(textField.getText()));
 				}
 				if(isInt(textField_1.getText())){
 					Main.visionParams.erodeDilateIterations = Integer.valueOf(textField_1.getText());
 				}
-				if(isInt(textField_2.getText())){
-					Main.visionParams.minArea = Integer.valueOf(textField_2.getText());
+				if(isDouble(minArea.getText())){
+					Main.visionParams.minArea = Double.valueOf(minArea.getText());
 				}
-				Main.visionParams.minHue = slider.getValue();
-				Main.visionParams.maxHue = slider_1.getValue();
-				Main.visionParams.minSaturation = slider_2.getValue();
-				Main.visionParams.maxSaturation = slider_3.getValue();
-				Main.visionParams.minValue = slider_4.getValue();
-				Main.visionParams.maxValue = slider_5.getValue();
 				if(!textField_3.getText().equals("")){
 					Main.outputPath = textField_3.getText();
 				}
 				if(isInt(textField_4.getText())){
 					Main.seconds_between_dumps = Integer.valueOf(textField_4.getText());
 				}
+				Main.visionParams.minHue = sMinHue.getValue();
+				Main.visionParams.maxHue = sMaxHue.getValue();
+				Main.visionParams.minSaturation = sMinSat.getValue();
+				Main.visionParams.maxSaturation = sMaxSat.getValue();
+				Main.visionParams.minValue = sMinVal.getValue();
+				Main.visionParams.maxValue = sMaxVal.getValue();
+				Main.visionParams.distToCentreImportance = ((double) slider.getValue())/100;
+				Main.visionParams.aspectRatioThresh = ((double) slider_1.getValue())/100;
 				txtHue.setText("Hue: "+Main.visionParams.minHue+"-"+Main.visionParams.maxHue);
 				txtSaturation.setText("Saturation: "+Main.visionParams.minSaturation+"-"+Main.visionParams.maxSaturation);
 				txtValue.setText("Value: "+Main.visionParams.minValue+"-"+Main.visionParams.maxValue);
+				txtDtci.setText("Distance To Center Importance: "+(Main.visionParams.distToCentreImportance*100)+"%");
 				Thread.sleep(5);
 			}catch(Exception e){
 				e.printStackTrace();
@@ -251,13 +285,22 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		if(arg0.getSource() == btnSave){
-			Main.save();
+			Main.saveVisionParams();
 		}
 	}
+
 	private boolean isInt(String s){
 		try{
-			@SuppressWarnings("unused")
-			int i = Integer.valueOf(s);
+			Integer.valueOf(s);
+			return true;
+		}catch(NumberFormatException e){
+			return false;
+		}
+	}
+
+	private boolean isDouble(String s){
+		try{
+			Double.valueOf(s);
 			return true;
 		}catch(NumberFormatException e){
 			return false;
