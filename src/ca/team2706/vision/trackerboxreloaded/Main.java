@@ -197,7 +197,7 @@ public class Main {
             Files.copy(
                     Paths.get("visionParams.properties"), Paths.get(outputPath + "/visionParams-"
                             + format.format(Calendar.getInstance().getTime()) + ".properties"),
-                    StandardCopyOption.COPY_ATTRIBUTES);
+                    StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e2) {
             e2.printStackTrace();
         }
@@ -363,9 +363,6 @@ public class Main {
             output = new File(outputPath + "imageraw" + format.format(Calendar.getInstance().getTime()) + ".png");
         } else {
             output = new File(outputPath + "imageprocessed" + format.format(Calendar.getInstance().getTime()) + ".png");
-        }
-        if (!output.getParentFile().exists()) {
-            output.getParentFile().mkdirs();
         }
         try {
             ImageIO.write(image, "PNG", output);
