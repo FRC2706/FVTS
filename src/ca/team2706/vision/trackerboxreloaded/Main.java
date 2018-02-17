@@ -57,8 +57,8 @@ public class Main {
 			double xCentreNorm;
 			int yCentre;
 			double yCentreNorm;
-			double areaNorm; // [0,1] representing how much of the screen it
-								// occupies
+			double areaNorm; // [0,1] representing how much of the screen it occupies
+			double area;
 			Rect boundingBox;
 		}
 
@@ -147,8 +147,10 @@ public class Main {
 		visionTable.putNumber("fps", visionData.fps);
 		visionTable.putNumber("numTargetsFound",visionData.targetsFound.size());
 
-		if (visionData.preferredTarget != null)
+		if (visionData.preferredTarget != null){
 			visionTable.putNumber("ctrX", visionData.preferredTarget.xCentreNorm);
+			visionTable.putNumber("area", visionData.preferredTarget.area);
+		}
 	}
 	
 

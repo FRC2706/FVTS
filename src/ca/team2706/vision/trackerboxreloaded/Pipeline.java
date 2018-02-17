@@ -83,6 +83,7 @@ public class Pipeline {
                     target1.yCentre = target1.boundingBox.y + (target1.boundingBox.height / 2);
                     target1.yCentreNorm = ((double) target1.yCentre - (src.height()/2)) / (src.height()/2);
                     target1.areaNorm = (target1.boundingBox.height * target1.boundingBox.width) / ((double) imgArea);
+                    target1.area = (target1.boundingBox.height * target1.boundingBox.width);
                     visionData.targetsFound.add(target1);
 
 
@@ -95,6 +96,7 @@ public class Pipeline {
                     target2.yCentre = target2.boundingBox.y + (target2.boundingBox.height / 2);
 					target2.yCentreNorm = ((double) target2.yCentre - (src.height()/2)) / (src.height()/2);
 					target2.areaNorm = (target2.boundingBox.height * target2.boundingBox.width) / ((double) imgArea);
+					target2.area = (target2.boundingBox.height * target2.boundingBox.width);
 					visionData.targetsFound.add(target2);
 
                 } else {
@@ -105,6 +107,7 @@ public class Pipeline {
 					target.yCentre = target.boundingBox.y + (target.boundingBox.height / 2);
 					target.yCentreNorm = ((double) target.yCentre - (src.height()/2)) / (src.height()/2);
 					target.areaNorm = (target.boundingBox.height * target.boundingBox.width) / ((double) imgArea);
+					target.area = (target.boundingBox.height * target.boundingBox.width);
 					visionData.targetsFound.add(target);
                 }
             }
@@ -156,6 +159,7 @@ public class Pipeline {
 				bestScore = score;
 			}
 		}
+		
 	}
 
 	//Create Colour Values
