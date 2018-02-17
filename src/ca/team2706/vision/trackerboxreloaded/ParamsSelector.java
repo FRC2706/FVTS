@@ -192,7 +192,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		textField_3.setBounds(310, 44, 86, 20);
 		contentPane.add(textField_3);
 		textField_3.setColumns(10);
-		textField_3.setText(properties.getProperty("dumpPath"));
+		textField_3.setText(properties.getProperty("imgDumpPath"));
 		
 		txtTimeBetweenCaptures = new JTextField();
 		txtTimeBetweenCaptures.setEditable(false);
@@ -205,7 +205,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		textField_4.setBounds(405, 106, 86, 20);
 		contentPane.add(textField_4);
 		textField_4.setColumns(10);
-		textField_4.setText(properties.getProperty("dumpWait"));
+		textField_4.setText(properties.getProperty("imgDumpWait"));
 		slider = new JSlider();
 		slider.setValue((int) (Double.valueOf(properties.getProperty("distToCentreImportance"))*100));
 		slider.setOrientation(SwingConstants.VERTICAL);
@@ -255,7 +255,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 					Main.outputPath = textField_3.getText();
 				}
 				if(isInt(textField_4.getText())){
-					Main.seconds_between_dumps = Integer.valueOf(textField_4.getText());
+					Main.seconds_between_img_dumps = Integer.valueOf(textField_4.getText());
 				}
 				Main.visionParams.minHue = sMinHue.getValue();
 				Main.visionParams.maxHue = sMaxHue.getValue();

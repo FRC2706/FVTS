@@ -22,8 +22,8 @@ import java.util.Properties;
 
 public class Main {
 
-	public static int seconds_between_dumps = 10;
-	public static int current_time_seconds = 0;
+	public static int seconds_between_img_dumps = 10;
+	public static long current_time_seconds;
 	public static String outputPath;
 	public static final SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd-hh-mm-ss");
 
@@ -111,8 +111,8 @@ public class Main {
 			visionParams.maxValue = Integer.valueOf(properties.getProperty("maxValue"));
 			visionParams.minArea = Double.valueOf(properties.getProperty("minArea"));
 			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
-			outputPath = properties.getProperty("dumpPath");
-			seconds_between_dumps = Integer.valueOf(properties.getProperty("dumpWait"));
+			outputPath = properties.getProperty("imgDumpPath");
+			seconds_between_img_dumps = Integer.valueOf(properties.getProperty("imgDumpWait"));
 			visionParams.aspectRatioThresh = Double.valueOf(properties.getProperty("aspectRatioThresh"));
 			visionParams.distToCentreImportance = Double.valueOf(properties.getProperty("distToCentreImportance"));
 			visionParams.imageFile = properties.getProperty("imageFile");
@@ -138,8 +138,8 @@ public class Main {
 			properties.setProperty("aspectRatioThresh", String.valueOf(visionParams.aspectRatioThresh));
 			properties.setProperty("distToCentreImportance", String.valueOf(visionParams.distToCentreImportance));
 			properties.setProperty("imageFile", visionParams.imageFile);
-			properties.setProperty("dumpWait", String.valueOf(seconds_between_dumps));
-			properties.setProperty("dumpPath", outputPath);
+			properties.setProperty("imgDumpWait", String.valueOf(seconds_between_img_dumps));
+			properties.setProperty("imgDumpPath", outputPath);
 			
 			FileOutputStream out = new FileOutputStream("visionParams.properties");
 			properties.store(out, "");
@@ -251,8 +251,6 @@ public class Main {
 			}
 		}
 		// Main video processing loop
-		// Starts the timer
-		new Timer();
 		while (true) {
 			if (useCamera) {
 				if (!camera.read(frame)) {
@@ -299,17 +297,19 @@ public class Main {
 					continue;
 				}
 			}
-				if (current_time_seconds >= seconds_between_dumps) {
-					current_time_seconds = 0;
+				long elapsedTime = (System.currentTimeMillis() / 1000) - current_time_seconds;
+				if (elapsedTime >= seconds_between_img_dumps) {
+					current_time_seconds = (System.currentTimeMillis() / 1000);
+
 					new Thread(new Runnable() {
 						public void run() {
 							try {
-								dump(matToBufferedImage(rawOutputImg), true);
+								imgDump(matToBufferedImage(rawOutputImg), true);
 							} catch (IOException e1) {
 								e1.printStackTrace();
 							}
 							try {
-								dump(matToBufferedImage(visionData.outputImg), false);
+								imgDump(matToBufferedImage(visionData.outputImg), false);
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
@@ -341,8 +341,8 @@ public class Main {
 			properties.setProperty("maxValue", String.valueOf(visionParams.maxValue));
 			properties.setProperty("erodeDilateIterations", String.valueOf(visionParams.erodeDilateIterations));
 			properties.setProperty("minArea", String.valueOf(visionParams.minArea));
-			properties.setProperty("dumpPath", outputPath);
-			properties.setProperty("dumpWait", String.valueOf(seconds_between_dumps));
+			properties.setProperty("imgDumpPath", outputPath);
+			properties.setProperty("imgDumpWait", String.valueOf(seconds_between_img_dumps));
 			FileOutputStream out = new FileOutputStream("visionParams.properties");
 			properties.store(out, "");
 		} catch (Exception e1) {
@@ -358,7 +358,7 @@ public class Main {
 		return mat;
 	}
 
-	public static void dump(BufferedImage image, boolean raw) {
+	public static void imgDump(BufferedImage image, boolean raw) {
 		File output;
 		if (raw) {
 			output = new File(outputPath + "imageraw" + format.format(Calendar.getInstance().getTime()) + ".png");
