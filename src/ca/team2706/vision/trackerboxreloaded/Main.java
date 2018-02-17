@@ -200,6 +200,7 @@ public class Main {
                     StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e2) {
             e2.printStackTrace();
+            System.exit(1);
         }
         Mat frame = new Mat();
         // Open a connection to the camera
