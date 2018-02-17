@@ -7,6 +7,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.ArrayList;
@@ -141,7 +144,9 @@ public class Main {
 			properties.setProperty("aspectRatioThresh", String.valueOf(visionParams.aspectRatioThresh));
 			properties.setProperty("distToCentreImportance", String.valueOf(visionParams.distToCentreImportance));
 			properties.setProperty("imageFile", visionParams.imageFile);
-
+			properties.setProperty("dumpWait", String.valueOf(seconds_between_dumps));
+			properties.setProperty("dumpPath", outputPath);
+			
 			FileOutputStream out = new FileOutputStream("visionParams.properties");
 			properties.store(out, "");
 		} catch (Exception e1) {
@@ -198,6 +203,11 @@ public class Main {
 
 		// read the vision calibration values from file.
 		loadVisionParams();
+		try {
+			Files.copy(Paths.get("visionParams.properties"), Paths.get(outputPath+"/visionParams-"+format.format(Calendar.getInstance().getTime())+".properties"), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e2) {
+			e2.printStackTrace();
+		}
 		Mat frame = new Mat();
 		// Open a connection to the camera
 		VideoCapture camera = null;
@@ -294,7 +304,7 @@ public class Main {
 					e.printStackTrace();
 					continue;
 				}
-
+			}
 				if (current_time_seconds >= seconds_between_dumps) {
 					current_time_seconds = 0;
 					new Thread(new Runnable() {
@@ -321,7 +331,6 @@ public class Main {
 				System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime, "");
 			}
 		} // end main video processing loop
-	}
 
 	/**
 	 * Saves the properties :]
