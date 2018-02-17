@@ -22,14 +22,11 @@ import java.util.Properties;
 
 public class Main {
 
-	public static int seconds_between_dumps = 10;
+	public static int seconds_between_dumps = 0;
 	public static int current_time_seconds = 0;
 	public static String outputPath;
 	public static final SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd-hh-mm-ss");
 
-	public static NetworkTable vision;
-	public static NetworkTable fps;
-	public static NetworkTable data;
 	// Camera Type
 	// Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
 	// there is no webcam :/
@@ -140,7 +137,7 @@ public class Main {
 			properties.setProperty("imageFile", visionParams.imageFile);
 			properties.setProperty("dumpWait", String.valueOf(seconds_between_dumps));
 			properties.setProperty("dumpPath", outputPath);
-			
+
 			FileOutputStream out = new FileOutputStream("visionParams.properties");
 			properties.store(out, "");
 		} catch (Exception e1) {
@@ -198,7 +195,10 @@ public class Main {
 		// read the vision calibration values from file.
 		loadVisionParams();
 		try {
-			Files.copy(Paths.get("visionParams.properties"), Paths.get(outputPath+"/visionParams-"+format.format(Calendar.getInstance().getTime())+".properties"), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(
+					Paths.get("visionParams.properties"), Paths.get(outputPath + "/visionParams-"
+							+ format.format(Calendar.getInstance().getTime()) + ".properties"),
+					StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e2) {
 			e2.printStackTrace();
 		}
@@ -299,32 +299,33 @@ public class Main {
 					continue;
 				}
 			}
-				if (current_time_seconds >= seconds_between_dumps) {
-					current_time_seconds = 0;
-					new Thread(new Runnable() {
-						public void run() {
-							try {
-								dump(matToBufferedImage(rawOutputImg), true);
-							} catch (IOException e1) {
-								e1.printStackTrace();
-							}
-							try {
-								dump(matToBufferedImage(visionData.outputImg), false);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
+			if (current_time_seconds >= seconds_between_dumps) {
+				current_time_seconds = 0;
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							dump(matToBufferedImage(rawOutputImg), true);
+						} catch (IOException e1) {
+							e1.printStackTrace();
+							return;
 						}
-					}).start();
-				}
-				// Display the frame rate
-				System.out.printf("Vision FPS: %3.2f", visionData.fps);
-
-				// Display the frame rate onto the console
-				double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND)
-						* 1000;
-				System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime, "");
+						try {
+							dump(matToBufferedImage(visionData.outputImg), false);
+						} catch (IOException e) {
+							e.printStackTrace();
+							return;
+						}
+					}
+				}).start();
 			}
-		} // end main video processing loop
+			// Display the frame rate
+			System.out.printf("Vision FPS: %3.2f", visionData.fps);
+
+			// Display the frame rate onto the console
+			double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND) * 1000;
+			System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime, "");
+		}
+	} // end main video processing loop
 
 	/**
 	 * Saves the properties :]
@@ -358,7 +359,7 @@ public class Main {
 		return mat;
 	}
 
-	public static void dump(BufferedImage image, boolean raw) {
+	public static void dump(BufferedImage image, boolean raw) throws IOException {
 		File output;
 		if (raw) {
 			output = new File(outputPath + "imageraw" + format.format(Calendar.getInstance().getTime()) + ".png");
@@ -368,15 +369,10 @@ public class Main {
 		if (!output.getParentFile().exists()) {
 			output.getParentFile().mkdirs();
 		}
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					ImageIO.write(image, "PNG", output);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
+		try {
+			ImageIO.write(image, "PNG", output);
+		} catch (IOException e) {
+			throw new IOException(e.getMessage());
+		}
 	}
 }
