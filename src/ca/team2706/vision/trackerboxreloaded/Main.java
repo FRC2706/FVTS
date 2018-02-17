@@ -197,7 +197,7 @@ public class Main {
             Files.copy(
                     Paths.get("visionParams.properties"), Paths.get(outputPath + "/visionParams-"
                             + format.format(Calendar.getInstance().getTime()) + ".properties"),
-                    StandardCopyOption.REPLACE_EXISTING);
+                    StandardCopyOption.COPY_ATTRIBUTES);
         } catch (IOException e2) {
             e2.printStackTrace();
         }

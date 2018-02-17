@@ -184,7 +184,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		txtOutputPath = new JTextField();
 		txtOutputPath.setEditable(false);
 		txtOutputPath.setText("Output Path:");
-		txtOutputPath.setBounds(310, 11, 86, 20);
+		txtOutputPath.setBounds(310, 24, 86, 20);
 		contentPane.add(txtOutputPath);
 		txtOutputPath.setColumns(10);
 		
@@ -197,12 +197,12 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		txtTimeBetweenCaptures = new JTextField();
 		txtTimeBetweenCaptures.setEditable(false);
 		txtTimeBetweenCaptures.setText("Time Between Captures:");
-		txtTimeBetweenCaptures.setBounds(384, 75, 131, 20);
+		txtTimeBetweenCaptures.setBounds(431, 24, 131, 20);
 		contentPane.add(txtTimeBetweenCaptures);
 		txtTimeBetweenCaptures.setColumns(10);
 		
 		textField_4 = new JTextField();
-		textField_4.setBounds(405, 106, 86, 20);
+		textField_4.setBounds(431, 44, 86, 20);
 		contentPane.add(textField_4);
 		textField_4.setColumns(10);
 		textField_4.setText(properties.getProperty("imgDumpWait"));
