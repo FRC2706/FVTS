@@ -66,6 +66,7 @@ public class DisplayGui extends JFrame implements Runnable {
 			height = image.getHeight();
 			this.setPreferredSize(new Dimension(width+30,height+30));
 			this.setMinimumSize(new Dimension(width+30,height+30));
+			this.setSize(new Dimension(width+30,height+30));
 		}
 	}
 
