@@ -1,12 +1,9 @@
 package ca.team2706.vision.trackerboxreloaded;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
-
-import javax.swing.JFrame;
 
 /**
  * The Class DisplayGui.
@@ -15,6 +12,10 @@ public class DisplayGui extends JFrame implements Runnable {
 	
 	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
+	
+	private int width;
+	
+	private int height;
 	
 	/** The image. */
 	private BufferedImage image;
@@ -26,6 +27,8 @@ public class DisplayGui extends JFrame implements Runnable {
 	 */
 	public DisplayGui(BufferedImage image, String windowTitle){
 		this.image = image;
+		this.width = image.getWidth();
+		this.height = image.getHeight();
 		this.setPreferredSize(new Dimension(image.getWidth()+30,image.getHeight()+30));
 		this.setMinimumSize(new Dimension(image.getWidth()+30,image.getHeight()+30));
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -41,6 +44,8 @@ public class DisplayGui extends JFrame implements Runnable {
 	 * @param height the height
 	 */
 	public DisplayGui(int width, int height, String windowTitle){
+		this.width = width;
+		this.height = height;
 		this.setPreferredSize(new Dimension(width+30,height+30));
 		this.setMinimumSize(new Dimension(width+30,height+30));
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -56,6 +61,13 @@ public class DisplayGui extends JFrame implements Runnable {
 	 */
 	public void updateImage(BufferedImage image){
 		this.image = image;
+		if(image.getWidth() != width || image.getHeight() != height){
+			width = image.getWidth();
+			height = image.getHeight();
+			this.setPreferredSize(new Dimension(width+30,height+30));
+			this.setMinimumSize(new Dimension(width+30,height+30));
+			this.setSize(new Dimension(width+30,height+30));
+		}
 	}
 
 	/* (non-Javadoc)
