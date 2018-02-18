@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Pipeline {
-	
+
 	/** Numerical Constants **/
 	public static final int NANOSECONDS_PER_SECOND = 1000000000;
-	
+
 	public static long fpsTimer = System.nanoTime();
 
 	 /**
@@ -23,7 +23,19 @@ public class Pipeline {
      * @return All the data!
      */
 	@SuppressWarnings("unused")
-	public static VisionData process(Mat src, VisionParams visionParams) {
+	public static VisionData process(Mat src, VisionParams visionParams, boolean use_GUI) {
+
+		// As a memory footprint optimization, when running on a Pi, re-use one working image in memory
+		Mat dilated, erodeOne, erodeTwo, workingImg;
+		if (use_GUI) {
+			dilated = new Mat();
+			erodeOne = new Mat();
+			erodeTwo = new Mat();
+		} else {
+			dilated = new Mat();
+			erodeOne = dilated;
+			erodeTwo = dilated;
+		}
 
 		int imgArea = src.height() * src.width();
 
@@ -38,14 +50,11 @@ public class Pipeline {
 				new Scalar(visionParams.maxHue, visionParams.maxSaturation, visionParams.maxValue), hsvThreshold);
 
 		// Erode - Dilate*2 - Erode
-		Mat dilated = new Mat();
-		Mat erodeOne = new Mat();
-		Mat erodeTwo = new Mat();
 		Imgproc.erode(hsvThreshold, erodeOne, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
 		Imgproc.dilate(erodeOne, dilated, new Mat(), new Point(), 2*visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
 	    Imgproc.erode(dilated, erodeTwo, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
 
-		visionData.outputImg = erodeTwo.clone();
+		visionData.outputImg = erodeTwo;
 
 		//Find contours
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
@@ -113,6 +122,7 @@ public class Pipeline {
 
 		long now = System.nanoTime();
 		visionData.fps = ((double) NANOSECONDS_PER_SECOND) / (now - fpsTimer);
+		visionData.fps = ((int)(visionData.fps*10))/10.0; // round to 1 decimal place
 		fpsTimer = now;
 
 		return visionData;
