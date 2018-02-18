@@ -1,12 +1,9 @@
 package ca.team2706.vision.trackerboxreloaded;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
-
-import javax.swing.JFrame;
 
 /**
  * The Class DisplayGui.

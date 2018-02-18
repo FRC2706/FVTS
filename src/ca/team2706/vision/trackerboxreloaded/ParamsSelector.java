@@ -1,18 +1,12 @@
 package ca.team2706.vision.trackerboxreloaded;
 
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
 
 public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 
@@ -36,6 +30,10 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JTextField txtHue;
 	private JTextField txtSaturation;
 	private JTextField txtValue;
+	private JTextField txtOutputPath;
+	private JTextField textField_3;
+	private JTextField txtTimeBetweenCaptures;
+	private JTextField textField_4;
 	private JTextField txtDtci;
 	private JSlider slider_1;
 	private JTextField txtDoubleCubeDetection;
@@ -43,7 +41,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	
 	public ParamsSelector() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 600, 300);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(null);
@@ -183,6 +181,31 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		contentPane.add(txtValue);
 		txtValue.setColumns(10);
 		
+		txtOutputPath = new JTextField();
+		txtOutputPath.setEditable(false);
+		txtOutputPath.setText("Output Path:");
+		txtOutputPath.setBounds(310, 24, 86, 20);
+		contentPane.add(txtOutputPath);
+		txtOutputPath.setColumns(10);
+		
+		textField_3 = new JTextField();
+		textField_3.setBounds(310, 44, 86, 20);
+		contentPane.add(textField_3);
+		textField_3.setColumns(10);
+		textField_3.setText(properties.getProperty("imgDumpPath"));
+		
+		txtTimeBetweenCaptures = new JTextField();
+		txtTimeBetweenCaptures.setEditable(false);
+		txtTimeBetweenCaptures.setText("Time Between Captures:");
+		txtTimeBetweenCaptures.setBounds(431, 24, 131, 20);
+		contentPane.add(txtTimeBetweenCaptures);
+		txtTimeBetweenCaptures.setColumns(10);
+		
+		textField_4 = new JTextField();
+		textField_4.setBounds(431, 44, 86, 20);
+		contentPane.add(textField_4);
+		textField_4.setColumns(10);
+		textField_4.setText(properties.getProperty("imgDumpWait"));
 		slider = new JSlider();
 		slider.setValue((int) (Double.valueOf(properties.getProperty("distToCentreImportance"))*100));
 		slider.setOrientation(SwingConstants.VERTICAL);
@@ -227,6 +250,12 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				}
 				if(isDouble(minArea.getText())){
 					Main.visionParams.minArea = Double.valueOf(minArea.getText());
+				}
+				if(!textField_3.getText().equals("")){
+					Main.outputPath = textField_3.getText();
+				}
+				if(isInt(textField_4.getText())){
+					Main.seconds_between_img_dumps = Integer.valueOf(textField_4.getText());
 				}
 				Main.visionParams.minHue = sMinHue.getValue();
 				Main.visionParams.maxHue = sMaxHue.getValue();
