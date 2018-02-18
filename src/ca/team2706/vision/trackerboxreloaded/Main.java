@@ -22,6 +22,52 @@ import java.util.Properties;
 
 public class Main {
 
+	public static NetworkTable visionTable;
+
+
+	public static VisionParams visionParams = new VisionParams();
+
+	/**
+	 * A class to hold any visionTable data returned by process() :) :) :} :] :]
+	 */
+
+	public static class VisionData {
+
+		public static class Target {
+			int xCentre;
+			double xCentreNorm;
+			int yCentre;
+			double yCentreNorm;
+			double areaNorm; // [0,1] representing how much of the screen it occupies
+			Rect boundingBox;
+		}
+
+		ArrayList<Target> targetsFound = new ArrayList<Target>();
+		Target preferredTarget;
+		public Mat outputImg = new Mat();
+		public double fps;
+	}
+
+	/**
+	 * Turns all the vision data into packets that kno da wae to get to the
+	 * robo rio :]
+	 *
+	 * @param visionData
+	 */
+	private static void sendVisionDataOverNetworkTables(VisionData visionData) {
+
+		// Sends the data
+		visionTable.putNumber("fps", visionData.fps);
+		visionTable.putNumber("numTargetsFound",visionData.targetsFound.size());
+
+		if (visionData.preferredTarget != null){
+			visionTable.putNumber("ctrX", visionData.preferredTarget.xCentreNorm);
+			visionTable.putNumber("area", visionData.preferredTarget.areaNorm);
+		}
+	}
+	
+
+	
     public static int seconds_between_img_dumps;
     public static long current_time_seconds;
     public static String outputPath;
@@ -30,8 +76,6 @@ public class Main {
     // Camera Type
     // Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
     // there is no webcam :/
-
-    public static NetworkTable visionTable;
 
     /**
      * A class to hold calibration parameters for the image processing algorithm
@@ -49,30 +93,6 @@ public class Main {
         double minArea;
         double distToCentreImportance;
         String imageFile;
-    }
-
-    public static VisionParams visionParams = new VisionParams();
-
-    /**
-     * A class to hold any visionTable data returned by process() :) :) :} :] :]
-     */
-
-    public static class VisionData {
-
-        public static class Target {
-            int xCentre;
-            double xCentreNorm;
-            int yCentre;
-            double yCentreNorm;
-            double areaNorm; // [0,1] representing how much of the screen it
-            // occupies
-            Rect boundingBox;
-        }
-
-        ArrayList<Target> targetsFound = new ArrayList<Target>();
-        Target preferredTarget;
-        public Mat outputImg = new Mat();
-        public double fps;
     }
 
     /**
@@ -151,15 +171,6 @@ public class Main {
      *
      * @param visionData
      */
-    private static void sendVisionDataOverNetworkTables(VisionData visionData) {
-
-        // Sends the data
-        visionTable.putNumber("fps", visionData.fps);
-        visionTable.putNumber("numTargetsFound", visionData.targetsFound.size());
-
-        if (visionData.preferredTarget != null)
-            visionTable.putNumber("ctrX", visionData.preferredTarget.xCentreNorm);
-    }
 
     /**
      * Converts a OpenCV Matrix to a BufferedImage :)
