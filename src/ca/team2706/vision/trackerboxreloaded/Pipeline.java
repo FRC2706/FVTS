@@ -23,11 +23,11 @@ public class Pipeline {
      * @return All the data!
      */
 	@SuppressWarnings("unused")
-	public static VisionData process(Mat src, VisionParams visionParams) {
+	public static VisionData process(Mat src, VisionParams visionParams, boolean use_GUI) {
 
 		// As a memory footprint optimization, when running on a Pi, re-use one working image in memory
 		Mat dilated, erodeOne, erodeTwo, workingImg;
-		if (Main.use_GUI) {
+		if (use_GUI) {
 			dilated = new Mat();
 			erodeOne = new Mat();
 			erodeTwo = new Mat();

@@ -1,5 +1,7 @@
 package ca.team2706.vision.trackerboxreloaded;
 
+import org.opencv.core.Size;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionEvent;
@@ -290,9 +292,11 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				}
 				if(isInt(textField_2.getText())){
 					Main.visionParams.width = Integer.valueOf(textField_2.getText());
+					Main.visionParams.sz = new Size(Main.visionParams.width,Main.visionParams.height);
 				}
 				if(isInt(textField_3.getText())){
 					Main.visionParams.height = Integer.valueOf(textField_3.getText());
+					Main.visionParams.sz = new Size(Main.visionParams.width,Main.visionParams.height);
 				}
 				Main.visionParams.minHue = sMinHue.getValue();
 				Main.visionParams.maxHue = sMaxHue.getValue();

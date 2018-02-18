@@ -1,33 +1,22 @@
 package ca.team2706.vision.trackerboxreloaded;
 
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import org.opencv.core.*;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.videoio.VideoCapture;
+
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.ArrayList;
 import java.util.Properties;
-
-import javax.imageio.ImageIO;
-
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.Rect;
-import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.videoio.VideoCapture;
-
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 
 public class Main {
@@ -58,9 +47,10 @@ public class Main {
 		double aspectRatioThresh;
 		double minArea;
 		double distToCentreImportance;
-		String imageFile;
 		int width;
 		int height;
+		Size sz;
+		String imageFile;
 	}
 
 	/**
@@ -289,7 +279,7 @@ public class Main {
         }
 
         Size sz = new Size(visionParams.width,visionParams.height);
-        Imgproc.resize( frame, frame, sz );
+        Imgproc.resize( frame, frame, visionParams.sz );
 
         // Set up the GUI display windows
         if (use_GUI) {
@@ -312,11 +302,11 @@ public class Main {
                 }
             } // else use the image from disk that we loaded above
 
-            Imgproc.resize( frame, frame, sz );
+            Imgproc.resize( frame, frame, visionParams.sz );
 
             // Process the frame!
             long pipelineStart = System.nanoTime();
-            VisionData visionData = Pipeline.process(frame, visionParams);
+            VisionData visionData = Pipeline.process(frame, visionParams, use_GUI);
             long pipelineEnd = System.nanoTime();
 
             Pipeline.selectPreferredTarget(visionData, visionParams);
