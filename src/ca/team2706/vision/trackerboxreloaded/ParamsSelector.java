@@ -190,12 +190,12 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		txtOutputPath = new JTextField();
 		txtOutputPath.setEditable(false);
 		txtOutputPath.setText("Output Path:");
-		txtOutputPath.setBounds(310, 24, 86, 20);
+		txtOutputPath.setBounds(348, 102, 86, 20);
 		contentPane.add(txtOutputPath);
 		txtOutputPath.setColumns(10);
 		
 		textField_5 = new JTextField();
-		textField_5.setBounds(310, 44, 86, 20);
+		textField_5.setBounds(348, 130, 214, 20);
 		contentPane.add(textField_5);
 		textField_5.setColumns(10);
 		textField_5.setText(properties.getProperty("imgDumpPath"));

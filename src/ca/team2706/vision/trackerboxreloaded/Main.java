@@ -278,7 +278,7 @@ public class Main {
             use_GUI = true;
         }
 
-        Size sz = new Size(visionParams.width,visionParams.height);
+        visionParams.sz = new Size(visionParams.width,visionParams.height);
         Imgproc.resize( frame, frame, visionParams.sz );
 
         // Set up the GUI display windows
