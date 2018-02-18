@@ -122,7 +122,7 @@ public class Pipeline {
 
 		long now = System.nanoTime();
 		visionData.fps = ((double) NANOSECONDS_PER_SECOND) / (now - fpsTimer);
-		visionData.fps = ((int)(visionData.fps*10))/10; // round to 1 decimal place
+		visionData.fps = ((int)(visionData.fps*10))/10.0; // round to 1 decimal place
 		fpsTimer = now;
 
 		return visionData;
