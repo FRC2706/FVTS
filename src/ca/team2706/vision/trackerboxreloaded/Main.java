@@ -111,15 +111,20 @@ public class Main {
             outputPath = properties.getProperty("imgDumpPath");
             seconds_between_img_dumps = Integer.valueOf(properties.getProperty("imgDumpWait"));
             visionParams.imageFile = properties.getProperty("imageFile");
-            if(properties.getProperty("resolution").equals("320x240")){
+
+            String resolution = properties.getProperty("resolution");
+            if(resolution.equals("320x240")){
                 visionParams.width = 320;
                 visionParams.height = 240;
-            }else if(properties.getProperty("resolution").equals("640x480")){
+            }else if(resolution.equals("640x480")){
                 visionParams.width = 640;
                 visionParams.height = 480;
-            }else if(properties.getProperty("resolution").equals("160x120")){
+            }else if(resolution.equals("160x120")) {
                 visionParams.width = 160;
                 visionParams.height = 120;
+            }else if(resolution.equals("80x60")) {
+                visionParams.width = 80;
+                visionParams.height = 60;
             }else{
                 throw new IllegalArgumentException("Error: "+properties.getProperty("resolution")+" is not a supported resolution.\n"+
                         "Allowed: 160x120, 320x240, 640x480.");
@@ -362,12 +367,9 @@ public class Main {
                     }
                 }).start();
             }
-            // Display the frame rate
-            System.out.printf("Vision FPS: %3.2f", visionData.fps);
-
             // Display the frame rate onto the console
             double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND) * 1000;
-            System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime, "");
+            System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime);
         }
     } // end main video processing loop
 }
