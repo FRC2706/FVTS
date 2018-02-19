@@ -80,7 +80,7 @@ public class Main {
 	 */
 	private static void initNetworkTables() {
 		NetworkTable.setClientMode();
-		NetworkTable.setUpdateRate(0.2);
+		NetworkTable.setUpdateRate(0.02);
 		NetworkTable.setTeam(2706); // Use this for the robit
 		NetworkTable.setDSClientEnabled(true); // and this for the robit
 		//NetworkTable.setIPAddress("127.0.0.1"); //Use this for testing
