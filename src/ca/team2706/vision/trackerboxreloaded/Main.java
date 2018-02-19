@@ -5,6 +5,8 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
+import org.opencv.videoio.VideoWriter;
+import org.opencv.videoio.Videoio;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -81,9 +83,9 @@ public class Main {
 	private static void initNetworkTables() {
 		NetworkTable.setClientMode();
 		NetworkTable.setUpdateRate(0.02);
-		NetworkTable.setTeam(2706); // Use this for the robit
-		NetworkTable.setDSClientEnabled(true); // and this for the robit
-		//NetworkTable.setIPAddress("127.0.0.1"); //Use this for testing
+//		NetworkTable.setTeam(2706); // Use this for the robit
+//		NetworkTable.setDSClientEnabled(true); // and this for the robit
+		NetworkTable.setIPAddress("10.27.6.67"); //Use this for testing
 		NetworkTable.initialize();
 		visionTable = NetworkTable.getTable("vision");
 	}
@@ -127,7 +129,7 @@ public class Main {
                 visionParams.height = 60;
             }else{
                 throw new IllegalArgumentException("Error: "+properties.getProperty("resolution")+" is not a supported resolution.\n"+
-                        "Allowed: 160x120, 320x240, 640x480.");
+                        "Allowed: 80x60, 160x120, 320x240, 640x480.");
             }
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
@@ -237,6 +239,7 @@ public class Main {
 
         // read the vision calibration values from file.
         loadVisionParams();
+
         try {
             Files.copy(
                     Paths.get("visionParams.properties"), Paths.get(outputPath + "/visionParams-"
@@ -246,6 +249,7 @@ public class Main {
             e2.printStackTrace();
         }
         Mat frame = new Mat();
+
         // Open a connection to the camera
         VideoCapture camera = null;
 
@@ -257,6 +261,12 @@ public class Main {
 
         if (useCamera) {
             camera = new VideoCapture(visionParams.cameraSelect);
+
+            int fourcc = VideoWriter.fourcc('M', 'J', 'P', 'G');
+            camera.set(Videoio.CAP_PROP_FOURCC, fourcc);
+            camera.set(Videoio.CAP_PROP_FRAME_WIDTH, visionParams.width);
+            camera.set(Videoio.CAP_PROP_FRAME_HEIGHT, visionParams.height);
+
             camera.read(frame);
 
             if (!camera.isOpened()) {
@@ -307,7 +317,8 @@ public class Main {
                 }
             } // else use the image from disk that we loaded above
 
-            Imgproc.resize( frame, frame, visionParams.sz );
+            if (use_GUI)
+                Imgproc.resize( frame, frame, visionParams.sz );
 
             // Process the frame!
             long pipelineStart = System.nanoTime();
