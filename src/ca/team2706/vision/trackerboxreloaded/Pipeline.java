@@ -54,7 +54,7 @@ public class Pipeline {
 		Imgproc.dilate(erodeOne, dilated, new Mat(), new Point(), 2*visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
 	    Imgproc.erode(dilated, erodeTwo, new Mat(), new Point(), visionParams.erodeDilateIterations, Core.BORDER_CONSTANT, new Scalar(0));
 
-		visionData.outputImg = erodeTwo;
+		visionData.binMask = erodeTwo;
 
 		//Find contours
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();

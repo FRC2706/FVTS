@@ -72,7 +72,7 @@ public class Main {
 
 		ArrayList<Target> targetsFound = new ArrayList<Target>();
 		Target preferredTarget;
-		public Mat outputImg = new Mat();
+		public Mat binMask = new Mat();
 		public double fps;
 	}
 
@@ -211,13 +211,8 @@ public class Main {
         return mat;
     }
 
-    public static void imgDump(BufferedImage image, boolean raw) throws IOException {
-        File output;
-        if (raw) {
-            output = new File(outputPath + "imageraw" + format.format(Calendar.getInstance().getTime()) + ".png");
-        } else {
-            output = new File(outputPath + "imageprocessed" + format.format(Calendar.getInstance().getTime()) + ".png");
-        }
+    public static void imgDump(BufferedImage image, String suffix) throws IOException {
+        File output = new File(outputPath + suffix + "_" + format.format(Calendar.getInstance().getTime()) + ".png");
         try {
             ImageIO.write(image, "PNG", output);
         } catch (IOException e) {
@@ -327,13 +322,8 @@ public class Main {
 
             Pipeline.selectPreferredTarget(visionData, visionParams);
 
-            Mat rawOutputImg;
-            if (use_GUI) {
-                rawOutputImg = frame.clone();
-                Pipeline.drawPreferredTarget(rawOutputImg, visionData);
-            } else {
-                rawOutputImg = frame;
-            }
+            Mat outputTargetImg = frame.clone();
+            Pipeline.drawPreferredTarget(outputTargetImg, visionData);
 
             sendVisionDataOverNetworkTables(visionData);
 
@@ -342,8 +332,8 @@ public class Main {
                 try {
                     // May throw a NullPointerException if initializing
                     // the window failed
-                    guiRawImg.updateImage(matToBufferedImage(rawOutputImg));
-                    guiProcessedImg.updateImage(matToBufferedImage(visionData.outputImg));
+                    guiRawImg.updateImage(matToBufferedImage(outputTargetImg));
+                    guiProcessedImg.updateImage(matToBufferedImage(visionData.binMask));
                 } catch (IOException e) {
                     // means mat2BufferedImage broke
                     // non-fatal error, let the program continue
@@ -358,19 +348,20 @@ public class Main {
                     continue;
                 }
             }
+
+
+            // log images to file once every seconds_between_img_dumps
             long elapsedTime = (System.currentTimeMillis() / 1000) - current_time_seconds;
             if (elapsedTime >= seconds_between_img_dumps) {
                 current_time_seconds = (System.currentTimeMillis() / 1000);
+
+                Mat finalFrame = frame.clone();
                 new Thread(new Runnable() {
                     public void run() {
                         try {
-                            imgDump(matToBufferedImage(rawOutputImg), true);
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                            return;
-                        }
-                        try {
-                            imgDump(matToBufferedImage(visionData.outputImg), false);
+                            imgDump(matToBufferedImage(finalFrame), "raw");
+                            imgDump(matToBufferedImage(visionData.binMask), "binMask");
+                            imgDump(matToBufferedImage(outputTargetImg), "output");
                         } catch (IOException e) {
                             e.printStackTrace();
                             return;
