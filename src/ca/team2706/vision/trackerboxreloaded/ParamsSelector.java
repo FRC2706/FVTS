@@ -43,6 +43,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private JTextField txtResolutionWidth;
 	private JTextField textField_2;
 	private JTextField txtHeight;
+	private JButton btnAutoCallibrate;
 	
 	
 	public ParamsSelector() {
@@ -266,6 +267,12 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		contentPane.add(textField_3);
 		textField_3.setColumns(10);
 		textField_3.setText(String.valueOf(Main.visionParams.height));
+		
+		btnAutoCallibrate = new JButton("Auto Callibrate");
+		btnAutoCallibrate.setToolTipText("Automaticcaly callibrates the vision paramaters, simply put the cube the maximum distance you want to be able to track away and allign it with the middle after pressing this button");
+		btnAutoCallibrate.setBounds(345, 72, 131, 23);
+		btnAutoCallibrate.addActionListener(this);
+		contentPane.add(btnAutoCallibrate);
 		setVisible(true);
 		
 		new Thread(this).start();
@@ -321,6 +328,9 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	public void actionPerformed(ActionEvent arg0) {
 		if(arg0.getSource() == btnSave){
 			Main.saveVisionParams();
+		}
+		if(arg0.getSource() == btnAutoCallibrate){
+			new AutoCallibrator();
 		}
 	}
 

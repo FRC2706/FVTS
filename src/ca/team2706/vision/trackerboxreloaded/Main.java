@@ -1,15 +1,14 @@
 package ca.team2706.vision.trackerboxreloaded;
 
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
-import org.opencv.core.*;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.videoio.VideoCapture;
-
-import javax.imageio.ImageIO;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -17,6 +16,19 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Properties;
+
+import javax.imageio.ImageIO;
+
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.core.Rect;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.videoio.VideoCapture;
+
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 
 public class Main {
@@ -26,6 +38,10 @@ public class Main {
 	public static int seconds_between_img_dumps;
     public static long current_time_seconds;
     public static String outputPath;
+    public static BufferedImage currentImage;
+    public static VideoCapture camera;
+    public static VisionData lastData;
+    public static boolean showMiddle = false;
     public static final SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd-hh-mm-ss");
 
     // Camera Type (set in visionParams.properties)
@@ -242,7 +258,7 @@ public class Main {
         }
         Mat frame = new Mat();
         // Open a connection to the camera
-        VideoCapture camera = null;
+        camera = null;
 
         // Whether to use a camera, or load an image file from disk.
         boolean useCamera = true;
@@ -320,13 +336,21 @@ public class Main {
             }
 
             sendVisionDataOverNetworkTables(visionData);
-
+            lastData = visionData;
             // display the processed frame in the GUI
             if (use_GUI) {
                 try {
                     // May throw a NullPointerException if initializing
                     // the window failed
-                    guiRawImg.updateImage(matToBufferedImage(rawOutputImg));
+                	BufferedImage raw = matToBufferedImage(rawOutputImg);
+                	currentImage = raw;
+                	if(showMiddle){
+                		Graphics g = raw.getGraphics();
+                		g.setColor(Color.RED);
+                		g.fillOval(raw.getWidth()/2 - 8, raw.getHeight() / 2 - 8, 8,8);
+                		g.dispose();
+                	}
+                    guiRawImg.updateImage(raw);
                     guiProcessedImg.updateImage(matToBufferedImage(visionData.outputImg));
                 } catch (IOException e) {
                     // means mat2BufferedImage broke
@@ -370,4 +394,22 @@ public class Main {
             System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime, "");
         }
     } // end main video processing loop
+    
+    public void hideMiddle(){
+    	showMiddle = false;
+    }
+    public void showMiddle(){
+    	showMiddle = true;
+    }
+    public static VisionData forceProcess(){
+    	Mat frame = new Mat();
+    	camera.read(frame);
+    	Imgproc.resize( frame, frame, visionParams.sz );
+
+        VisionData visionData = Pipeline.process(frame, visionParams, false);
+
+        Pipeline.selectPreferredTarget(visionData, visionParams);
+        
+        return visionData;
+    }
 }
