@@ -35,12 +35,14 @@ public class Main {
 
     public static VisionParams visionParams = new VisionParams();
 	public static NetworkTable visionTable;
+	public static ParamsSelector selector;
 	public static int seconds_between_img_dumps;
     public static long current_time_seconds;
     public static String outputPath;
     public static BufferedImage currentImage;
     public static VideoCapture camera;
     public static VisionData lastData;
+    public static boolean process = true;
     public static boolean showMiddle = false;
     public static final SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd-hh-mm-ss");
 
@@ -302,7 +304,7 @@ public class Main {
             try {
                 guiRawImg = new DisplayGui(matToBufferedImage(frame), "Raw Camera Image");
                 guiProcessedImg = new DisplayGui(matToBufferedImage(frame), "Processed Image");
-                new ParamsSelector();
+                selector = new ParamsSelector();
             } catch (IOException e) {
                 // means mat2BufferedImage broke
                 // non-fatal error, let the program continue
@@ -311,6 +313,14 @@ public class Main {
 
         // Main video processing loop
         while (true) {
+        	if(!process){
+        		try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+        		continue;
+        	}
             if (useCamera) {
                 if (!camera.read(frame)) {
                     System.err.println("Error: Failed to get a frame from the camera");
@@ -407,9 +417,23 @@ public class Main {
     	Imgproc.resize( frame, frame, visionParams.sz );
 
         VisionData visionData = Pipeline.process(frame, visionParams, false);
-
+        
         Pipeline.selectPreferredTarget(visionData, visionParams);
         
         return visionData;
+    }
+    public static VisionData forceProcess(Mat frame){
+    	Imgproc.resize( frame, frame, visionParams.sz );
+
+        VisionData visionData = Pipeline.process(frame, visionParams, false);
+        
+        Pipeline.selectPreferredTarget(visionData, visionParams);
+        
+        return visionData;
+    }
+    public static Mat getFrame(){
+    	Mat frame = new Mat();
+    	camera.read(frame);
+    	return frame;
     }
 }

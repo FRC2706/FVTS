@@ -15,35 +15,35 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
-	private JTextField textField;
-	private JTextField txtCamera;
-	private JButton btnSave;
-	private JSlider sMinHue; //Minimum Hue
-	private JSlider sMaxHue; //Maximum Hue
-	private JSlider sMinSat; //Minimum Saturation
-	private JSlider sMaxSat; //Maximum Saturation
-	private JSlider sMinVal; //Minimum Value
-	private JSlider sMaxVal; //Maximum Value
-	private JSlider slider;
-	private JTextField txtIterations;
-	private JTextField textField_1; //Erode Dilate Iterations
-	private JTextField txtMinimumArea;
-	private JTextField minArea; //Minimum Area
-	private JTextField txtHue;
-	private JTextField txtSaturation;
-	private JTextField txtValue;
-	private JTextField txtOutputPath;
-	private JTextField textField_3;
-	private JTextField txtTimeBetweenCaptures;
-	private JTextField textField_4;
-	private JTextField textField_5;
-	private JTextField txtDtci;
-	private JSlider slider_1;
-	private JTextField txtDoubleCubeDetection;
-	private JTextField txtResolutionWidth;
-	private JTextField textField_2;
-	private JTextField txtHeight;
-	private JButton btnAutoCallibrate;
+	public JTextField textField;
+	public JTextField txtCamera;
+	public JButton btnSave;
+	public JSlider sMinHue; //Minimum Hue
+	public JSlider sMaxHue; //Maximum Hue
+	public JSlider sMinSat; //Minimum Saturation
+	public JSlider sMaxSat; //Maximum Saturation
+	public JSlider sMinVal; //Minimum Value
+	public JSlider sMaxVal; //Maximum Value
+	public JSlider slider;
+	public JTextField txtIterations;
+	public JTextField textField_1; //Erode Dilate Iterations
+	public JTextField txtMinimumArea;
+	public JTextField minArea; //Minimum Area
+	public JTextField txtHue;
+	public JTextField txtSaturation;
+	public JTextField txtValue;
+	public JTextField txtOutputPath;
+	public JTextField textField_3;
+	public JTextField txtTimeBetweenCaptures;
+	public JTextField textField_4;
+	public JTextField textField_5;
+	public JTextField txtDtci;
+	public JSlider slider_1;
+	public JTextField txtDoubleCubeDetection;
+	public JTextField txtResolutionWidth;
+	public JTextField textField_2;
+	public JTextField txtHeight;
+	public JButton btnAutoCallibrate;
 	
 	
 	public ParamsSelector() {

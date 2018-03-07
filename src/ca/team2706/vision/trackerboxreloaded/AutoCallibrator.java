@@ -10,13 +10,17 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
+import org.opencv.core.Mat;
+
+import ca.team2706.vision.trackerboxreloaded.Main.VisionData;
+
 public class AutoCallibrator implements ActionListener {
 	private static final int RANGE = 10;
 	private JButton btnStart;
-
+	private JFrame frame;
 	public AutoCallibrator() {
 		Main.showMiddle = true;
-		JFrame frame = new JFrame("Auto Callibration");
+		frame = new JFrame("Auto Callibration");
 		frame.setSize(200, 60);
 		frame.getContentPane().setLayout(null);
 
@@ -37,44 +41,38 @@ public class AutoCallibrator implements ActionListener {
 			} catch (InterruptedException e1) {
 				e1.printStackTrace();
 			}
-			Main.visionParams.minHue = 0;
-			Main.visionParams.maxHue = 255;
-			Main.visionParams.minSaturation = 0;
+			Main.visionParams.minSaturation = 150;
 			Main.visionParams.maxSaturation = 255;
 			Main.visionParams.minValue = 0;
 			Main.visionParams.maxValue = 255;
 			List<Pixel> touching = getTouching(Main.currentImage);
 			Main.visionParams.minArea = touching.size();
-			boolean bottom = false;
-			int column = 0;
-			for (int i = 0; i < 765; i++) {
-				if (bottom) {
-					if (column == 0) {
-						
-						bottom = true;
-					} else if (column == 1) {
-						
-						bottom = true;
-					} else {
-						
-						bottom = true;
-					}
-				} else {
-					if (column == 0) {
-						
-						column++;
-						bottom = false;
-					} else if (column == 1) {
-						
-						column++;
-						bottom = false;
-					} else {
-						
-						column = 0;
-						bottom = false;
-					}
+			float[] hsv = new float[3];
+			int middleX, middleY;
+			middleX = Main.currentImage.getWidth() / 2;
+			middleY = Main.currentImage.getHeight() / 2;
+			Color color = new Color(Main.currentImage.getRGB(middleX, middleY));
+			Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsv);
+			Main.visionParams.minHue = (int) (hsv[0] - 10);
+			Main.visionParams.maxHue = (int) (hsv[0] + 10);
+			Main.process = false;
+			Mat frame = Main.getFrame();
+			boolean success = false;
+			for (int i = 0; i < 255; i++) {
+				System.out.println("Checking");
+				Main.selector.sMinVal.setValue(Main.selector.sMinVal.getValue()+1);
+				VisionData data = Main.forceProcess(frame);
+				if(data.targetsFound.size() == 1 && data.preferredTarget.xCentreNorm > -0.1 && data.preferredTarget.xCentreNorm < 0.1){
+					System.out.println("Callibrated!");
+					success = true;
+					break;
 				}
 			}
+			if(!success){
+				System.out.println("Callibration failed! Manual callibration required");
+			}
+			this.frame.setVisible(false);
+			Main.process = true;
 		}
 	}
 
