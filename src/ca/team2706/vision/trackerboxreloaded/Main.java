@@ -109,7 +109,7 @@ public class Main {
 	/**
 	 * Loads the visionTable params! :]
 	 **/
-	private static void loadVisionParams() {
+	public static void loadVisionParams() {
 		Properties properties = new Properties();
 		try {
 			FileInputStream in = new FileInputStream("visionParams.properties");
@@ -397,11 +397,12 @@ public class Main {
                 }).start();
             }
             // Display the frame rate
-            System.out.printf("Vision FPS: %3.2f", visionData.fps);
-
+            //System.out.printf("Vision FPS: %3.2f", visionData.fps);
+            //System.out.println();
             // Display the frame rate onto the console
-            double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND) * 1000;
-            System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime, "");
+            @SuppressWarnings("unused")
+			double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND) * 1000;
+            //System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime, "");
         }
     } // end main video processing loop
     

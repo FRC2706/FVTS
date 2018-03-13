@@ -15,9 +15,10 @@ import org.opencv.core.Mat;
 import ca.team2706.vision.trackerboxreloaded.Main.VisionData;
 
 public class AutoCallibrator implements ActionListener {
-	private static final int RANGE = 10;
+	private static final int RANGE = 30;
 	private JButton btnStart;
 	private JFrame frame;
+
 	public AutoCallibrator() {
 		Main.showMiddle = true;
 		frame = new JFrame("Auto Callibration");
@@ -41,35 +42,84 @@ public class AutoCallibrator implements ActionListener {
 			} catch (InterruptedException e1) {
 				e1.printStackTrace();
 			}
-			Main.visionParams.minSaturation = 150;
-			Main.visionParams.maxSaturation = 255;
-			Main.visionParams.minValue = 0;
-			Main.visionParams.maxValue = 255;
+			Main.selector.sMinSat.setValue(100);
+			Main.selector.sMaxSat.setValue(255);
+			Main.selector.sMinVal.setValue(0);
+			Main.selector.sMaxVal.setValue(255);
 			List<Pixel> touching = getTouching(Main.currentImage);
-			Main.visionParams.minArea = touching.size();
+			String[] decimals = String.valueOf(
+					(((double) touching.size() / (double) (Main.visionParams.width * Main.visionParams.height)) * 10)
+							/ 10.0)
+					.split("");
+			String decimal = "";
+			for (int i = 0; i < decimals.length && i < 4; i++) {
+				decimal += decimals[i];
+			}
+			Main.selector.minArea.setText(decimal);
 			float[] hsv = new float[3];
 			int middleX, middleY;
 			middleX = Main.currentImage.getWidth() / 2;
 			middleY = Main.currentImage.getHeight() / 2;
 			Color color = new Color(Main.currentImage.getRGB(middleX, middleY));
 			Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsv);
-			Main.visionParams.minHue = (int) (hsv[0] - 10);
-			Main.visionParams.maxHue = (int) (hsv[0] + 10);
+			Main.selector.sMinHue.setValue((int) (hsv[0] * 255 - RANGE));
+			Main.selector.sMaxHue.setValue((int) (hsv[0] * 255 + RANGE));
 			Main.process = false;
 			Mat frame = Main.getFrame();
 			boolean success = false;
 			for (int i = 0; i < 255; i++) {
 				System.out.println("Checking");
-				Main.selector.sMinVal.setValue(Main.selector.sMinVal.getValue()+1);
+				Main.selector.sMinVal.setValue(Main.selector.sMinVal.getValue() + 1);
 				VisionData data = Main.forceProcess(frame);
-				if(data.targetsFound.size() == 1 && data.preferredTarget.xCentreNorm > -0.1 && data.preferredTarget.xCentreNorm < 0.1){
-					System.out.println("Callibrated!");
+				if (data.targetsFound.size() == 1 && data.preferredTarget.xCentreNorm > -0.1
+						&& data.preferredTarget.xCentreNorm < 0.1) {
 					success = true;
+					for (int i1 = 0; i1 < 255; i1++) {
+						System.out.println("Checking");
+						Main.selector.sMaxVal.setValue(Main.selector.sMaxVal.getValue() - 1);
+						VisionData data1 = Main.forceProcess(frame);
+						if (data1.targetsFound.size() == 1 && data1.preferredTarget.xCentreNorm > -0.1
+								&& data1.preferredTarget.xCentreNorm < 0.1) {
+							continue;
+						} else {
+							Main.selector.sMaxVal.setValue(Main.selector.sMaxVal.getValue() + 1);
+						}
+					}
 					break;
 				}
 			}
-			if(!success){
-				System.out.println("Callibration failed! Manual callibration required");
+			if (!success) {
+				Main.selector.sMinVal.setValue(0);
+				for (int i = 0; i < 255; i++) {
+					System.out.println("Checking");
+					Main.selector.sMaxVal.setValue(Main.selector.sMaxVal.getValue() - 1);
+					VisionData data = Main.forceProcess(frame);
+					if (data.targetsFound.size() == 1 && data.preferredTarget.xCentreNorm > -0.1
+							&& data.preferredTarget.xCentreNorm < 0.1) {
+						
+						success = true;
+						for (int i1 = 0; i1 < 255; i1++) {
+							System.out.println("Checking");
+							Main.selector.sMinVal.setValue(Main.selector.sMinVal.getValue() + 1);
+							VisionData data1 = Main.forceProcess(frame);
+							if (data1.targetsFound.size() == 1 && data1.preferredTarget.xCentreNorm > -0.1
+									&& data1.preferredTarget.xCentreNorm < 0.1) {
+								continue;
+							} else {
+								Main.selector.sMaxVal.setValue(Main.selector.sMaxVal.getValue() + 1);
+							}
+						}
+						break;
+					}
+				}
+				if (!success) {
+					System.out.println("Callibration failed! Manual callibration required");
+					// Main.loadVisionParams();
+				}else{
+					System.out.println("Callibrated!");
+				}
+			}else{
+				System.out.println("Callibrated!");
 			}
 			this.frame.setVisible(false);
 			Main.process = true;
@@ -89,9 +139,9 @@ public class AutoCallibrator implements ActionListener {
 				Color color2 = new Color(image.getRGB(x, y));
 				float[] vals2 = new float[3];
 				Color.RGBtoHSB(color2.getRed(), color2.getGreen(), color2.getBlue(), vals2);
-				if (vals2[0] > vals[0] - RANGE && vals2[0] < vals[0] + RANGE) {
-					if (vals2[1] > vals[1] - RANGE && vals2[1] < vals[1] + RANGE) {
-						if (vals2[2] > vals[2] - RANGE && vals2[2] < vals[2] + RANGE) {
+				if (vals2[0] * 255 > vals[0] * 255 - RANGE && vals2[0] * 255 < vals[0] * 255 + RANGE) {
+					if (vals2[1] * 255 > vals[1] * 255 - RANGE && vals2[1] * 255 < vals[1] * 255 + RANGE) {
+						if (vals2[2] * 255 > vals[2] * 255 - RANGE && vals2[2] * 255 < vals[2] * 255 + RANGE) {
 							matches.add(new Pixel(x, y, color2));
 						}
 					}
