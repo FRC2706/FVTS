@@ -83,9 +83,9 @@ public class Main {
 	private static void initNetworkTables() {
 		NetworkTable.setClientMode();
 		NetworkTable.setUpdateRate(0.02);
-//		NetworkTable.setTeam(2706); // Use this for the robit
-//		NetworkTable.setDSClientEnabled(true); // and this for the robit
-		NetworkTable.setIPAddress("10.27.6.67"); //Use this for testing
+		NetworkTable.setTeam(2706); // Use this for the robit
+		NetworkTable.setDSClientEnabled(true); // and this for the robit
+//		NetworkTable.setIPAddress("10.27.6.67"); //Use this for testing
 		NetworkTable.initialize();
 		visionTable = NetworkTable.getTable("vision");
 	}
