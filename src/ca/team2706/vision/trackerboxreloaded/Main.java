@@ -27,6 +27,8 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
+import org.opencv.videoio.VideoWriter;
+import org.opencv.videoio.Videoio;
 
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
@@ -88,7 +90,7 @@ public class Main {
 
 		ArrayList<Target> targetsFound = new ArrayList<Target>();
 		Target preferredTarget;
-		public Mat outputImg = new Mat();
+		public Mat binMask = new Mat();
 		public double fps;
 	}
 
@@ -98,10 +100,10 @@ public class Main {
 	 */
 	private static void initNetworkTables() {
 		NetworkTable.setClientMode();
-		NetworkTable.setUpdateRate(0.2);
+		NetworkTable.setUpdateRate(0.02);
 		NetworkTable.setTeam(2706); // Use this for the robit
 		NetworkTable.setDSClientEnabled(true); // and this for the robit
-		//NetworkTable.setIPAddress("127.0.0.1"); //Use this for testing
+//		NetworkTable.setIPAddress("10.27.6.67"); //Use this for testing
 		NetworkTable.initialize();
 		visionTable = NetworkTable.getTable("vision");
 	}
@@ -129,18 +131,23 @@ public class Main {
             outputPath = properties.getProperty("imgDumpPath");
             seconds_between_img_dumps = Integer.valueOf(properties.getProperty("imgDumpWait"));
             visionParams.imageFile = properties.getProperty("imageFile");
-            if(properties.getProperty("resolution").equals("320x240")){
+
+            String resolution = properties.getProperty("resolution");
+            if(resolution.equals("320x240")){
                 visionParams.width = 320;
                 visionParams.height = 240;
-            }else if(properties.getProperty("resolution").equals("640x480")){
+            }else if(resolution.equals("640x480")){
                 visionParams.width = 640;
                 visionParams.height = 480;
-            }else if(properties.getProperty("resolution").equals("160x120")){
+            }else if(resolution.equals("160x120")) {
                 visionParams.width = 160;
                 visionParams.height = 120;
+            }else if(resolution.equals("80x60")) {
+                visionParams.width = 80;
+                visionParams.height = 60;
             }else{
                 throw new IllegalArgumentException("Error: "+properties.getProperty("resolution")+" is not a supported resolution.\n"+
-                        "Allowed: 160x120, 320x240, 640x480.");
+                        "Allowed: 80x60, 160x120, 320x240, 640x480.");
             }
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
@@ -222,13 +229,8 @@ public class Main {
         return mat;
     }
 
-    public static void imgDump(BufferedImage image, boolean raw) throws IOException {
-        File output;
-        if (raw) {
-            output = new File(outputPath + "imageraw" + format.format(Calendar.getInstance().getTime()) + ".png");
-        } else {
-            output = new File(outputPath + "imageprocessed" + format.format(Calendar.getInstance().getTime()) + ".png");
-        }
+    public static void imgDump(BufferedImage image, String suffix) throws IOException {
+        File output = new File(outputPath + suffix + "_" + format.format(Calendar.getInstance().getTime()) + ".png");
         try {
             ImageIO.write(image, "PNG", output);
         } catch (IOException e) {
@@ -250,6 +252,7 @@ public class Main {
 
         // read the vision calibration values from file.
         loadVisionParams();
+
         try {
             Files.copy(
                     Paths.get("visionParams.properties"), Paths.get(outputPath + "/visionParams-"
@@ -259,6 +262,7 @@ public class Main {
             e2.printStackTrace();
         }
         Mat frame = new Mat();
+
         // Open a connection to the camera
         camera = null;
 
@@ -270,6 +274,12 @@ public class Main {
 
         if (useCamera) {
             camera = new VideoCapture(visionParams.cameraSelect);
+
+            int fourcc = VideoWriter.fourcc('M', 'J', 'P', 'G');
+            camera.set(Videoio.CAP_PROP_FOURCC, fourcc);
+            camera.set(Videoio.CAP_PROP_FRAME_WIDTH, visionParams.width);
+            camera.set(Videoio.CAP_PROP_FRAME_HEIGHT, visionParams.height);
+
             camera.read(frame);
 
             if (!camera.isOpened()) {
@@ -328,7 +338,8 @@ public class Main {
                 }
             } // else use the image from disk that we loaded above
 
-            Imgproc.resize( frame, frame, visionParams.sz );
+            if (use_GUI)
+                Imgproc.resize( frame, frame, visionParams.sz );
 
             // Process the frame!
             long pipelineStart = System.nanoTime();
@@ -337,13 +348,8 @@ public class Main {
 
             Pipeline.selectPreferredTarget(visionData, visionParams);
 
-            Mat rawOutputImg;
-            if (use_GUI) {
-                rawOutputImg = frame.clone();
-                Pipeline.drawPreferredTarget(rawOutputImg, visionData);
-            } else {
-                rawOutputImg = frame;
-            }
+            Mat outputTargetImg = frame.clone();
+            Pipeline.drawPreferredTarget(outputTargetImg, visionData);
 
             sendVisionDataOverNetworkTables(visionData);
             lastData = visionData;
@@ -352,7 +358,7 @@ public class Main {
                 try {
                     // May throw a NullPointerException if initializing
                     // the window failed
-                	BufferedImage raw = matToBufferedImage(rawOutputImg);
+                	BufferedImage raw = matToBufferedImage(frame);
                 	currentImage = raw;
                 	if(showMiddle){
                 		Graphics g = raw.getGraphics();
@@ -361,7 +367,7 @@ public class Main {
                 		g.dispose();
                 	}
                     guiRawImg.updateImage(raw);
-                    guiProcessedImg.updateImage(matToBufferedImage(visionData.outputImg));
+                    guiProcessedImg.updateImage(matToBufferedImage(visionData.binMask));
                 } catch (IOException e) {
                     // means mat2BufferedImage broke
                     // non-fatal error, let the program continue
@@ -376,19 +382,20 @@ public class Main {
                     continue;
                 }
             }
+
+
+            // log images to file once every seconds_between_img_dumps
             long elapsedTime = (System.currentTimeMillis() / 1000) - current_time_seconds;
             if (elapsedTime >= seconds_between_img_dumps) {
                 current_time_seconds = (System.currentTimeMillis() / 1000);
+
+                Mat finalFrame = frame.clone();
                 new Thread(new Runnable() {
                     public void run() {
                         try {
-                            imgDump(matToBufferedImage(rawOutputImg), true);
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                            return;
-                        }
-                        try {
-                            imgDump(matToBufferedImage(visionData.outputImg), false);
+                            imgDump(matToBufferedImage(finalFrame), "raw");
+                            imgDump(matToBufferedImage(visionData.binMask), "binMask");
+                            imgDump(matToBufferedImage(outputTargetImg), "output");
                         } catch (IOException e) {
                             e.printStackTrace();
                             return;
@@ -396,13 +403,9 @@ public class Main {
                     }
                 }).start();
             }
-            // Display the frame rate
-            //System.out.printf("Vision FPS: %3.2f", visionData.fps);
-            //System.out.println();
             // Display the frame rate onto the console
-            @SuppressWarnings("unused")
-			double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND) * 1000;
-            //System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime, "");
+            double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND) * 1000;
+            System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime);
         }
     } // end main video processing loop
     
