@@ -98,6 +98,7 @@ public class Main {
 		/** The image that contains the targets **/
 		public Mat outputImg = new Mat();
 		/** The frames per second **/
+		public Mat binMask = new Mat();
 		public double fps;
 	}
 
@@ -296,22 +297,19 @@ public class Main {
     /**
      * 
      * @param The image to dump to a file
-     * @param Wether the image is raw or processed, raw = true, processed = false
+     * @param image the image to be dumped
+     * @param suffix the suffix to put on the file name
      * @throws IOException
      */
-    public static void imgDump(BufferedImage image, boolean raw) throws IOException {
-        File output;
-        if (raw) {
-            output = new File(outputPath + "imageraw" + format.format(Calendar.getInstance().getTime()) + ".png");
-        } else {
-            output = new File(outputPath + "imageprocessed" + format.format(Calendar.getInstance().getTime()) + ".png");
-        }
+    public static void imgDump(BufferedImage image, String suffix) throws IOException {
+        File output = new File(outputPath + suffix + "_" + format.format(Calendar.getInstance().getTime()) + ".png");
         try {
             ImageIO.write(image, "PNG", output);
         } catch (IOException e) {
             throw new IOException(e.getMessage());
         }
     }
+
 
     /**
      * The main method! Very important Do not delete! :] :]
@@ -470,25 +468,26 @@ public class Main {
                     continue;
                 }
             }
-            //Find how long its been since the last image dump
+            // log images to file once every seconds_between_img_dumps
             long elapsedTime = (System.currentTimeMillis() / 1000) - current_time_seconds;
             //If the elapsed time is more that the seconds between image dumps then dump images asynchronously
             if (elapsedTime >= seconds_between_img_dumps) {
             	//Sets the current number of seconds
                 current_time_seconds = (System.currentTimeMillis() / 1000);
-                //Starts a new thread to dump images
+				//Clones the frame
+				Mat finalFrame = frame.clone();
+				//Starts a new thread to dump images
                 new Thread(new Runnable() {
                     public void run() {
                         try {
                         	//Dumps the raw image
-                            imgDump(matToBufferedImage(rawOutputImg), true);
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                            return;
-                        }
-                        try {
-                        	//Dumps the processed image
-                            imgDump(matToBufferedImage(visionData.outputImg), false);
+                            imgDump(matToBufferedImage(finalFrame), "raw");
+                            //Dumps the binMask image
+                            imgDump(matToBufferedImage(visionData.binMask), "binMask");
+                            //Draw the target to the output image
+                            Pipeline.drawPreferredTarget(finalFrame, visionData);
+                            //Dumps the output image
+                            imgDump(matToBufferedImage(finalFrame), "output");
                         } catch (IOException e) {
                             e.printStackTrace();
                             return;
