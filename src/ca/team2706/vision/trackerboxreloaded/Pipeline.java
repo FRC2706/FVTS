@@ -13,6 +13,7 @@ public class Pipeline {
 	/** Numerical Constants **/
 	public static final int NANOSECONDS_PER_SECOND = 1000000000;
 
+	/** The fps timer **/
 	public static long fpsTimer = System.nanoTime();
 
 	 /**
@@ -27,16 +28,19 @@ public class Pipeline {
 
 		// As a memory footprint optimization, when running on a Pi, re-use one working image in memory
 		Mat dilated, erodeOne, erodeTwo, workingImg;
+		//If using the guis
 		if (use_GUI) {
+			//Make new Mats
 			dilated = new Mat();
 			erodeOne = new Mat();
 			erodeTwo = new Mat();
 		} else {
+			//Else re use them
 			dilated = new Mat();
 			erodeOne = dilated;
 			erodeTwo = dilated;
 		}
-
+		//Calculate the image area
 		int imgArea = src.height() * src.width();
 
 		// If there's any data or intermediate images that you want to return, add them to the VisionData class
