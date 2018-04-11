@@ -39,7 +39,7 @@ public class Main {
     public static long current_time_seconds;
     public static String outputPath;
     public static int timestamp = 0;
-    public static File tsf = new File(outputPath+"/"+"time.stamp");
+    public static File timestampfile = new File(outputPath+"/"+"time.stamp");
     // Camera Type (set in visionParams.properties)
     // Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
     // there is no webcam :/
@@ -80,7 +80,7 @@ public class Main {
 			Rect boundingBox;
 		}
 
-		ArrayList<Target> targetsFound = new ArrayList<Target>();
+		ArrayList<Target> targetimestampfileound = new ArrayList<Target>();
 		Target preferredTarget;
 		public Mat binMask = new Mat();
 		public double fps;
@@ -118,43 +118,46 @@ public class Main {
 			visionParams.maxValue = Integer.valueOf(properties.getProperty("maxValue"));
 			visionParams.minArea = Double.valueOf(properties.getProperty("minArea"));
 			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
-            visionParams.aspectRatioThresh = Double.valueOf(properties.getProperty("aspectRatioThresh"));
+      visionParams.aspectRatioThresh = Double.valueOf(properties.getProperty("aspectRatioThresh"));
 			visionParams.distToCentreImportance = Double.valueOf(properties.getProperty("distToCentreImportance"));
-            outputPath = properties.getProperty("imgDumpPath");
-            seconds_between_img_dumps = Integer.valueOf(properties.getProperty("imgDumpWait"));
-            visionParams.imageFile = properties.getProperty("imageFile");
-            if(tsf.exists()){
-            Scanner s = new Scanner(tsf);
-            timestamp = Integer.valueOf(s.nextLine()).intValue();
-            timestamp++;
-            s.close();
-            }
-            String resolution = properties.getProperty("resolution");
-            if(resolution.equals("320x240")){
-                visionParams.width = 320;
-                visionParams.height = 240;
-            }else if(resolution.equals("640x480")){
-                visionParams.width = 640;
-                visionParams.height = 480;
-            }else if(resolution.equals("160x120")) {
-                visionParams.width = 160;
-                visionParams.height = 120;
-            }else if(resolution.equals("80x60")) {
-                visionParams.width = 80;
-                visionParams.height = 60;
-            }else{
-                throw new IllegalArgumentException("Error: "+properties.getProperty("resolution")+" is not a supported resolution.\n"+
-                        "Allowed: 80x60, 160x120, 320x240, 640x480.");
-            }
-        } catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-            System.exit(1);
 
-        } catch (Exception e1) {
-            e1.printStackTrace();
-            System.err.println("\n\nError reading the params file, check if the file is corrupt?");
-            System.exit(1);
+      outputPath = properties.getProperty("imgDumpPath");
+      seconds_between_img_dumps = Integer.valueOf(properties.getProperty("imgDumpWait"));
+      visionParams.imageFile = properties.getProperty("imageFile");
+
+        // if the file, take the timestamp from there
+        if(timestampfile.exists()){
+          Scanner s = new Scanner(timestampfile);
+          timestamp = Integer.valueOf(s.nextLine()).intValue();
+          timestamp++;
+          s.close();
         }
+
+        String resolution = properties.getProperty("resolution");
+        if(resolution.equals("320x240")){
+          visionParams.width = 320;
+          visionParams.height = 240;
+        } else if(resolution.equals("640x480")){
+          visionParams.width = 640;
+          visionParams.height = 480;
+        } else if(resolution.equals("160x120")) {
+          visionParams.width = 160;
+          visionParams.height = 120;
+        }else if(resolution.equals("80x60")) {
+          visionParams.width = 80;
+          visionParams.height = 60;
+        }else{
+          throw new IllegalArgumentException("Error: "+properties.getProperty("resolution")+" is not a supported resolution.\n"+
+                        "Allowed: 80x60, 160x120, 320x240, 640x480.");
+        }
+      } catch (IllegalArgumentException e) {
+        System.err.println(e.getMessage());
+        System.exit(1);
+      } catch (Exception e1) {
+        e1.printStackTrace();
+        System.err.println("\n\nError reading the params file, check if the file is corrupt?");
+        System.exit(1);
+      }
 	}
 
 	public static void saveVisionParams() {
@@ -193,7 +196,7 @@ public class Main {
 
         // Sends the data
         visionTable.putNumber("fps", visionData.fps);
-        visionTable.putNumber("numTargetsFound",visionData.targetsFound.size());
+        visionTable.putNumber("numTargetimestampfileound",visionData.targetimestampfileound.size());
 
         if (visionData.preferredTarget != null){
             visionTable.putNumber("ctrX", visionData.preferredTarget.xCentreNorm);
@@ -226,19 +229,19 @@ public class Main {
         return mat;
     }
 
-    public static void imgDump(BufferedImage image, String suffix) throws IOException {
-        File output = new File(outputPath + suffix + "_" + timestamp + ".png");
+    public static void imgDump(BufferedImage image, String suffix, int timestamp) throws IOException {
+        // prepend the file name with the tamestamp integer, left-padded with zeros so it sorts properly
+        File output = new File(outputPath + String.format("%05d",timestamp) +"_" + suffix + ".png");
         try {
             ImageIO.write(image, "PNG", output);
         } catch (IOException e) {
             throw new IOException(e.getMessage());
         }
-        tsf.delete();
-        tsf.createNewFile();
-        PrintWriter out = new PrintWriter(tsf);
+        timestampfile.delete();
+        timestampfile.createNewFile();
+        PrintWriter out = new PrintWriter(timestampfile);
         out.println(timestamp);
         out.close();
-        timestamp++;
     }
 
     /**
@@ -380,9 +383,10 @@ public class Main {
                 new Thread(new Runnable() {
                     public void run() {
                         try {
-                            imgDump(matToBufferedImage(finalFrame), "raw");
-                            imgDump(matToBufferedImage(visionData.binMask), "binMask");
-                            imgDump(matToBufferedImage(outputTargetImg), "output");
+                            imgDump(matToBufferedImage(finalFrame), "raw", timestamp);
+                            imgDump(matToBufferedImage(visionData.binMask), "binMask", timestamp);
+                            imgDump(matToBufferedImage(outputTargetImg), "output", timestamp);
+                            timestamp++;
                         } catch (IOException e) {
                             e.printStackTrace();
                             return;
