@@ -80,7 +80,7 @@ public class Main {
 			Rect boundingBox;
 		}
 
-		ArrayList<Target> targetimestampfileound = new ArrayList<Target>();
+		ArrayList<Target> targetsFound = new ArrayList<Target>();
 		Target preferredTarget;
 		public Mat binMask = new Mat();
 		public double fps;
@@ -196,7 +196,7 @@ public class Main {
 
         // Sends the data
         visionTable.putNumber("fps", visionData.fps);
-        visionTable.putNumber("numTargetimestampfileound",visionData.targetimestampfileound.size());
+        visionTable.putNumber("numTargetimestampfileound",visionData.targetsFound.size());
 
         if (visionData.preferredTarget != null){
             visionTable.putNumber("ctrX", visionData.preferredTarget.xCentreNorm);
