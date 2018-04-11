@@ -123,10 +123,12 @@ public class Main {
             outputPath = properties.getProperty("imgDumpPath");
             seconds_between_img_dumps = Integer.valueOf(properties.getProperty("imgDumpWait"));
             visionParams.imageFile = properties.getProperty("imageFile");
+            if(tsf.exists()){
             Scanner s = new Scanner(tsf);
             timestamp = Integer.valueOf(s.nextLine()).intValue();
             timestamp++;
             s.close();
+            }
             String resolution = properties.getProperty("resolution");
             if(resolution.equals("320x240")){
                 visionParams.width = 320;
