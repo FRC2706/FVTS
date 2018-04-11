@@ -39,7 +39,14 @@ public class Main {
     public static long current_time_seconds;
     public static String outputPath;
     public static int timestamp = 0;
-    public static File timestampfile = new File(outputPath+"/"+"time.stamp");
+    public static File timestampfile;
+    static{
+    	if(outputPath.endsWith("/") || outputPath.endsWith("\\")){
+    		timestampfile = new File(outputPath+"time.stamp");
+    	}else{
+    		timestampfile = new File(outputPath+"/"+"time.stamp");
+    	}
+    }
     // Camera Type (set in visionParams.properties)
     // Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
     // there is no webcam :/
