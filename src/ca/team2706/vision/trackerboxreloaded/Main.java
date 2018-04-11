@@ -1,24 +1,34 @@
 package ca.team2706.vision.trackerboxreloaded;
 
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
-import org.opencv.core.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.Scanner;
+
+import javax.imageio.ImageIO;
+
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.core.Rect;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.VideoWriter;
 import org.opencv.videoio.Videoio;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Properties;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 
 public class Main {
@@ -28,8 +38,8 @@ public class Main {
 	public static int seconds_between_img_dumps;
     public static long current_time_seconds;
     public static String outputPath;
-    public static final SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd-hh-mm-ss");
-
+    public static int timestamp = 0;
+    public static File tsf = new File(outputPath+"/"+"time.stamp");
     // Camera Type (set in visionParams.properties)
     // Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
     // there is no webcam :/
@@ -113,7 +123,10 @@ public class Main {
             outputPath = properties.getProperty("imgDumpPath");
             seconds_between_img_dumps = Integer.valueOf(properties.getProperty("imgDumpWait"));
             visionParams.imageFile = properties.getProperty("imageFile");
-
+            Scanner s = new Scanner(tsf);
+            timestamp = Integer.valueOf(s.nextLine()).intValue();
+            timestamp++;
+            s.close();
             String resolution = properties.getProperty("resolution");
             if(resolution.equals("320x240")){
                 visionParams.width = 320;
@@ -212,12 +225,18 @@ public class Main {
     }
 
     public static void imgDump(BufferedImage image, String suffix) throws IOException {
-        File output = new File(outputPath + suffix + "_" + format.format(Calendar.getInstance().getTime()) + ".png");
+        File output = new File(outputPath + suffix + "_" + timestamp + ".png");
         try {
             ImageIO.write(image, "PNG", output);
         } catch (IOException e) {
             throw new IOException(e.getMessage());
         }
+        tsf.delete();
+        tsf.createNewFile();
+        PrintWriter out = new PrintWriter(tsf);
+        out.println(timestamp);
+        out.close();
+        timestamp++;
     }
 
     /**
@@ -238,7 +257,7 @@ public class Main {
         try {
             Files.copy(
                     Paths.get("visionParams.properties"), Paths.get(outputPath + "/visionParams-"
-                            + format.format(Calendar.getInstance().getTime()) + ".properties"),
+                            + timestamp + ".properties"),
                     StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e2) {
             e2.printStackTrace();
