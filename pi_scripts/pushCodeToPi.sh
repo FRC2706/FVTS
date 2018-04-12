@@ -41,7 +41,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-./gradlew build
+#./gradlew build
 
 # ERROR HANDLING: check that the build succeeded
 if [ $? -ne 0 ]; then

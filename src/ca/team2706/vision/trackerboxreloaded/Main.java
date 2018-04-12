@@ -42,7 +42,11 @@ public class Main {
 	public static VisionData lastData;
 	public static boolean process = true;
 	public static boolean showMiddle = false;
-
+	public static boolean useCamera = true;
+	public static Mat frame;
+	public static void setFrame(Mat f){
+		frame = f;
+	}
 	// Camera Type (set in visionParams.properties)
 	// Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
 	// there is no webcam :/
@@ -446,13 +450,13 @@ public class Main {
 		}
 		// Initilizes a Matrix to hold the frame
 
-		Mat frame = new Mat();
+		frame = new Mat();
 
 		// Open a connection to the camera
 		VideoCapture camera = null;
 
 		// Whether to use a camera, or load an image file from disk.
-		boolean useCamera = true;
+		useCamera = true;
 		if (visionParams.cameraSelect == -1) {
 			useCamera = false;
 		}
@@ -484,7 +488,7 @@ public class Main {
 				frame = bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
 			} catch (IOException e) {
 				e.printStackTrace();
-				System.exit(1);
+				frame = new Mat();
 			}
 		}
 		// The window to display the raw image
@@ -584,6 +588,7 @@ public class Main {
 					continue;
 				}
 			}
+			if(useCamera){
 			// log images to file once every seconds_between_img_dumps
 			long elapsedTime = (System.currentTimeMillis() / 1000) - current_time_seconds;
 			// If the elapsed time is more that the seconds between image dumps
@@ -612,6 +617,7 @@ public class Main {
 						}
 					}
 				}).start();
+			}
 			}
 			// Display the frame rate onto the console
 			double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND) * 1000;

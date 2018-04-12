@@ -2,18 +2,22 @@ package ca.team2706.vision.trackerboxreloaded;
 
 import org.opencv.core.Size;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Properties;
 
 public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 
 	private static final long serialVersionUID = 1L;
 	
+	private JButton btnOpenImage;
+	private File f = null;
 	/**
 	 * The content panel
 	 */
@@ -554,6 +558,11 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		btnAutoCallibrate.addActionListener(this);
 		contentPane.add(btnAutoCallibrate);
 		
+		btnOpenImage = new JButton("Open Image");
+		btnOpenImage.setBounds(431, 178, 116, 23);
+		btnOpenImage.addActionListener(this);
+		contentPane.add(btnOpenImage);
+		
 		//Makes the window visible
 		setVisible(true);
 		
@@ -652,6 +661,24 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		}
 		if(arg0.getSource() == btnAutoCallibrate){
 			new AutoCallibrator();
+		}
+		if(arg0.getSource() == btnOpenImage){
+			JFileChooser chooser = new JFileChooser();
+			if(f != null){
+				chooser.setCurrentDirectory(f.getParentFile());
+			}
+			chooser.showOpenDialog(contentPane);
+			if(chooser.getSelectedFile() != null){
+				f = chooser.getSelectedFile();
+				Main.useCamera = false;
+				try {
+					Main.setFrame(Main.bufferedImageToMat(ImageIO.read(f)));
+				} catch (IOException e) {
+					e.printStackTrace();
+					Main.useCamera = true;
+				}
+				
+			}
 		}
 	}
 	/**
