@@ -406,11 +406,15 @@ public class Main {
  * @throws IOException
  */
 
-	public static void imgDump(BufferedImage image, String suffix, int timestamp) throws IOException {
+	public static void imgDump(BufferedImage image, String suffix) throws IOException {
 		// prepend the file name with the tamestamp integer, left-padded with
 		// zeros so it sorts properly
-		File output = new File(outputPath + String.format("%05d", timestamp) + "_" + suffix + ".png");
+		File output = new File(outputPath + String.format("%05d",timestamp) + "_" + suffix + ".png");
 		try {
+			if(output.exists()){
+				timestamp++;
+				imgDump(image, suffix);
+			}
 			ImageIO.write(image, "PNG", output);
 		} catch (IOException e) {
 			throw new IOException(e.getMessage());
@@ -603,13 +607,13 @@ public class Main {
 					public void run() {
 						try {
 							// Dumps the raw image
-							imgDump(matToBufferedImage(finalFrame), "raw",timestamp);
+							imgDump(matToBufferedImage(finalFrame), "raw");
 							// Dumps the binMask image
-							imgDump(matToBufferedImage(visionData.binMask), "binMask",timestamp);
+							imgDump(matToBufferedImage(visionData.binMask), "binMask");
 							// Draw the target to the output image
 							Pipeline.drawPreferredTarget(finalFrame, visionData);
 							// Dumps the output image
-							imgDump(matToBufferedImage(finalFrame), "output",timestamp);
+							imgDump(matToBufferedImage(finalFrame), "output");
 							timestamp++;
 						} catch (IOException e) {
 							e.printStackTrace();
