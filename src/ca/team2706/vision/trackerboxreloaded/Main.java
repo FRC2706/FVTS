@@ -61,7 +61,7 @@ public class Main {
 	 * This is the number of seconds between dumping images to a usb stick, this
 	 * is taken from the vision parameters
 	 **/
-	public static int seconds_between_img_dumps;
+	public static double seconds_between_img_dumps;
 	/**
 	 * This is the current number of seconds, this resets every time it is over
 	 * the seconds_between_img_dumps
