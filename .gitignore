@@ -18,3 +18,4 @@ out/
 # Java Gui Stuff
 *.log
 imagedump/
+field images/
