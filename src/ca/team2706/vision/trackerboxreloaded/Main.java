@@ -66,7 +66,7 @@ public class Main {
 	 * This is the current number of seconds, this resets every time it is over
 	 * the seconds_between_img_dumps
 	 **/
-	public static long current_time_seconds;
+	public static double current_time_seconds;
 	/** The directory that images are dumped to **/
 	public static String outputPath;
 
@@ -231,7 +231,7 @@ public class Main {
 			outputPath = properties.getProperty("imgDumpPath");
 			// Sets the seconds between image dumps to the seconds between image
 			// dumps in the properties file
-			seconds_between_img_dumps = Integer.valueOf(properties.getProperty("imgDumpWait"));
+			seconds_between_img_dumps = Double.valueOf(properties.getProperty("imgDumpWait"));
 			// Sets the image file path to the image file path in the properties
 			// file, this is only used if the selected camera is -1
 			visionParams.imageFile = properties.getProperty("imageFile");
@@ -590,12 +590,12 @@ public class Main {
 			}
 			if(useCamera){
 			// log images to file once every seconds_between_img_dumps
-			long elapsedTime = (System.currentTimeMillis() / 1000) - current_time_seconds;
+			double elapsedTime = ( (double) System.currentTimeMillis() / 1000) - current_time_seconds;
 			// If the elapsed time is more that the seconds between image dumps
 			// then dump images asynchronously
 			if (elapsedTime >= seconds_between_img_dumps) {
 				// Sets the current number of seconds
-				current_time_seconds = (System.currentTimeMillis() / 1000);
+				current_time_seconds = (((double) System.currentTimeMillis()) / 1000);
 				// Clones the frame
 				Mat finalFrame = frame.clone();
 				// Starts a new thread to dump images
