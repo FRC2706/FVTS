@@ -6,8 +6,6 @@ import java.util.List;
 
 public class ImageDumpScheduler implements Runnable{
 	private static List<Bundle> bundles = new ArrayList<Bundle>();
-	private static long lastTime = System.currentTimeMillis();
-	private static final long TIMEOUT = 3000;
 	private static Thread thread;
 	@Override
 	public void run() {
@@ -36,20 +34,6 @@ public class ImageDumpScheduler implements Runnable{
 	public static void start(){
 		thread = new Thread(new ImageDumpScheduler());
 		thread.start();
-		new Thread(new Runnable(){
-			@SuppressWarnings("deprecation")
-			@Override
-			public void run() {
-				while(true){
-					if(System.currentTimeMillis()-lastTime > TIMEOUT){
-						//Time out
-						lastTime = System.currentTimeMillis();
-						thread.stop();
-						thread.start();
-					}
-				}
-			}
-		}).start();
 	}
 
 }
