@@ -11,8 +11,11 @@ public class ImageDumpScheduler implements Runnable{
 	public void run() {
 		while(true){
 			if(bundles.size() > 0){
-				Bundle b = bundles.get(0);
-				bundles.remove(0);
+				Bundle b = bundles.get(bundles.size()-1);
+				bundles.remove(bundles.size()-1);
+				if(bundles.size() > 5){
+					bundles.clear();
+				}
 				try {
 					Main.imgDump(b.getRaw(), "raw",b.getTimeStamp());
 					Main.imgDump(b.getBinMask(), "binMask", b.getTimeStamp());
