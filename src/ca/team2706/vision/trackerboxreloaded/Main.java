@@ -416,26 +416,17 @@ public class Main {
 		// prepend the file name with the tamestamp integer, left-padded with
 		// zeros so it sorts properly
 		File output = new File(outputPath + String.format("%05d", timestamp) + "_" + suffix + ".png");
-		boolean recurse = false;
 		try {
-			if (output.exists()) {
-				recurse = true;
-				timestamp++;
-				imgDump(image, suffix, timestamp);
-			}
-			if (!recurse) {
-				ImageIO.write(image, "PNG", output);
-			}
+			ImageIO.write(image, "PNG", output);
 		} catch (IOException e) {
 			throw new IOException(e.getMessage());
 		}
-		if (!recurse) {
-			timestampfile.delete();
-			timestampfile.createNewFile();
-			PrintWriter out = new PrintWriter(timestampfile);
-			out.println(timestamp);
-			out.close();
-		}
+		timestampfile.delete();
+		timestampfile.createNewFile();
+		PrintWriter out = new PrintWriter(timestampfile);
+		out.println(timestamp);
+		out.close();
+		
 	}
 
 	/**
