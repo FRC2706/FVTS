@@ -245,7 +245,11 @@ public class Main {
 			// if the file, take the timestamp from there
 			if (timestampfile.exists()) {
 				Scanner s = new Scanner(timestampfile);
-				timestamp = Integer.valueOf(s.nextLine()).intValue();
+				try{
+					timestamp = Integer.valueOf(s.nextLine()).intValue();
+				}catch(Exception e){
+					e.printStackTrace();
+				}
 				timestamp++;
 				s.close();
 			}

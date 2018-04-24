@@ -5,16 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ImageDumpScheduler implements Runnable{
+	public static final int QUEUE_LIMIT = 10;
+	
 	private static List<Bundle> bundles = new ArrayList<Bundle>();
 	private static Thread thread;
 	@Override
 	public void run() {
 		while(true){
 			if(bundles.size() > 0){
-				Bundle b = bundles.get(bundles.size()-1);
-				bundles.remove(bundles.size()-1);
-				if(bundles.size() > 5){
-					bundles.clear();
+				Bundle b = bundles.get(0);
+				bundles.remove(0);
+				while(bundles.size() > QUEUE_LIMIT){
+					bundles.remove(0);
 				}
 				try {
 					Main.imgDump(b.getRaw(), "raw",b.getTimeStamp());
