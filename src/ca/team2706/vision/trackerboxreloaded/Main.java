@@ -59,8 +59,6 @@ public class Main {
 	 * RoboRIO
 	 **/
 	public static NetworkTable visionTable;
-	
-	public static NetworkTable loggingTable;
 	/**
 	 * This is the number of seconds between dumping images to a usb stick, this
 	 * is taken from the vision parameters
@@ -184,7 +182,6 @@ public class Main {
 		NetworkTable.initialize();
 		// Sets the vision table to the "vision" table that is in NetworkTables
 		visionTable = NetworkTable.getTable("vision");
-		loggingTable = NetworkTable.getTable("logging-level");
 	}
 
 	/**
@@ -252,7 +249,6 @@ public class Main {
 					timestamp = Integer.valueOf(s.nextLine()).intValue();
 				}catch(Exception e){
 					e.printStackTrace();
-					timestamp--;
 				}
 				timestamp++;
 				s.close();
@@ -419,12 +415,7 @@ public class Main {
 	public static void imgDump(BufferedImage image, String suffix, int timestamp) throws IOException {
 		// prepend the file name with the tamestamp integer, left-padded with
 		// zeros so it sorts properly
-		@SuppressWarnings("deprecation")
-		String matchName = loggingTable.getString("match");
-		if(matchName.equals("")){
-			matchName = "practice";
-		}
-		File output = new File(outputPath + matchName+"-"+String.format("%05d", timestamp) + "_" + suffix + ".png");
+		File output = new File(outputPath + String.format("%05d", timestamp) + "_" + suffix + ".png");
 		boolean recurse = false;
 		try {
 			if (output.exists()) {
