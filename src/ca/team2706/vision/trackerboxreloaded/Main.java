@@ -44,9 +44,11 @@ public class Main {
 	public static boolean showMiddle = false;
 	public static boolean useCamera = true;
 	public static Mat frame;
-	public static void setFrame(Mat f){
+
+	public static void setFrame(Mat f) {
 		frame = f;
 	}
+
 	// Camera Type (set in visionParams.properties)
 	// Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
 	// there is no webcam :/
@@ -61,12 +63,12 @@ public class Main {
 	 * This is the number of seconds between dumping images to a usb stick, this
 	 * is taken from the vision parameters
 	 **/
-	public static int seconds_between_img_dumps;
+	public static double seconds_between_img_dumps;
 	/**
 	 * This is the current number of seconds, this resets every time it is over
 	 * the seconds_between_img_dumps
 	 **/
-	public static long current_time_seconds;
+	public static double current_time_seconds;
 	/** The directory that images are dumped to **/
 	public static String outputPath;
 
@@ -231,7 +233,7 @@ public class Main {
 			outputPath = properties.getProperty("imgDumpPath");
 			// Sets the seconds between image dumps to the seconds between image
 			// dumps in the properties file
-			seconds_between_img_dumps = Integer.valueOf(properties.getProperty("imgDumpWait"));
+			seconds_between_img_dumps = Double.valueOf(properties.getProperty("imgDumpWait"));
 			// Sets the image file path to the image file path in the properties
 			// file, this is only used if the selected camera is -1
 			visionParams.imageFile = properties.getProperty("imageFile");
@@ -243,7 +245,11 @@ public class Main {
 			// if the file, take the timestamp from there
 			if (timestampfile.exists()) {
 				Scanner s = new Scanner(timestampfile);
-				timestamp = Integer.valueOf(s.nextLine()).intValue();
+				try{
+					timestamp = Integer.valueOf(s.nextLine()).intValue();
+				}catch(Exception e){
+					e.printStackTrace();
+				}
 				timestamp++;
 				s.close();
 			}
@@ -395,16 +401,16 @@ public class Main {
 		return mat;
 	}
 
-/**
- * 
- * @param The
- *            image to dump to a file
- * @param image
- *            the image to be dumped
- * @param suffix
- *            the suffix to put on the file name
- * @throws IOException
- */
+	/**
+	 * 
+	 * @param The
+	 *            image to dump to a file
+	 * @param image
+	 *            the image to be dumped
+	 * @param suffix
+	 *            the suffix to put on the file name
+	 * @throws IOException
+	 */
 
 	public static void imgDump(BufferedImage image, String suffix, int timestamp) throws IOException {
 		// prepend the file name with the tamestamp integer, left-padded with
@@ -420,12 +426,13 @@ public class Main {
 		PrintWriter out = new PrintWriter(timestampfile);
 		out.println(timestamp);
 		out.close();
+		
 	}
 
 	/**
 	 * The main method! Very important Do not delete! :] :]
 	 *
-
+	 * 
 	 * @param The
 	 *            command line arguments
 	 */
@@ -441,10 +448,10 @@ public class Main {
 		loadVisionParams();
 
 		try {
-// Copys the vision parameters to a usb flash drive
+			// Copys the vision parameters to a usb flash drive
 			Files.copy(Paths.get("visionParams.properties"),
 					Paths.get(outputPath + "/visionParams-" + timestamp + ".properties"),
-		StandardCopyOption.REPLACE_EXISTING);	
+					StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e2) {
 			e2.printStackTrace();
 		}
@@ -521,7 +528,7 @@ public class Main {
 				// non-fatal error, let the program continue
 			}
 		}
-
+		ImageDumpScheduler.start();
 		// Main video processing loop
 		while (true) {
 			if (useCamera) {
@@ -588,36 +595,29 @@ public class Main {
 					continue;
 				}
 			}
-			if(useCamera){
-			// log images to file once every seconds_between_img_dumps
-			long elapsedTime = (System.currentTimeMillis() / 1000) - current_time_seconds;
-			// If the elapsed time is more that the seconds between image dumps
-			// then dump images asynchronously
-			if (elapsedTime >= seconds_between_img_dumps) {
-				// Sets the current number of seconds
-				current_time_seconds = (System.currentTimeMillis() / 1000);
-				// Clones the frame
-				Mat finalFrame = frame.clone();
-				// Starts a new thread to dump images
-				new Thread(new Runnable() {
-					public void run() {
-						try {
-							// Dumps the raw image
-							imgDump(matToBufferedImage(finalFrame), "raw",timestamp);
-							// Dumps the binMask image
-							imgDump(matToBufferedImage(visionData.binMask), "binMask",timestamp);
-							// Draw the target to the output image
-							Pipeline.drawPreferredTarget(finalFrame, visionData);
-							// Dumps the output image
-							imgDump(matToBufferedImage(finalFrame), "output",timestamp);
-							timestamp++;
-						} catch (IOException e) {
-							e.printStackTrace();
-							return;
-						}
+			if (useCamera) {
+				// log images to file once every seconds_between_img_dumps
+				double elapsedTime = ((double) System.currentTimeMillis() / 1000) - current_time_seconds;
+				// If the elapsed time is more that the seconds between image
+				// dumps
+				// then dump images asynchronously
+				if (elapsedTime >= seconds_between_img_dumps) {
+					// Sets the current number of seconds
+					current_time_seconds = (((double) System.currentTimeMillis()) / 1000);
+					// Clones the frame
+					Mat finalFrame = frame.clone();
+					try {
+						Mat draw = finalFrame.clone();
+						Pipeline.drawPreferredTarget(draw, visionData);
+						Bundle b = new Bundle(matToBufferedImage(finalFrame), matToBufferedImage(visionData.binMask),
+								matToBufferedImage(draw), timestamp);
+						ImageDumpScheduler.schedule(b);
+						timestamp++;
+					} catch (IOException e) {
+						e.printStackTrace();
+						return;
 					}
-				}).start();
-			}
+				}
 			}
 			// Display the frame rate onto the console
 			double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND) * 1000;
@@ -655,10 +655,9 @@ public class Main {
 		return visionData;
 	}
 
-	public static Mat getFrame(){
-    	Mat frame = new Mat();
-    	camera.read(frame);
-    	return frame;
-    }
+	public static Mat getFrame() {
+		Mat frame = new Mat();
+		camera.read(frame);
+		return frame;
+	}
 }
-
