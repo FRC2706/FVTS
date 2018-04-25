@@ -43,6 +43,7 @@ public class Main {
 	public static boolean process = true;
 	public static boolean showMiddle = false;
 	public static boolean useCamera = true;
+	public static NetworkTable loggingTable;
 	public static Mat frame;
 
 	public static void setFrame(Mat f) {
@@ -182,6 +183,7 @@ public class Main {
 		NetworkTable.initialize();
 		// Sets the vision table to the "vision" table that is in NetworkTables
 		visionTable = NetworkTable.getTable("vision");
+		loggingTable = NetworkTable.getTable("logging-level");
 	}
 
 	/**
@@ -415,7 +417,12 @@ public class Main {
 	public static void imgDump(BufferedImage image, String suffix, int timestamp) throws IOException {
 		// prepend the file name with the tamestamp integer, left-padded with
 		// zeros so it sorts properly
-		File output = new File(outputPath + String.format("%05d", timestamp) + "_" + suffix + ".png");
+		@SuppressWarnings("deprecation")
+		String match = loggingTable.getString("match");
+		if(match.equals("")){
+			match = "practice";
+		}
+		File output = new File(outputPath +match+"-"+String.format("%05d", timestamp) + "_" + suffix + ".png");
 		try {
 			ImageIO.write(image, "PNG", output);
 		} catch (IOException e) {
