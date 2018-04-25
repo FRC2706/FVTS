@@ -422,6 +422,7 @@ public class Main {
 		if(match.equals("")){
 			match = "practice";
 		}
+		
 		File output = new File(outputPath +match+"-"+String.format("%05d", timestamp) + "_" + suffix + ".png");
 		try {
 			ImageIO.write(image, "PNG", output);
