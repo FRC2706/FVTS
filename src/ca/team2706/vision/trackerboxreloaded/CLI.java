@@ -2,18 +2,19 @@ package ca.team2706.vision.trackerboxreloaded;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JButton;
-import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 public class CLI implements Runnable, ActionListener {
 
@@ -26,13 +27,55 @@ public class CLI implements Runnable, ActionListener {
 	private JButton btnConnect;
 	private JButton btnSend;
 	private JTextArea textArea;
+	private static List<String> logs = new ArrayList<String>();
 	/**
 	 * Create the application.
 	 */
 	public CLI() {
 		initialize();
 	}
+	public static void log(String message){
+		logs.add(message);
+		while(logs.size() > 20){
+			logs.remove(0);
+		}
+	}
 
+	public static void startServer(){
+		new Thread(new Runnable(){
+			@Override
+			public void run() {
+				try{
+					ServerSocket ss = new ServerSocket(6677);
+					while(!ss.isClosed()){
+						try{
+							Socket s = ss.accept();
+							new Thread(new Runnable(){
+								@Override
+								public void run() {
+									try {
+										PrintWriter out = new PrintWriter(s.getOutputStream(),true);
+										Scanner in = new Scanner(s.getInputStream());
+										while(!s.isClosed()){
+											process(out,in,in.nextLine());
+										}
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+									
+								}
+							}).start();
+						}catch(Exception e){}
+						Thread.sleep(1);
+					}
+					ss.close();
+				}catch(Exception e){
+					e.printStackTrace();
+					System.exit(-1);
+				}
+			}
+		}).start();
+	}
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -124,5 +167,29 @@ public class CLI implements Runnable, ActionListener {
 		if(e.getSource() == btnSend){
 			out.println(textField_1.getText());
 		}
+	}
+	public static void process(PrintWriter out, Scanner in, String message){
+		if(!message.startsWith("?")){
+			help(out);
+			return;
+		}
+		if(message.equalsIgnoreCase("?help")){
+			help(out);
+			return;
+		}
+		if(message.equalsIgnoreCase("?reload")){
+			Main.loadVisionParams();
+			Main.initNetworkTables();
+			return;
+		}
+		if(message.equalsIgnoreCase("?shutdown")){
+			Runtime.getRuntime().halt(0);
+		}
+	}
+	private static void help(PrintWriter out){
+		out.println("Help menu:");
+		out.println("?help - shows this menu");
+		out.println("?reload - reloads the vision parameters and also networktables");
+		out.println("?shutdown - forcively shuts down the vision process");
 	}
 }

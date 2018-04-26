@@ -71,7 +71,7 @@ public class Main {
 	public static double current_time_seconds;
 	/** The directory that images are dumped to **/
 	public static String outputPath;
-
+	public static CLI cli;
 	/**
 	 * A class to hold calibration parameters for the image processing algorithm
 	 */
@@ -167,7 +167,7 @@ public class Main {
 	 * Initilizes the Network Tables WARNING! Change 127.0.0.1 to the robot ip
 	 * before it is on master or it will not be fun :)
 	 */
-	private static void initNetworkTables() {
+	public static void initNetworkTables() {
 		// Tells the NetworkTable class that this is a client
 		NetworkTable.setClientMode();
 		// Sets the interval for updating NetworkTables
@@ -188,7 +188,7 @@ public class Main {
 	 * Loads the visionTable params! :]
 	 **/
 
-	private static void loadVisionParams() {
+	public static void loadVisionParams() {
 		// Initilizes the properties
 		Properties properties = new Properties();
 		try {
@@ -280,6 +280,7 @@ public class Main {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.err.println("\n\nError reading the params file, check if the file is corrupt?");
+			CLI.log("Error reading the params file, check if the file is corrupt?");
 			System.exit(1);
 		}
 	}
@@ -461,7 +462,7 @@ public class Main {
 
 		// Open a connection to the camera
 		VideoCapture camera = null;
-
+		CLI.startServer();
 		// Whether to use a camera, or load an image file from disk.
 		useCamera = true;
 		if (visionParams.cameraSelect == -1) {
@@ -483,6 +484,7 @@ public class Main {
 			if (!camera.isOpened()) {
 				// If the camera didn't open throw an error
 				System.err.println("Error: Can not connect to camera");
+				CLI.log("Error: Can not connect to camera");
 				// Exit
 				System.exit(1);
 			}
@@ -498,6 +500,7 @@ public class Main {
 				frame = new Mat();
 			}
 		}
+		
 		// The window to display the raw image
 		DisplayGui guiRawImg = null;
 		// The window to display the processed image
@@ -523,6 +526,7 @@ public class Main {
 				guiProcessedImg = new DisplayGui(matToBufferedImage(frame), "Processed Image");
 				// Initilizes the parameters selector
 				new ParamsSelector();
+				cli = new CLI();
 			} catch (IOException e) {
 				// means mat2BufferedImage broke
 				// non-fatal error, let the program continue
@@ -535,6 +539,7 @@ public class Main {
 				// Read the frame from the camera, if it fails try again
 				if (!camera.read(frame)) {
 					System.err.println("Error: Failed to get a frame from the camera");
+					CLI.log("Error: Failed to get a frame from the camera");
 					continue;
 				}
 			} // else use the image from disk that we loaded above
@@ -588,6 +593,7 @@ public class Main {
 				} catch (NullPointerException e) {
 					e.printStackTrace();
 					System.out.println("Window closed");
+					CLI.log("Window closed");
 					Runtime.getRuntime().halt(0);
 				} catch (Exception e) {
 					// just in case
@@ -622,6 +628,7 @@ public class Main {
 			// Display the frame rate onto the console
 			double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND) * 1000;
 			System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime);
+			CLI.log("Vision FPS: "+visionData.fps+", pipeline took: "+pipelineTime+" ms");
 		}
 	} // end main video processing loop
 
