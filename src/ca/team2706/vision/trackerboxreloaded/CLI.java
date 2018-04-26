@@ -190,7 +190,7 @@ public class CLI implements Runnable, ActionListener {
 			out.flush();
 			String os = System.getProperty("os.name");
 			if(os.contains("Windows")){
-				String[] args = new String[] {"cmd", "/c", "taskkill","/f","/t","/im", "javaw.exe"};
+				String[] args = new String[] {"cmd", "/c", "taskkill","/f","/t","/im", "javaw.exe"}; 
 				try {
 					new ProcessBuilder(args).start();
 				} catch (IOException e) {
