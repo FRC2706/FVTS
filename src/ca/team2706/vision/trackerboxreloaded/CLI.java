@@ -197,7 +197,7 @@ public class CLI implements Runnable, ActionListener {
 					e.printStackTrace();
 				}
 			}else{
-				String[] args = new String[] {"/bin/bash", "-c", "killall", "-9", "java"};
+				String[] args = new String[] {"/bin/bash", "-c", "sudo", "systemctl", "stop", "java"};
 				try {
 					new ProcessBuilder(args).start();
 				} catch (IOException e) {
@@ -219,6 +219,8 @@ public class CLI implements Runnable, ActionListener {
 				e.printStackTrace();
 			}
 		}
+		help(out);
+		return;
 	}
 	private static void help(PrintWriter out){
 		out.println("Help menu:");
