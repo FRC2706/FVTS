@@ -19,3 +19,4 @@ out/
 *.log
 imagedump/
 field images/
+*.prefs

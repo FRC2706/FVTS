@@ -2,6 +2,7 @@ package ca.team2706.vision.trackerboxreloaded;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -57,7 +58,8 @@ public class CLI implements Runnable, ActionListener {
 										PrintWriter out = new PrintWriter(s.getOutputStream(),true);
 										Scanner in = new Scanner(s.getInputStream());
 										while(!s.isClosed()){
-											process(out,in,in.nextLine());
+											String next = in.nextLine();
+											process(out,in,next);
 										}
 									} catch (Exception e) {
 										e.printStackTrace();
@@ -98,6 +100,7 @@ public class CLI implements Runnable, ActionListener {
 		btnConnect = new JButton("Connect");
 		btnConnect.setBounds(335, 10, 89, 23);
 		btnConnect.addActionListener(this);
+		frame.getRootPane().setDefaultButton(btnConnect);
 		frame.getContentPane().add(btnConnect);
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -105,6 +108,7 @@ public class CLI implements Runnable, ActionListener {
 		frame.getContentPane().add(scrollPane);
 		
 		textArea = new JTextArea();
+		textArea.setEditable(false);
 		scrollPane.setViewportView(textArea);
 		
 		textField_1 = new JTextField();
@@ -125,17 +129,11 @@ public class CLI implements Runnable, ActionListener {
 		while(true){
 			try{
 				if(s != null && in != null && out != null){
-					append(in.nextLine());
-				}
-				if(s == null){
-					throw new Exception();
+					String next = in.nextLine();
+					append("remote: "+next);
 				}
 			}catch(Exception e){
-				s = null;
-				in = null;
-				out = null;
-				btnConnect.setEnabled(true);
-				btnSend.setEnabled(false);
+				
 			}
 			try {
 				Thread.sleep(1);
@@ -158,6 +156,7 @@ public class CLI implements Runnable, ActionListener {
 					in = new Scanner(s.getInputStream());
 					out = new PrintWriter(s.getOutputStream(),true);
 					btnSend.setEnabled(true);
+					frame.getRootPane().setDefaultButton(btnSend);
 				} catch (Exception e1) {
 					btnConnect.setEnabled(true);
 					btnSend.setEnabled(false);
@@ -166,6 +165,9 @@ public class CLI implements Runnable, ActionListener {
 		}
 		if(e.getSource() == btnSend){
 			out.println(textField_1.getText());
+			out.flush();
+			append("me: "+textField_1.getText());
+			textField_1.setText("");
 		}
 	}
 	public static void process(PrintWriter out, Scanner in, String message){
@@ -180,10 +182,34 @@ public class CLI implements Runnable, ActionListener {
 		if(message.equalsIgnoreCase("?reload")){
 			Main.loadVisionParams();
 			Main.initNetworkTables();
+			out.println("Success");
 			return;
 		}
 		if(message.equalsIgnoreCase("?shutdown")){
-			Runtime.getRuntime().halt(0);
+			out.println("Shutting down!");
+			out.flush();
+			String os = System.getProperty("os.name");
+			if(os.contains("Windows")){
+				String[] args = new String[] {"cmd", "/c", "taskkill","/f","/t","/im", "javaw.exe"};
+				try {
+					new ProcessBuilder(args).start();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}else{
+				String[] args = new String[] {"/bin/bash", "-c", "killall", "-9", "java"};
+				try {
+					new ProcessBuilder(args).start();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		if(message.equalsIgnoreCase("?logs")){
+			for(String s : logs){
+				out.println(s);
+			}
+			return;
 		}
 	}
 	private static void help(PrintWriter out){
@@ -191,5 +217,6 @@ public class CLI implements Runnable, ActionListener {
 		out.println("?help - shows this menu");
 		out.println("?reload - reloads the vision parameters and also networktables");
 		out.println("?shutdown - forcively shuts down the vision process");
+		out.flush();
 	}
 }
