@@ -211,6 +211,14 @@ public class CLI implements Runnable, ActionListener {
 			}
 			return;
 		}
+		if(message.equalsIgnoreCase("?restart")){
+			String[] args = new String[] {"/bin/bash", "-c", "sudo", "systemctl", "restart","vision.service"};
+			try {
+				new ProcessBuilder(args).start();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	private static void help(PrintWriter out){
 		out.println("Help menu:");
