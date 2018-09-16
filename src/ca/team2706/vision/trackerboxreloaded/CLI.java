@@ -37,7 +37,7 @@ public class CLI implements Runnable, ActionListener {
 	}
 	public static void log(String message){
 		logs.add(message);
-		while(logs.size() > 20){
+		while(logs.size() > 200){
 			logs.remove(0);
 		}
 	}

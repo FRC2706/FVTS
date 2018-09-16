@@ -248,7 +248,7 @@ public class Main {
 				try{
 					timestamp = Integer.valueOf(s.nextLine()).intValue();
 				}catch(Exception e){
-					e.printStackTrace();
+					Log.e(e.getMessage(), true);
 				}
 				timestamp++;
 				s.close();
@@ -278,9 +278,7 @@ public class Main {
 						+ " is not a supported resolution.\n" + "Allowed: 80x60, 160x120, 320x240, 640x480.");
 			}
 		} catch (Exception e1) {
-			e1.printStackTrace();
-			System.err.println("\n\nError reading the params file, check if the file is corrupt?");
-			CLI.log("Error reading the params file, check if the file is corrupt?");
+			Log.e("Error reading the params file, check if the file is corrupt?",true);
 			System.exit(1);
 		}
 	}
@@ -341,7 +339,8 @@ public class Main {
 			// Dumps the properties to the output stream
 			properties.store(out, "");
 		} catch (Exception e1) {
-			e1.printStackTrace();
+			Log.e(e1.getMessage(), true);
+			Log.e("Error saving properties file", true);
 			System.exit(1);
 		}
 	}
@@ -453,8 +452,9 @@ public class Main {
 			Files.copy(Paths.get("visionParams.properties"),
 					Paths.get(outputPath + "/visionParams-" + timestamp + ".properties"),
 					StandardCopyOption.REPLACE_EXISTING);
+			Log.i("Saved visionparams.properties!", true);
 		} catch (IOException e2) {
-			e2.printStackTrace();
+			Log.e(e2.getMessage(), true);
 		}
 		// Initilizes a Matrix to hold the frame
 
@@ -496,7 +496,7 @@ public class Main {
 			try {
 				frame = bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.e(e.getMessage(), true);
 				frame = new Mat();
 			}
 		}
@@ -528,6 +528,8 @@ public class Main {
 				new ParamsSelector();
 				cli = new CLI();
 			} catch (IOException e) {
+				Log.e("Mat2BufferedImage broke! Non-fatal error", true);
+				Log.e(e.getMessage(), true);
 				// means mat2BufferedImage broke
 				// non-fatal error, let the program continue
 			}
@@ -538,8 +540,7 @@ public class Main {
 			if (useCamera) {
 				// Read the frame from the camera, if it fails try again
 				if (!camera.read(frame)) {
-					System.err.println("Error: Failed to get a frame from the camera");
-					CLI.log("Error: Failed to get a frame from the camera");
+					Log.e("Error: Failed to get a frame from the camera",true);
 					continue;
 				}
 			} // else use the image from disk that we loaded above
@@ -587,17 +588,18 @@ public class Main {
 					guiRawImg.updateImage(raw);
 					guiProcessedImg.updateImage(matToBufferedImage(visionData.binMask));
 				} catch (IOException e) {
+					Log.e("Mat2BufferedImage broke! Non-fatal error", true);
+					Log.e(e.getMessage(), true);
 					// means mat2BufferedImage broke
 					// non-fatal error, let the program continue
 					continue;
 				} catch (NullPointerException e) {
 					e.printStackTrace();
-					System.out.println("Window closed");
-					CLI.log("Window closed");
+					Log.i("Window closed",false);
 					Runtime.getRuntime().halt(0);
 				} catch (Exception e) {
 					// just in case
-					e.printStackTrace();
+					Log.e(e.getMessage(), true);
 					continue;
 				}
 			}
@@ -620,15 +622,14 @@ public class Main {
 						ImageDumpScheduler.schedule(b);
 						timestamp++;
 					} catch (IOException e) {
-						e.printStackTrace();
+						Log.e(e.getMessage(), true);
 						return;
 					}
 				}
 			}
 			// Display the frame rate onto the console
 			double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND) * 1000;
-			System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime);
-			CLI.log("Vision FPS: "+visionData.fps+", pipeline took: "+pipelineTime+" ms");
+			Log.i("Vision FPS: "+visionData.fps+", pipeline took: "+pipelineTime+" ms",false);
 		}
 	} // end main video processing loop
 
