@@ -9,7 +9,7 @@ public class ImageDumpScheduler implements Runnable{
 	
 	public static double At = 0;
 	public static double Dt = 0;
-	private static double lastTime = System.currentTimeMilliseconds();
+	private static double lastTime = System.currentTimeMillis();
 	
 	private static List<Bundle> bundles = new ArrayList<Bundle>();
 	private static List<Thread> threads = new ArrayList<Thread>();
@@ -18,14 +18,14 @@ public class ImageDumpScheduler implements Runnable{
 		while(true){
 			synchronized(bundles){
 				if(bundles.size() > 0){
-					long start = System.currentTimeMilliseconds();
+					long start = System.currentTimeMillis();
 					Bundle b = bundles.get(0);
 					bundles.remove(0);
 					try {
 						Main.imgDump(b.getRaw(), "raw",b.getTimeStamp());
 						Main.imgDump(b.getBinMask(), "binMask", b.getTimeStamp());
 						Main.imgDump(b.getOutput(), "output", b.getTimeStamp());
-						long diff = System.currentTimeMilliseconds() - start;
+						long diff = System.currentTimeMillis() - start;
 						Dt = (double) diff;
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -40,7 +40,7 @@ public class ImageDumpScheduler implements Runnable{
 		}
 	}
 	public static void schedule(Bundle b){
-		At = System.currentTimeMilliseconds()-lastTime;
+		At = System.currentTimeMillis()-lastTime;
 		bundles.add(b);
 	}
 	public static void start(){
@@ -51,7 +51,12 @@ public class ImageDumpScheduler implements Runnable{
 				double threadCount = At/Dt+1;
 				int i = 0;
 				while(threads.size() > (int) threadCount){
-					threads.get(i).join();
+					try {
+						threads.get(i).join();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					threads.remove(i);
 					i++;
 				}
@@ -66,7 +71,8 @@ public class ImageDumpScheduler implements Runnable{
 					e.printStackTrace();
 				}
 			}
-		}).start();
+		});
+		managerThread.start();
 	}
 
 }
