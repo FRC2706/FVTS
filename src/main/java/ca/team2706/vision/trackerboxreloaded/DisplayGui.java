@@ -82,6 +82,9 @@ public class DisplayGui extends JFrame implements Runnable {
 	 * @param image the image
 	 */
 	public void updateImage(BufferedImage image){
+		if(image == null) {
+			return;
+		}
 		//Sets the image to the image
 		this.image = image;
 		//If the image width or height is more or less than the last image change the size
