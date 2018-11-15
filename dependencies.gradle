@@ -4,6 +4,10 @@ ext.ntcoreDep = { ->
         classifier = "windows2015"
     } else if (buildType == "linux") {
         classifier = "desktop"
+    } else if(buildType == "linux-x86_64"){
+	classifier = "desktop"
+    } else if(buildType == "linux-x86"){
+    	classifier = "desktop"
     } else {
         classifier = buildType
     }

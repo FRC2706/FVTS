@@ -6,6 +6,7 @@ build/
 output/
 .classpath
 .project
+.settings/
 
 # IntelliJ stuff we don't want in git
 bin/
@@ -20,3 +21,4 @@ out/
 imagedump/
 field images/
 *.prefs
+
