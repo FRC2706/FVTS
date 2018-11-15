@@ -2,22 +2,23 @@ package ca.team2706.vision.trackerboxreloaded;
 
 import org.opencv.core.Size;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Properties;
 
-public class ParamsSelector extends JFrame implements Runnable, ActionListener {
+public class ParamsSelector extends JFrame implements Runnable, ActionListener, KeyListener {
 
 	private static final long serialVersionUID = 1L;
 	
 	private JButton btnOpenImage;
 	private File f = null;
+	private int index = 0;
 	/**
 	 * The content panel
 	 */
@@ -145,6 +146,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//Sets the size of the window
 		setBounds(100, 100, 600, 300);
+		
 		//Initilizes the content panel
 		contentPane = new JPanel();
 		//Sets the window border
@@ -563,6 +565,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		btnOpenImage.addActionListener(this);
 		contentPane.add(btnOpenImage);
 		
+		this.addKeyListener(this);
+		
 		//Makes the window visible
 		setVisible(true);
 		
@@ -671,13 +675,14 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 			if(chooser.getSelectedFile() != null){
 				f = chooser.getSelectedFile();
 				Main.useCamera = false;
-				try {
-					Main.setFrame(Main.bufferedImageToMat(ImageIO.read(f)));
-				} catch (IOException e) {
-					e.printStackTrace();
-					Main.useCamera = true;
+				Main.visionParams.imageFile= f.getAbsolutePath();
+				for(int i = 0; i < f.getParentFile().listFiles().length;i++) {
+					String path = f.getParentFile().listFiles()[i].getAbsolutePath();
+					if(path.equals(f.getAbsolutePath())) {
+						index = i;
+						break;
+					}
 				}
-				
 			}
 		}
 	}
@@ -712,5 +717,37 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 			//Fail
 			return false;
 		}
+	}
+
+	@Override
+	public void keyPressed(KeyEvent key) {
+		System.out.println(key.getKeyCode());
+		if(key.getKeyCode() == KeyEvent.VK_LEFT) {
+			if(f != null && index != f.getParentFile().listFiles().length) {
+				index++;
+				f = f.getParentFile().listFiles()[index];
+				Main.useCamera = false;
+				Main.visionParams.imageFile= f.getAbsolutePath();
+			}
+		}else if(key.getKeyCode() == KeyEvent.VK_RIGHT) {
+			if(f != null && index != 0) {
+				index--;
+				f = f.getParentFile().listFiles()[index];
+				Main.useCamera = false;
+				Main.visionParams.imageFile= f.getAbsolutePath();
+			}
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 }

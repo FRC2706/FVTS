@@ -173,11 +173,11 @@ public class Main {
 		// Sets the interval for updating NetworkTables
 		NetworkTable.setUpdateRate(0.02);
 		// Sets the team number
-		NetworkTable.setTeam(2706); // Use this for the robit
+		//NetworkTable.setTeam(2706); // Use this for the robit
 		// Enables DSClient
 		NetworkTable.setDSClientEnabled(true); // and this for the robit
 		// Sets the IP adress to connect to
-		// NetworkTable.setIPAddress("10.27.6.67"); //Use this for testing
+		 NetworkTable.setIPAddress("localhost"); //Use this for testing
 		// Initilizes NetworkTables
 		NetworkTable.initialize();
 		// Sets the vision table to the "vision" table that is in NetworkTables
@@ -505,6 +505,7 @@ public class Main {
 		// Wether to open the guis
 		boolean use_GUI = false;
 		// If on Linux don't use guis
+		use_GUI = true;
 		if (System.getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
 			use_GUI = true;
 		}
@@ -522,7 +523,9 @@ public class Main {
 				// Initilizes the window to display the processed image
 				guiProcessedImg = new DisplayGui(matToBufferedImage(frame), "Processed Image");
 				// Initilizes the parameters selector
-				new ParamsSelector();
+				ParamsSelector selector = new ParamsSelector();
+				guiRawImg.addKeyListener(selector);
+				guiProcessedImg.addKeyListener(selector);
 			} catch (IOException e) {
 				// means mat2BufferedImage broke
 				// non-fatal error, let the program continue
@@ -538,6 +541,16 @@ public class Main {
 					continue;
 				}
 			} // else use the image from disk that we loaded above
+			else{
+				// load the image from file.
+	                        try {
+        	                        frame = bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
+                	        } catch (IOException e) {
+                        	        e.printStackTrace();
+                                	frame = new Mat();
+                        	}
+
+			}
 			if (use_GUI) {
 				// Resize the frame
 				Imgproc.resize(frame, frame, visionParams.sz);
@@ -571,7 +584,7 @@ public class Main {
 				try {
 					// May throw a NullPointerException if initializing
 					// the window failed
-					BufferedImage raw = matToBufferedImage(frame);
+					BufferedImage raw = matToBufferedImage(rawOutputImg);
 					currentImage = raw;
 					if (showMiddle) {
 						Graphics g = raw.getGraphics();
