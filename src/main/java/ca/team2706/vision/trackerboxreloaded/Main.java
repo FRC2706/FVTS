@@ -463,7 +463,6 @@ public class Main {
 		VideoCapture camera = null;
 
 		// Whether to use a camera, or load an image file from disk.
-		useCamera = true;
 		if (visionParams.cameraSelect == -1) {
 			useCamera = false;
 		}
@@ -503,11 +502,10 @@ public class Main {
 		// The window to display the processed image
 		DisplayGui guiProcessedImg = null;
 		// Wether to open the guis
-		boolean use_GUI = false;
+		boolean use_GUI = true;
 		// If on Linux don't use guis
-		use_GUI = true;
-		if (System.getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
-			use_GUI = true;
+		if (System.getProperty("os.name").toLowerCase().indexOf("raspbian") != -1) {
+			use_GUI = false;
 		}
 		// Set the vision parameters size
 		visionParams.sz = new Size(visionParams.width, visionParams.height);
