@@ -98,7 +98,6 @@ task downloadOpenCv() {
         }
     }
 }
-
 task tdownloadOpenCv() {
     description = 'Downloads the OpenCV Native maven dependency.'
     group = 'WPILib'
@@ -123,7 +122,6 @@ task tdownloadOpenCv() {
         }
     }
 }
-
 
 ext.openCvUnzipLocation = "$buildDir/opencv"
 

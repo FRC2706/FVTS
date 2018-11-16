@@ -8,7 +8,7 @@ import org.junit.Test;
 
 public class DisplayGuiTest {
 
-	@SuppressWarnings("unused")
+	/*@SuppressWarnings("unused")
 	@Test
 	public void DisplayGui() {
 		try {
@@ -103,6 +103,6 @@ public class DisplayGuiTest {
 			fail(e.getMessage());
 		}
 	}
-	
+	*/
 
 }

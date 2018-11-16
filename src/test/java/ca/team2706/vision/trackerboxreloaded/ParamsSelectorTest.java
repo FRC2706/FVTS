@@ -9,6 +9,7 @@ import org.junit.Test;
 
 public class ParamsSelectorTest {
 
+	/*
 	@Test
 	public void ParamsSelector() {
 		try {
@@ -145,5 +146,5 @@ public class ParamsSelectorTest {
 			fail(e.getMessage());
 		}
 	}
-	
+	*/
 }
