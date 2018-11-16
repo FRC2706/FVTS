@@ -440,11 +440,7 @@ public class Main {
 	public static void main(String[] args) {
 		// Must be included!
 		// Loads OpenCV
-		if(System.getProperty("os.name").contains("raspbian")) {
-			System.load("opencv_java310-raspbian.so");
-		}else {
-			System.loadLibrary("opencv_java310");
-		}
+		System.loadLibrary("opencv_java310");
 
 		// Connect NetworkTables, and get access to the publishing table
 		initNetworkTables();
