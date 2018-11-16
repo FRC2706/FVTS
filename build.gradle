@@ -151,6 +151,8 @@ task zipOutput(type: Zip) {
 
 tasks.withType(Test) {
     systemProperty "java.library.path", "${buildDir}/tests/opencv"
+    scanForTestClasses = false
+    include "**/*Test.class"
 }
 
 build.dependsOn setbuildType
