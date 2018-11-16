@@ -9,6 +9,11 @@ import org.junit.Test;
 
 public class ParamsSelectorTest {
 
+	//Dont remove this or gradle breaks;
+	@Test
+	public void t(){
+		
+	}
 	/*
 	@Test
 	public void ParamsSelector() {
