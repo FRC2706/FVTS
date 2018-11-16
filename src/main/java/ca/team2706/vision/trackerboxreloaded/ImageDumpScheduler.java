@@ -7,11 +7,12 @@ import java.util.List;
 public class ImageDumpScheduler implements Runnable{
 	public static final int QUEUE_LIMIT = 10;
 	
-	private static List<Bundle> bundles = new ArrayList<Bundle>();
-	private static Thread thread;
+	public static List<Bundle> bundles = new ArrayList<Bundle>();
+	public static Thread thread;
+	public static boolean b = true;
 	@Override
 	public void run() {
-		while(true){
+		while(b){
 			if(bundles.size() > 0){
 				Bundle b = bundles.get(0);
 				bundles.remove(0);

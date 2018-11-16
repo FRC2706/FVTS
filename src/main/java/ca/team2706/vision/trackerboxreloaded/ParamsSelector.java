@@ -19,12 +19,11 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 	private JButton btnOpenImage;
 	private File f = null;
 	private int index = 0;
+	public boolean b = true;
 	/**
 	 * The content panel
 	 */
 	private JPanel contentPane;
-
-	public JButton btnAutoCallibrate;
 	/**
 	 * The camera selecting field
 	 */
@@ -554,11 +553,6 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 		//Sets the text
 		textField_3.setText(String.valueOf(Main.visionParams.height));
 		
-		btnAutoCallibrate = new JButton("Auto Callibrate");
-		btnAutoCallibrate.setToolTipText("Automaticcaly callibrates the vision paramaters, simply put the cube the maximum distance you want to be able to track away and allign it with the middle after pressing this button");
-		btnAutoCallibrate.setBounds(345, 72, 131, 23);
-		btnAutoCallibrate.addActionListener(this);
-		contentPane.add(btnAutoCallibrate);
 		
 		btnOpenImage = new JButton("Open Image");
 		btnOpenImage.setBounds(431, 178, 116, 23);
@@ -579,7 +573,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 	 */
 	@Override
 	public void run() {
-		while(true){
+		while(b){
 			try{
 				//If the camera number is a number
 				if(isInt(textField.getText())){
@@ -663,9 +657,6 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 			//Save vision parameters
 			Main.saveVisionParams();
 		}
-		if(arg0.getSource() == btnAutoCallibrate){
-			new AutoCallibrator();
-		}
 		if(arg0.getSource() == btnOpenImage){
 			JFileChooser chooser = new JFileChooser();
 			if(f != null){
@@ -674,6 +665,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 			chooser.showOpenDialog(contentPane);
 			if(chooser.getSelectedFile() != null){
 				f = chooser.getSelectedFile();
+				Main.filename = f.getName();
 				Main.useCamera = false;
 				Main.visionParams.imageFile= f.getAbsolutePath();
 				for(int i = 0; i < f.getParentFile().listFiles().length;i++) {
@@ -691,7 +683,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 	 * @param s the string
 	 * @return if the string is a integer
 	 */
-	private boolean isInt(String s){
+	public static boolean isInt(String s){
 		try{
 			//Test if it is a int
 			Integer.valueOf(s);
@@ -707,7 +699,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 	 * @param s the string
 	 * @return if the string is a double
 	 */
-	private boolean isDouble(String s){
+	public static boolean isDouble(String s){
 		try{
 			//Test if it is a double
 			Double.valueOf(s);
@@ -726,6 +718,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 			if(f != null && index != f.getParentFile().listFiles().length) {
 				index++;
 				f = f.getParentFile().listFiles()[index];
+				Main.filename = f.getName();
 				Main.useCamera = false;
 				Main.visionParams.imageFile= f.getAbsolutePath();
 			}
@@ -733,6 +726,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 			if(f != null && index != 0) {
 				index--;
 				f = f.getParentFile().listFiles()[index];
+				Main.filename = f.getName();
 				Main.useCamera = false;
 				Main.visionParams.imageFile= f.getAbsolutePath();
 			}
@@ -741,13 +735,11 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 
 	@Override
 	public void keyReleased(KeyEvent arg0) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void keyTyped(KeyEvent arg0) {
-		// TODO Auto-generated method stub
 		
 	}
 }

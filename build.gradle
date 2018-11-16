@@ -18,16 +18,12 @@ apply plugin: 'application'
 // Uncomment the line below to build for 64 bit linux
 ext.buildType = "linux-x86_64"
 
-// Uncomment the line below to build for 32 bit linux
-//ext.buildType = "linux-x86"
-
 // Uncomment the line below to build for an armhf device such as a Jetson or a Beaglebone Black
 //ext.buildType = "armhf"
 
 // Change the line below if you change the name of your main Java class
 // Comment this line and uncomment the line after it to build/run the Server, and vice versa to run the main vision program
 mainClassName = 'ca.team2706.vision.trackerboxreloaded.Main'
-//mainClassName = 'ca.team2706.vision.trackerboxreloaded.NetworkTablesServer'
 
 // Change the line below to change the name of the output jar
 def projectName = 'CameraVision'
@@ -60,6 +56,8 @@ dependencies {
   compile 'org.opencv:opencv-java:3.1.0'
   compile 'junit:junit:4.12'
   testCompile 'junit:junit:4.12'
+  testCompile ntcoreDep()
+  testCompile 'org.opencv:opencv-java:3.1.0'
 }
 
 jar {
@@ -88,13 +86,10 @@ def outputDirectory = file("${rootDir}/output")
 task writeExecuteScript() {
   dependsOn jar
   doLast {
-    if (buildType == "windows") {
-      def runFile = new File("${buildDir}/run${projectName}.bat")
-      runFile.write "java -Djava.library.path=. -jar ${projectName}-all.jar"
-    } else {
-      def runFile = new File("${buildDir}/run${projectName}")
-      runFile.write "#!/bin/bash\njava -Djava.library.path=. -jar ${projectName}-all.jar"
-    }
+    def runFile = new File("${buildDir}/run${projectName}.bat")
+    runFile.write "java -Djava.library.path=. -jar ${projectName}-all.jar"
+    def runFile2 = new File("${buildDir}/run${projectName}")
+    runFile2.write "#!/bin/bash\njava -Djava.library.path=. -jar ${projectName}-all.jar"
   }
 }
 
@@ -109,12 +104,9 @@ task copyToOutput(type: Copy) {
     exclude 'META-INF'
     exclude '**/MANIFEST.MF'
   }
-  if (buildType == "windows") {
-    from (file("${buildDir}/run${projectName}.bat")) {
-    }
-  } else {
-    from (file("${buildDir}/run${projectName}")) {
-    }
+  from (file("${buildDir}/run${projectName}.bat")) {
+  }
+  from (file("${buildDir}/run${projectName}")) {
   }
 }
 
@@ -130,20 +122,23 @@ task zipOutput(type: Zip) {
     exclude 'META-INF'
     exclude '**/MANIFEST.MF'
   }
-  if (buildType == "windows") {
-    from (file("${buildDir}/run${projectName}.bat")) {
-    }
-  } else {
-    from (file("${buildDir}/run${projectName}")) {
-      fileMode 0777
-    }
+  from (file("${buildDir}/run${projectName}.bat")) {
   }
+  from (file("${buildDir}/run${projectName}")) {
+    fileMode 0777
+  }
+}
+
+tasks.withType(Test) {
+    systemProperty "java.library.path", "${openCvUnzipLocation}"
 }
 
 distZip.dependsOn unzipOpenCv
 distTar.dependsOn unzipOpenCv
 
 applicationDefaultJvmArgs = ["-Djava.library.path=${openCvUnzipLocation}"]
+
+test.dependsOn unzipOpenCv
 
 build.dependsOn copyToOutput
 build.dependsOn zipOutput

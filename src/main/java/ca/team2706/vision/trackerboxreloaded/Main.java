@@ -33,7 +33,8 @@ import org.opencv.videoio.Videoio;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
-
+	
+	public static String filename = "";
 	public static ParamsSelector selector;
 	public static int timestamp = 0;
 	public static File timestampfile;
@@ -177,7 +178,7 @@ public class Main {
 		// Enables DSClient
 		NetworkTable.setDSClientEnabled(true); // and this for the robit
 		// Sets the IP adress to connect to
-		 NetworkTable.setIPAddress("localhost"); //Use this for testing
+		NetworkTable.setIPAddress("localhost"); //Use this for testing
 		// Initilizes NetworkTables
 		NetworkTable.initialize();
 		// Sets the vision table to the "vision" table that is in NetworkTables
@@ -439,7 +440,11 @@ public class Main {
 	public static void main(String[] args) {
 		// Must be included!
 		// Loads OpenCV
-		System.loadLibrary("opencv_java310");
+		if(System.getProperty("os.name").contains("raspbian")) {
+			System.load("opencv_java310-raspbian.so");
+		}else {
+			System.loadLibrary("opencv_java310");
+		}
 
 		// Connect NetworkTables, and get access to the publishing table
 		initNetworkTables();
