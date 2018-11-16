@@ -168,7 +168,7 @@ public class Main {
 	 * Initilizes the Network Tables WARNING! Change 127.0.0.1 to the robot ip
 	 * before it is on master or it will not be fun :)
 	 */
-	private static void initNetworkTables() {
+	public static void initNetworkTables() {
 		// Tells the NetworkTable class that this is a client
 		NetworkTable.setClientMode();
 		// Sets the interval for updating NetworkTables
@@ -189,7 +189,7 @@ public class Main {
 	 * Loads the visionTable params! :]
 	 **/
 
-	private static void loadVisionParams() {
+	public static void loadVisionParams() {
 		// Initilizes the properties
 		Properties properties = new Properties();
 		try {
@@ -352,7 +352,7 @@ public class Main {
 	 *
 	 * @param visionData
 	 */
-	private static void sendVisionDataOverNetworkTables(VisionData visionData) {
+	public static void sendVisionDataOverNetworkTables(VisionData visionData) {
 
 		// Sends the data
 		// Puts the fps into the vision table
@@ -378,7 +378,7 @@ public class Main {
 	 * @throws IOException
 	 * @throws Exception
 	 */
-	private static BufferedImage matToBufferedImage(Mat matrix) throws IOException {
+	public static BufferedImage matToBufferedImage(Mat matrix) throws IOException {
 		MatOfByte mob = new MatOfByte();
 		Imgcodecs.imencode(".jpg", matrix, mob);
 		byte ba[] = mob.toArray();
@@ -430,6 +430,8 @@ public class Main {
 		
 	}
 
+	public static boolean b = true;
+	
 	/**
 	 * The main method! Very important Do not delete! :] :]
 	 *
@@ -532,7 +534,7 @@ public class Main {
 		}
 		ImageDumpScheduler.start();
 		// Main video processing loop
-		while (true) {
+		while (b) {
 			if (useCamera) {
 				// Read the frame from the camera, if it fails try again
 				if (!camera.read(frame)) {
@@ -542,12 +544,12 @@ public class Main {
 			} // else use the image from disk that we loaded above
 			else{
 				// load the image from file.
-	                        try {
-        	                        frame = bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
-                	        } catch (IOException e) {
-                        	        e.printStackTrace();
-                                	frame = new Mat();
-                        	}
+	            try {
+        	        frame = bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
+                } catch (IOException e) {
+                	e.printStackTrace();
+                    frame = new Mat();
+                }
 
 			}
 			if (use_GUI) {
@@ -637,11 +639,11 @@ public class Main {
 		}
 	} // end main video processing loop
 
-	public void hideMiddle() {
+	public static void hideMiddle() {
 		showMiddle = false;
 	}
 
-	public void showMiddle() {
+	public static void showMiddle() {
 		showMiddle = true;
 	}
 
