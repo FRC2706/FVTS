@@ -2,11 +2,14 @@ package ca.team2706.vision.trackerboxreloaded;
 
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
 import ca.team2706.vision.trackerboxreloaded.Main.VisionData;
+import ca.team2706.vision.trackerboxreloaded.Main.VisionData.Target;
 import ca.team2706.vision.trackerboxreloaded.Main.VisionParams;
 
 public class PipelineTest {
@@ -33,7 +36,7 @@ public class PipelineTest {
 			params.minValue = 0;
 			VisionData data1 = Pipeline.process(new Mat(240, 320, CvType.CV_8U), params, false);
 			VisionData data2 = Pipeline.process(new Mat(240, 320, CvType.CV_8U), params, true);
-
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
@@ -55,6 +58,9 @@ public class PipelineTest {
 			params.maxValue = 0;
 			params.minValue = 0;
 			VisionData data1 = Pipeline.process(new Mat(240, 320, CvType.CV_8U), params, false);
+			Pipeline.selectPreferredTarget(data1, params);
+			data1.targetsFound = new ArrayList<Target>();
+			data1.targetsFound.clear();
 			Pipeline.selectPreferredTarget(data1, params);
 		} catch (Exception e) {
 			e.printStackTrace();
