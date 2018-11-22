@@ -406,9 +406,12 @@ public class Main {
 	 * @throws IOException
 	 */
 
-	public static void imgDump(BufferedImage image, String suffix, int timestamp) throws IOException {
+	public static void imgDump(BufferedImage image, String suffix, int timestamp) throws Exception {
 		// prepend the file name with the tamestamp integer, left-padded with
 		// zeros so it sorts properly
+		if(image == null) {
+			throw new Exception("Image is null");
+		}
 		File output = new File(outputPath + String.format("%05d", timestamp) + "_" + suffix + ".png");
 		try {
 			ImageIO.write(image, "PNG", output);

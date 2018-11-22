@@ -47,28 +47,17 @@ public class ImageDumpSchedulerTest {
 		try {
 			
 			ImageDumpScheduler scheduler = new ImageDumpScheduler();
-			
-			new Thread(new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					ImageDumpScheduler.b = false;
-				}
-				
-			}).start();
+			ImageDumpScheduler.stop = true;
 			BufferedImage image = new BufferedImage(10,10,BufferedImage.TYPE_INT_RGB);
 			Bundle bundle = new Bundle(image,image,image,1);
 			ImageDumpScheduler.schedule(bundle);
 			scheduler.run();
-			
-			ImageDumpScheduler.b = true;
-			
-		}catch(Exception e) {
+			Bundle bundle1 = new Bundle(null,null,null,2);
+			ImageDumpScheduler.schedule(bundle1);
+			scheduler.run();
+			ImageDumpScheduler.stop = false;
+		}
+		catch(Exception e) {
 			fail(e.getMessage());
 		}
 	}
