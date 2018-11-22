@@ -101,19 +101,6 @@ public class ParamsSelectorTest {
 			fail(e.getMessage());
 		}
 	}
-	@SuppressWarnings("deprecation")
-	@Test
-	public void keyPressed() {
-		try {
-			
-			ParamsSelector selector = new ParamsSelector(false,false);
-			
-			selector.keyPressed(new KeyEvent(selector, 0, 0, 0, 0));
-			
-		}catch(Exception e) {
-			fail(e.getMessage());
-		}
-	}
 	
 	@SuppressWarnings("deprecation")
 	@Test
