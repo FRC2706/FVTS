@@ -32,7 +32,7 @@ public class DisplayGui extends JFrame implements Runnable {
 	 *
 	 * @param image the image
 	 */
-	public DisplayGui(BufferedImage image, String windowTitle) {
+	public DisplayGui(BufferedImage image, String windowTitle, boolean show) {
 		// Sets the image to the image
 		this.image = image;
 		// Sets the width to the image width
@@ -46,7 +46,7 @@ public class DisplayGui extends JFrame implements Runnable {
 		// Makes the program exit when the X button on the window is pressed
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		// Makes the window visible
-		this.setVisible(true);
+		this.setVisible(show);
 		// Sets the window title
 		this.setTitle(windowTitle);
 		// Starts the rendering thread
@@ -71,7 +71,7 @@ public class DisplayGui extends JFrame implements Runnable {
 	 * @param width  the width
 	 * @param height the height
 	 */
-	public DisplayGui(int width, int height, String windowTitle) {
+	public DisplayGui(int width, int height, String windowTitle, boolean show) {
 		// Sets the width to the width
 		this.width = width;
 		// Sets the height to the height
@@ -83,7 +83,7 @@ public class DisplayGui extends JFrame implements Runnable {
 		// Makes the program end when the X button on the window is clicked
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		// Makes the window visible
-		this.setVisible(true);
+		this.setVisible(show);
 		// Sets the title to the window title
 		this.setTitle(windowTitle);
 		// Starts the rendering thread

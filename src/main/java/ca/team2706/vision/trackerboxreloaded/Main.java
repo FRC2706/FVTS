@@ -33,7 +33,7 @@ import org.opencv.videoio.Videoio;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
-
+	
 	public static String filename = "";
 	public static ParamsSelector selector;
 	public static int timestamp = 0;
@@ -56,17 +56,18 @@ public class Main {
 	/** The vision parameters, this is used by the vision pipeline **/
 	public static VisionParams visionParams = new VisionParams();
 	/**
-	 * The vision NetworkTable, this is used to publish vision data to the RoboRIO
+	 * The vision NetworkTable, this is used to publish vision data to the
+	 * RoboRIO
 	 **/
 	public static NetworkTable visionTable;
 	/**
-	 * This is the number of seconds between dumping images to a usb stick, this is
-	 * taken from the vision parameters
+	 * This is the number of seconds between dumping images to a usb stick, this
+	 * is taken from the vision parameters
 	 **/
 	public static double seconds_between_img_dumps;
 	/**
-	 * This is the current number of seconds, this resets every time it is over the
-	 * seconds_between_img_dumps
+	 * This is the current number of seconds, this resets every time it is over
+	 * the seconds_between_img_dumps
 	 **/
 	public static double current_time_seconds;
 	/** The directory that images are dumped to **/
@@ -89,21 +90,22 @@ public class Main {
 		/** This is the maximum value that the pipeline will recognize **/
 		int maxValue;
 		/**
-		 * This is how many times the pipeline will erode dilate the camera image
+		 * This is how many times the pipeline will erode dilate the camera
+		 * image
 		 **/
 		int erodeDilateIterations;
 		/** This is the id of the camera that will be used to get images **/
 		int cameraSelect;
 		/**
-		 * The threshold to detect one large cube as 2 cubes, this is a value between 0
-		 * and 1
+		 * The threshold to detect one large cube as 2 cubes, this is a value
+		 * between 0 and 1
 		 **/
 		double aspectRatioThresh;
 		/** The minimum area that a target can have and still be recognized **/
 		double minArea;
 		/**
-		 * How important it is for a target to be close to the center of the image, this
-		 * will change depending on how well we can turn
+		 * How important it is for a target to be close to the center of the
+		 * image, this will change depending on how well we can turn
 		 **/
 		double distToCentreImportance;
 		/** The width to resize the image from the camera to **/
@@ -111,8 +113,8 @@ public class Main {
 		/** The height to resize the image from the camera to **/
 		int height;
 		/**
-		 * The size to resize the image from the camera to, this is just the width and
-		 * the height values
+		 * The size to resize the image from the camera to, this is just the
+		 * width and the height values
 		 **/
 		Size sz;
 		/** This is the image to be processed if the selected camera is -1 **/
@@ -139,8 +141,8 @@ public class Main {
 			 **/
 			double yCentreNorm;
 			/**
-			 * A value between 0 and 1 representing the percentage of the image the target
-			 * takes up
+			 * A value between 0 and 1 representing the percentage of the image
+			 * the target takes up
 			 **/
 			double areaNorm; // [0,1] representing how much of the screen it
 								// occupies
@@ -151,8 +153,8 @@ public class Main {
 		/** The List of all the targets in the image **/
 		ArrayList<Target> targetsFound = new ArrayList<Target>();
 		/**
-		 * The target that is the most appealing, how it is chosen depends on the
-		 * distToCenterImportance value in the vision parameters
+		 * The target that is the most appealing, how it is chosen depends on
+		 * the distToCenterImportance value in the vision parameters
 		 **/
 		Target preferredTarget;
 		/** The image that contains the targets **/
@@ -172,11 +174,11 @@ public class Main {
 		// Sets the interval for updating NetworkTables
 		NetworkTable.setUpdateRate(0.02);
 		// Sets the team number
-		NetworkTable.setTeam(2706); // Use this for the robit
+		//NetworkTable.setTeam(2706); // Use this for the robit
 		// Enables DSClient
 		NetworkTable.setDSClientEnabled(true); // and this for the robit
 		// Sets the IP adress to connect to
-		// NetworkTable.setIPAddress("localhost"); //Use this for testing
+		NetworkTable.setIPAddress("localhost"); //Use this for testing
 		// Initilizes NetworkTables
 		NetworkTable.initialize();
 		// Sets the vision table to the "vision" table that is in NetworkTables
@@ -244,9 +246,9 @@ public class Main {
 			// if the file, take the timestamp from there
 			if (timestampfile.exists()) {
 				Scanner s = new Scanner(timestampfile);
-				try {
+				try{
 					timestamp = Integer.valueOf(s.nextLine()).intValue();
-				} catch (Exception e) {
+				}catch(Exception e){
 					e.printStackTrace();
 				}
 				timestamp++;
@@ -345,8 +347,8 @@ public class Main {
 	}
 
 	/**
-	 * Turns all the vision data into packets that kno da wae to get to the robo rio
-	 * :]
+	 * Turns all the vision data into packets that kno da wae to get to the robo
+	 * rio :]
 	 *
 	 * @param visionData
 	 */
@@ -370,7 +372,8 @@ public class Main {
 	/**
 	 * Converts a OpenCV Matrix to a BufferedImage :)
 	 *
-	 * @param matrix Matrix to be converted
+	 * @param matrix
+	 *            Matrix to be converted
 	 * @return Generated from the matrix
 	 * @throws IOException
 	 * @throws Exception
@@ -387,7 +390,8 @@ public class Main {
 	/**
 	 * Converts a Buffered Image to a OpenCV Matrix
 	 * 
-	 * @param Buffered Image to convert to matrix
+	 * @param Buffered
+	 *            Image to convert to matrix
 	 * @return The matrix from the buffered image
 	 */
 
@@ -400,43 +404,40 @@ public class Main {
 
 	/**
 	 * 
-	 * @param The    image to dump to a file
-	 * @param image  the image to be dumped
-	 * @param suffix the suffix to put on the file name
+	 * @param The
+	 *            image to dump to a file
+	 * @param image
+	 *            the image to be dumped
+	 * @param suffix
+	 *            the suffix to put on the file name
 	 * @throws IOException
 	 */
 
-	public static void imgDump(BufferedImage image, String suffix, int timestamp) throws Exception {
+	public static void imgDump(BufferedImage image, String suffix, int timestamp) throws IOException {
 		// prepend the file name with the tamestamp integer, left-padded with
 		// zeros so it sorts properly
-		if (image == null) {
-			throw new Exception("Image is null");
-		}
 		File output = new File(outputPath + String.format("%05d", timestamp) + "_" + suffix + ".png");
 		try {
 			ImageIO.write(image, "PNG", output);
 		} catch (IOException e) {
 			throw new IOException(e.getMessage());
 		}
-		try {
-			timestampfile.delete();
-			timestampfile.createNewFile();
-			PrintWriter out = new PrintWriter(timestampfile);
-			out.println(timestamp);
-			out.close();
-		} catch (Exception e) {
-
-		}
-
+		timestampfile.delete();
+		timestampfile.createNewFile();
+		PrintWriter out = new PrintWriter(timestampfile);
+		out.println(timestamp);
+		out.close();
+		
 	}
 
 	public static boolean b = true;
-
+	
 	/**
 	 * The main method! Very important Do not delete! :] :]
 	 *
 	 * 
-	 * @param The command line arguments
+	 * @param The
+	 *            command line arguments
 	 */
 	public static void main(String[] args) {
 		// Must be included!
@@ -519,11 +520,11 @@ public class Main {
 		if (use_GUI) {
 			try {
 				// Initilizes the window to display the raw image
-				guiRawImg = new DisplayGui(matToBufferedImage(frame), "Raw Camera Image");
+				guiRawImg = new DisplayGui(matToBufferedImage(frame), "Raw Camera Image",true);
 				// Initilizes the window to display the processed image
-				guiProcessedImg = new DisplayGui(matToBufferedImage(frame), "Processed Image");
+				guiProcessedImg = new DisplayGui(matToBufferedImage(frame), "Processed Image",true);
 				// Initilizes the parameters selector
-				ParamsSelector selector = new ParamsSelector();
+				ParamsSelector selector = new ParamsSelector(true,true);
 				guiRawImg.addKeyListener(selector);
 				guiProcessedImg.addKeyListener(selector);
 			} catch (IOException e) {
@@ -541,14 +542,14 @@ public class Main {
 					continue;
 				}
 			} // else use the image from disk that we loaded above
-			else {
+			else{
 				// load the image from file.
-				try {
-					frame = bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
-				} catch (IOException e) {
-					e.printStackTrace();
-					frame = new Mat();
-				}
+	            try {
+        	        frame = bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
+                } catch (IOException e) {
+                	e.printStackTrace();
+                    frame = new Mat();
+                }
 
 			}
 			if (use_GUI) {
@@ -635,14 +636,6 @@ public class Main {
 			// Display the frame rate onto the console
 			double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND) * 1000;
 			System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime);
-		}
-		try {
-			guiProcessedImg.setVisible(false);
-			guiRawImg.setVisible(false);
-			selector.setVisible(false);
-			NetworkTable.shutdown();
-		} catch (Exception e) {
-
 		}
 	} // end main video processing loop
 

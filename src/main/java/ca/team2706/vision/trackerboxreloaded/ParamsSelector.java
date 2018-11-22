@@ -16,6 +16,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 
 	private static final long serialVersionUID = 1L;
 	
+	public boolean stop = false;
+	
 	private JButton btnOpenImage;
 	private File f = null;
 	private int index = 0;
@@ -140,7 +142,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 	/**
 	 * Creates a new Parameters Selector
 	 */
-	public ParamsSelector() {
+	public ParamsSelector(boolean show, boolean b) {
+		this.b = b;
 		//Makes the program exit when the X button on the window is pressed
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//Sets the size of the window
@@ -562,7 +565,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 		this.addKeyListener(this);
 		
 		//Makes the window visible
-		setVisible(true);
+		setVisible(show);
 		
 		//Starts the update thread
 		new Thread(this).start();
@@ -574,6 +577,9 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 	@Override
 	public void run() {
 		while(b){
+			if(stop) {
+				b = false;
+			}
 			try{
 				//If the camera number is a number
 				if(isInt(textField.getText())){
