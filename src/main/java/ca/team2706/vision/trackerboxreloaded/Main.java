@@ -409,7 +409,7 @@ public class Main {
 	public static void imgDump(BufferedImage image, String suffix, int timestamp) throws Exception {
 		// prepend the file name with the tamestamp integer, left-padded with
 		// zeros so it sorts properly
-		if(image == null) {
+		if (image == null) {
 			throw new Exception("Image is null");
 		}
 		File output = new File(outputPath + String.format("%05d", timestamp) + "_" + suffix + ".png");
@@ -418,11 +418,15 @@ public class Main {
 		} catch (IOException e) {
 			throw new IOException(e.getMessage());
 		}
-		timestampfile.delete();
-		timestampfile.createNewFile();
-		PrintWriter out = new PrintWriter(timestampfile);
-		out.println(timestamp);
-		out.close();
+		try {
+			timestampfile.delete();
+			timestampfile.createNewFile();
+			PrintWriter out = new PrintWriter(timestampfile);
+			out.println(timestamp);
+			out.close();
+		} catch (Exception e) {
+
+		}
 
 	}
 
