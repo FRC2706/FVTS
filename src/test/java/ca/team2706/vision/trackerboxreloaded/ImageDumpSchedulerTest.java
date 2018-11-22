@@ -54,6 +54,9 @@ public class ImageDumpSchedulerTest {
 			scheduler.run();
 			Bundle bundle1 = new Bundle(null,null,null,2);
 			ImageDumpScheduler.schedule(bundle1);
+			for(int i = 0; i < ImageDumpScheduler.QUEUE_LIMIT;i++) {
+				ImageDumpScheduler.schedule(bundle1);
+			}
 			scheduler.run();
 			ImageDumpScheduler.stop = false;
 		}
