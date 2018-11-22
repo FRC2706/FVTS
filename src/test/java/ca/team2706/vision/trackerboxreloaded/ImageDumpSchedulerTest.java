@@ -61,7 +61,9 @@ public class ImageDumpSchedulerTest {
 				}
 				
 			}).start();
-			
+			BufferedImage image = new BufferedImage(10,10,BufferedImage.TYPE_INT_RGB);
+			Bundle bundle = new Bundle(image,image,image,1);
+			ImageDumpScheduler.schedule(bundle);
 			scheduler.run();
 			
 			ImageDumpScheduler.b = true;

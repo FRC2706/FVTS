@@ -27,11 +27,6 @@ public class ImageDumpScheduler implements Runnable{
 					e.printStackTrace();
 				}
 			}
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 	public static void schedule(Bundle b){
