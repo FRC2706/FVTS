@@ -1,42 +1,48 @@
 package ca.team2706.vision.trackerboxreloaded;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ImageDumpScheduler implements Runnable{
 	public static final int QUEUE_LIMIT = 10;
 	
-	private static List<Bundle> bundles = new ArrayList<Bundle>();
-	private static Thread thread;
+	public static List<Bundle> bundles = new ArrayList<Bundle>();
+	public static Thread thread;
+	public static boolean b = true;
+	public static boolean stop = false;
 	@Override
 	public void run() {
-		while(true){
+		try {
+		while(b){
 			if(bundles.size() > 0){
 				Bundle b = bundles.get(0);
 				bundles.remove(0);
 				while(bundles.size() > QUEUE_LIMIT){
 					bundles.remove(0);
 				}
+				
 				try {
 					Main.imgDump(b.getRaw(), "raw",b.getTimeStamp());
 					Main.imgDump(b.getBinMask(), "binMask", b.getTimeStamp());
 					Main.imgDump(b.getOutput(), "output", b.getTimeStamp());
-				} catch (IOException e) {
-					e.printStackTrace();
+				} catch (Exception e) {
+					//Non fatal error
+				}
+				if(stop) {
+					ImageDumpScheduler.b = false;
 				}
 			}
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		}
+		}catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 	public static void schedule(Bundle b){
 		bundles.add(b);
 	}
 	public static void start(){
+		b = true;
+		stop = false;
 		thread = new Thread(new ImageDumpScheduler());
 		thread.start();
 	}
