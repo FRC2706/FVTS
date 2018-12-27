@@ -123,7 +123,7 @@ public class Pipeline {
             // else
 			// skip this contour because it's too small
 		}
-
+		
 		long now = System.nanoTime();
 		visionData.fps = ((double) NANOSECONDS_PER_SECOND) / (now - fpsTimer);
 		visionData.fps = ((int)(visionData.fps*10))/10.0; // round to 1 decimal place
@@ -169,6 +169,32 @@ public class Pipeline {
 				bestScore = score;
 			}
 		}
+		
+		/*
+		 * 
+		 * Time to math the distance
+		 * y = height of cube
+		 * x = distance from cube
+		 * |
+		 * |
+		 * |
+		 * |
+		 * |
+		 * -------------------
+		 * 
+		 * using y = mx+b we can determine that the formula to 
+		 * calculate x from y is x = (y-b)/m
+		 * 
+		 */
+		
+		double y = visionData.preferredTarget.boundingBox.height;
+		
+		double x = (y - visionParams.yIntercept) / visionParams.slope;
+		
+		//Now we have the distance in cm!!!
+		
+		visionData.preferredTarget.distance = x;
+		
 	}
 
 	//Create Colour Values

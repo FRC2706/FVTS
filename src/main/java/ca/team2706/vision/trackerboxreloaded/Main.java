@@ -119,6 +119,8 @@ public class Main {
 		Size sz;
 		/** This is the image to be processed if the selected camera is -1 **/
 		String imageFile;
+		
+		double slope,yIntercept;
 	}
 
 	/**
@@ -148,6 +150,9 @@ public class Main {
 								// occupies
 			/** The rectangle made from x and y centers **/
 			Rect boundingBox;
+			
+			double distance;
+			
 		}
 
 		/** The List of all the targets in the image **/
@@ -278,6 +283,10 @@ public class Main {
 				throw new IllegalArgumentException("Error: " + properties.getProperty("resolution")
 						+ " is not a supported resolution.\n" + "Allowed: 80x60, 160x120, 320x240, 640x480.");
 			}
+			
+			visionParams.slope = Double.valueOf(properties.getProperty("slope"));
+			visionParams.yIntercept = Double.valueOf(properties.getProperty("yIntercept"));
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.err.println("\n\nError reading the params file, check if the file is corrupt?");
@@ -336,6 +345,11 @@ public class Main {
 			// Sets the image dumping path property in the file to the image
 			// dumping path value
 			properties.setProperty("imgDumpPath", outputPath);
+			
+			properties.setProperty("slope", String.valueOf(visionParams.slope));
+			
+			properties.setProperty("yIntercept", String.valueOf(visionParams.yIntercept));
+			
 			// Initilizes the output stream to the vision parameters file
 			FileOutputStream out = new FileOutputStream("visionParams.properties");
 			// Dumps the properties to the output stream
