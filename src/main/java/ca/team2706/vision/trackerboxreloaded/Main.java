@@ -534,11 +534,11 @@ public class Main {
 		if (use_GUI) {
 			try {
 				// Initilizes the window to display the raw image
-				guiRawImg = new DisplayGui(matToBufferedImage(frame), "Raw Camera Image");
+				guiRawImg = new DisplayGui(matToBufferedImage(frame), "Raw Camera Image",true);
 				// Initilizes the window to display the processed image
-				guiProcessedImg = new DisplayGui(matToBufferedImage(frame), "Processed Image");
+				guiProcessedImg = new DisplayGui(matToBufferedImage(frame), "Processed Image",true);
 				// Initilizes the parameters selector
-				ParamsSelector selector = new ParamsSelector();
+				ParamsSelector selector = new ParamsSelector(true,true);
 				guiRawImg.addKeyListener(selector);
 				guiProcessedImg.addKeyListener(selector);
 			} catch (IOException e) {

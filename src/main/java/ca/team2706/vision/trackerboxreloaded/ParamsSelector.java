@@ -23,7 +23,9 @@ import ca.team2706.vision.trackerboxreloaded.Main.VisionData;
 
 public class ParamsSelector extends JFrame implements Runnable, ActionListener, KeyListener {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;	
+	public boolean stop = false;
+	
 
 	private JButton btnOpenImage;
 	private File f = null;
@@ -154,8 +156,9 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 	/**
 	 * Creates a new Parameters Selector
 	 */
-	public ParamsSelector() {
-		// Makes the program exit when the X button on the window is pressed
+	public ParamsSelector(boolean show, boolean b) {
+		this.b = b;
+		//Makes the program exit when the X button on the window is pressed
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		// Sets the size of the window
 		setSize(600, 300);
@@ -584,11 +587,10 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 		btnDistance.addActionListener(this);
 
 		this.addKeyListener(this);
-
-		// Makes the window visible
-		setVisible(true);
-
-		// Starts the update thread
+		//Makes the window visible
+		setVisible(show);
+		
+		//Starts the update thread
 		new Thread(this).start();
 	}
 
@@ -597,11 +599,14 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 	 */
 	@Override
 	public void run() {
-		while (b) {
-			try {
-				// If the camera number is a number
-				if (isInt(textField.getText())) {
-					// Update the camera number
+		while(b){
+			if(stop) {
+				b = false;
+			}
+			try{
+				//If the camera number is a number
+				if(isInt(textField.getText())){
+					//Update the camera number
 					Main.visionParams.cameraSelect = Integer.valueOf(Integer.valueOf(textField.getText()));
 				}
 				// If the erode dilate iterations is a number
