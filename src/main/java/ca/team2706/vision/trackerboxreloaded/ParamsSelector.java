@@ -2,28 +2,30 @@ package ca.team2706.vision.trackerboxreloaded;
 
 import org.opencv.core.Size;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Properties;
 
-public class ParamsSelector extends JFrame implements Runnable, ActionListener {
+public class ParamsSelector extends JFrame implements Runnable, ActionListener, KeyListener {
 
 	private static final long serialVersionUID = 1L;
 	
+	public boolean stop = false;
+	
 	private JButton btnOpenImage;
 	private File f = null;
+	private int index = 0;
+	public boolean b = true;
 	/**
 	 * The content panel
 	 */
 	private JPanel contentPane;
-
-	public JButton btnAutoCallibrate;
 	/**
 	 * The camera selecting field
 	 */
@@ -140,11 +142,13 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	/**
 	 * Creates a new Parameters Selector
 	 */
-	public ParamsSelector() {
+	public ParamsSelector(boolean show, boolean b) {
+		this.b = b;
 		//Makes the program exit when the X button on the window is pressed
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//Sets the size of the window
 		setBounds(100, 100, 600, 300);
+		
 		//Initilizes the content panel
 		contentPane = new JPanel();
 		//Sets the window border
@@ -552,19 +556,16 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		//Sets the text
 		textField_3.setText(String.valueOf(Main.visionParams.height));
 		
-		btnAutoCallibrate = new JButton("Auto Callibrate");
-		btnAutoCallibrate.setToolTipText("Automaticcaly callibrates the vision paramaters, simply put the cube the maximum distance you want to be able to track away and allign it with the middle after pressing this button");
-		btnAutoCallibrate.setBounds(345, 72, 131, 23);
-		btnAutoCallibrate.addActionListener(this);
-		contentPane.add(btnAutoCallibrate);
 		
 		btnOpenImage = new JButton("Open Image");
 		btnOpenImage.setBounds(431, 178, 116, 23);
 		btnOpenImage.addActionListener(this);
 		contentPane.add(btnOpenImage);
 		
+		this.addKeyListener(this);
+		
 		//Makes the window visible
-		setVisible(true);
+		setVisible(show);
 		
 		//Starts the update thread
 		new Thread(this).start();
@@ -575,7 +576,10 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	 */
 	@Override
 	public void run() {
-		while(true){
+		while(b){
+			if(stop) {
+				b = false;
+			}
 			try{
 				//If the camera number is a number
 				if(isInt(textField.getText())){
@@ -659,9 +663,6 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 			//Save vision parameters
 			Main.saveVisionParams();
 		}
-		if(arg0.getSource() == btnAutoCallibrate){
-			new AutoCallibrator();
-		}
 		if(arg0.getSource() == btnOpenImage){
 			JFileChooser chooser = new JFileChooser();
 			if(f != null){
@@ -670,14 +671,16 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 			chooser.showOpenDialog(contentPane);
 			if(chooser.getSelectedFile() != null){
 				f = chooser.getSelectedFile();
+				Main.filename = f.getName();
 				Main.useCamera = false;
-				try {
-					Main.setFrame(Main.bufferedImageToMat(ImageIO.read(f)));
-				} catch (IOException e) {
-					e.printStackTrace();
-					Main.useCamera = true;
+				Main.visionParams.imageFile= f.getAbsolutePath();
+				for(int i = 0; i < f.getParentFile().listFiles().length;i++) {
+					String path = f.getParentFile().listFiles()[i].getAbsolutePath();
+					if(path.equals(f.getAbsolutePath())) {
+						index = i;
+						break;
+					}
 				}
-				
 			}
 		}
 	}
@@ -686,7 +689,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	 * @param s the string
 	 * @return if the string is a integer
 	 */
-	private boolean isInt(String s){
+	public static boolean isInt(String s){
 		try{
 			//Test if it is a int
 			Integer.valueOf(s);
@@ -702,7 +705,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	 * @param s the string
 	 * @return if the string is a double
 	 */
-	private boolean isDouble(String s){
+	public static boolean isDouble(String s){
 		try{
 			//Test if it is a double
 			Double.valueOf(s);
@@ -712,5 +715,37 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 			//Fail
 			return false;
 		}
+	}
+
+	@Override
+	public void keyPressed(KeyEvent key) {
+		System.out.println(key.getKeyCode());
+		if(key.getKeyCode() == KeyEvent.VK_LEFT) {
+			if(f != null && index != f.getParentFile().listFiles().length) {
+				index++;
+				f = f.getParentFile().listFiles()[index];
+				Main.filename = f.getName();
+				Main.useCamera = false;
+				Main.visionParams.imageFile= f.getAbsolutePath();
+			}
+		}else if(key.getKeyCode() == KeyEvent.VK_RIGHT) {
+			if(f != null && index != 0) {
+				index--;
+				f = f.getParentFile().listFiles()[index];
+				Main.filename = f.getName();
+				Main.useCamera = false;
+				Main.visionParams.imageFile= f.getAbsolutePath();
+			}
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent arg0) {
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent arg0) {
+		
 	}
 }

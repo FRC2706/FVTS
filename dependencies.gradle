@@ -13,6 +13,21 @@ ext.ntcoreDep = { ->
     }
     return "edu.wpi.first.wpilib.networktables.java:NetworkTables:+:$classifier"
 }
+ext.tntcoreDep = { ->
+    def classifier
+    if (testType == "windows") {
+        classifier = "windows2015"
+    } else if (testType == "linux") {
+        classifier = "desktop"
+    } else if(testType == "linux-x86_64"){
+        classifier = "desktop"
+    } else if(testType == "linux-x86"){
+        classifier = "desktop"
+    } else {
+        classifier = testType
+    }
+    return "edu.wpi.first.wpilib.networktables.java:NetworkTables:+:$classifier"
+}
 
 ext.getOpenCvPlatformPackage = { ->
   if (buildType == "windows") {
@@ -36,6 +51,29 @@ ext.getOpenCvPlatformPackage = { ->
   }
 }
 
+ext.tgetOpenCvPlatformPackage = { ->
+  if (testType == "windows") {
+    if (System.getProperty("os.arch") == "amd64") {
+      return "windows-x86_64_2015"
+    } else {
+      return "windows-x86_2015"
+    }
+  } else if (testType == "linux") {
+    if (System.getProperty("os.arch") == "amd64") {
+      return "linux-x86_64"
+    } else {
+      return "linux-x86"
+    }
+  } else if (testType == "armhf") {
+    return "linux-armhf"
+  } else if (testType == "arm-raspbian") {
+    return "linux-arm-raspbian"
+  } else {
+    return testType
+  }
+}
+
+
 task downloadOpenCv() {
     description = 'Downloads the OpenCV Native maven dependency.'
     group = 'WPILib'
@@ -46,6 +84,30 @@ task downloadOpenCv() {
 
     doFirst {
         def classifier = getOpenCvPlatformPackage()
+        def armOpenCvDependency = project.dependencies.create("org.opencv:opencv-jni:3.1.0:$classifier@jar")
+        def armOpenCvConfig = project.configurations.detachedConfiguration(armOpenCvDependency)
+        armOpenCvConfig.setTransitive(false)
+        armOpenCv = armOpenCvConfig.files[0].canonicalFile
+    }
+
+    doLast {
+        copy {
+            from armOpenCv
+            rename 'opencv(.+)', 'opencv.zip'
+            into depFolder
+        }
+    }
+}
+task tdownloadOpenCv() {
+    description = 'Downloads the OpenCV Native maven dependency.'
+    group = 'WPILib'
+    def depFolder = "$buildDir/dependencies"
+    def cvZip = file("$depFolder/opencv.zip")
+    outputs.file(cvZip)
+    def armOpenCv
+
+    doFirst {
+        def classifier = tgetOpenCvPlatformPackage()
         def armOpenCvDependency = project.dependencies.create("org.opencv:opencv-jni:3.1.0:$classifier@jar")
         def armOpenCvConfig = project.configurations.detachedConfiguration(armOpenCvDependency)
         armOpenCvConfig.setTransitive(false)
@@ -72,3 +134,17 @@ task unzipOpenCv(type: Copy) {
     from zipTree(downloadOpenCv.outputs.files.singleFile)
     into openCvUnzipLocation
 }
+
+ext.topenCvUnzipLocation = "$buildDir/tests/opencv"
+
+// Create a task that will unzip the wpiutil files into a temporary build directory
+task tunzipOpenCv(type: Copy) {
+    description = 'Unzips the wpiutil maven dependency so that the include files and libraries can be used'
+    group = 'WPILib'
+    dependsOn tdownloadOpenCv
+
+    from zipTree(downloadOpenCv.outputs.files.singleFile)
+    into topenCvUnzipLocation
+}
+
+

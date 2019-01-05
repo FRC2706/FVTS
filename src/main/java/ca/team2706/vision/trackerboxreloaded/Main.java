@@ -33,7 +33,8 @@ import org.opencv.videoio.Videoio;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
-
+	
+	public static String filename = "";
 	public static ParamsSelector selector;
 	public static int timestamp = 0;
 	public static File timestampfile;
@@ -174,11 +175,11 @@ public class Main {
 		// Sets the interval for updating NetworkTables
 		NetworkTable.setUpdateRate(0.02);
 		// Sets the team number
-		NetworkTable.setTeam(2706); // Use this for the robit
+		//NetworkTable.setTeam(2706); // Use this for the robit
 		// Enables DSClient
 		NetworkTable.setDSClientEnabled(true); // and this for the robit
 		// Sets the IP adress to connect to
-		// NetworkTable.setIPAddress("10.27.6.67"); //Use this for testing
+		NetworkTable.setIPAddress("localhost"); //Use this for testing
 		// Initilizes NetworkTables
 		NetworkTable.initialize();
 		// Sets the vision table to the "vision" table that is in NetworkTables
@@ -353,7 +354,7 @@ public class Main {
 	 *
 	 * @param visionData
 	 */
-	private static void sendVisionDataOverNetworkTables(VisionData visionData) {
+	public static void sendVisionDataOverNetworkTables(VisionData visionData) {
 
 		// Sends the data
 		// Puts the fps into the vision table
@@ -379,7 +380,7 @@ public class Main {
 	 * @throws IOException
 	 * @throws Exception
 	 */
-	private static BufferedImage matToBufferedImage(Mat matrix) throws IOException {
+	public static BufferedImage matToBufferedImage(Mat matrix) throws IOException {
 		MatOfByte mob = new MatOfByte();
 		Imgcodecs.imencode(".jpg", matrix, mob);
 		byte ba[] = mob.toArray();
@@ -437,6 +438,8 @@ public class Main {
 		
 	}
 
+	public static boolean b = true;
+	
 	/**
 	 * The main method! Very important Do not delete! :] :]
 	 *
@@ -472,7 +475,6 @@ public class Main {
 		VideoCapture camera = null;
 		CLI.startServer();
 		// Whether to use a camera, or load an image file from disk.
-		useCamera = true;
 		if (visionParams.cameraSelect == -1) {
 			useCamera = false;
 		}
@@ -514,10 +516,10 @@ public class Main {
 		// The window to display the processed image
 		DisplayGui guiProcessedImg = null;
 		// Wether to open the guis
-		boolean use_GUI = false;
+		boolean use_GUI = true;
 		// If on Linux don't use guis
-		if (System.getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
-			use_GUI = true;
+		if (System.getProperty("os.name").toLowerCase().indexOf("raspbian") != -1) {
+			use_GUI = false;
 		}
 		// Set the vision parameters size
 		visionParams.sz = new Size(visionParams.width, visionParams.height);
@@ -529,12 +531,14 @@ public class Main {
 		if (use_GUI) {
 			try {
 				// Initilizes the window to display the raw image
-				guiRawImg = new DisplayGui(matToBufferedImage(frame), "Raw Camera Image");
+				guiRawImg = new DisplayGui(matToBufferedImage(frame), "Raw Camera Image",true);
 				// Initilizes the window to display the processed image
-				guiProcessedImg = new DisplayGui(matToBufferedImage(frame), "Processed Image");
+				guiProcessedImg = new DisplayGui(matToBufferedImage(frame), "Processed Image",true);
 				// Initilizes the parameters selector
-				new ParamsSelector();
 				cli = new CLI();
+				ParamsSelector selector = new ParamsSelector(true,true);
+				guiRawImg.addKeyListener(selector);
+				guiProcessedImg.addKeyListener(selector);
 			} catch (IOException e) {
 				Log.e("Mat2BufferedImage broke! Non-fatal error", true);
 				Log.e(e.getMessage(), true);
@@ -544,7 +548,7 @@ public class Main {
 		}
 		ImageDumpScheduler.start();
 		// Main video processing loop
-		while (true) {
+		while (b) {
 			if (useCamera) {
 				// Read the frame from the camera, if it fails try again
 				if (!camera.read(frame)) {
@@ -552,6 +556,16 @@ public class Main {
 					continue;
 				}
 			} // else use the image from disk that we loaded above
+			else{
+				// load the image from file.
+	            try {
+        	        frame = bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
+                } catch (IOException e) {
+                	e.printStackTrace();
+                    frame = new Mat();
+                }
+
+			}
 			if (use_GUI) {
 				// Resize the frame
 				Imgproc.resize(frame, frame, visionParams.sz);
@@ -585,7 +599,7 @@ public class Main {
 				try {
 					// May throw a NullPointerException if initializing
 					// the window failed
-					BufferedImage raw = matToBufferedImage(frame);
+					BufferedImage raw = matToBufferedImage(rawOutputImg);
 					currentImage = raw;
 					if (showMiddle) {
 						Graphics g = raw.getGraphics();
@@ -641,11 +655,11 @@ public class Main {
 		}
 	} // end main video processing loop
 
-	public void hideMiddle() {
+	public static void hideMiddle() {
 		showMiddle = false;
 	}
 
-	public void showMiddle() {
+	public static void showMiddle() {
 		showMiddle = true;
 	}
 

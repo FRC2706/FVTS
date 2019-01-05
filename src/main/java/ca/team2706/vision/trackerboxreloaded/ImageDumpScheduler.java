@@ -11,7 +11,7 @@ public class ImageDumpScheduler implements Runnable{
 	public static double Dt = 0;
 	private static double lastTime = System.currentTimeMillis();
 	
-	private static List<Bundle> bundles = new ArrayList<Bundle>();
+	static List<Bundle> bundles = new ArrayList<Bundle>();
 	private static List<Thread> threads = new ArrayList<Thread>();
 	@Override
 	public void run() {
@@ -19,8 +19,7 @@ public class ImageDumpScheduler implements Runnable{
 			synchronized(bundles){
 				if(bundles.size() > 0){
 					long start = System.currentTimeMillis();
-					Bundle b = bundles.get(0);
-					bundles.remove(0);
+					Bundle b = bundles.get(0);					bundles.remove(0);
 					try {
 						Main.imgDump(b.getRaw(), "raw",b.getTimeStamp());
 						Main.imgDump(b.getBinMask(), "binMask", b.getTimeStamp());
@@ -30,11 +29,19 @@ public class ImageDumpScheduler implements Runnable{
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-				}
+				
 				try {
 					Thread.sleep(1);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
+				}
+				try {
+					Main.imgDump(b.getRaw(), "raw",b.getTimeStamp());
+					Main.imgDump(b.getBinMask(), "binMask", b.getTimeStamp());
+					Main.imgDump(b.getOutput(), "output", b.getTimeStamp());
+				} catch (Exception e) {
+					//Non fatal error
+				}
 				}
 			}
 		}
@@ -54,7 +61,6 @@ public class ImageDumpScheduler implements Runnable{
 					try {
 						threads.get(i).join();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					threads.remove(i);
