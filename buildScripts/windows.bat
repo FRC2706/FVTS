@@ -1,1 +1,1 @@
-gradlew build -PbuiltType=windows -PtestType=windows
+gradlew build -PbuildType=windows -PtestType=windows
