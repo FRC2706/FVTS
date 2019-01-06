@@ -163,11 +163,11 @@ public class Main {
 		// Sets the interval for updating NetworkTables
 		NetworkTable.setUpdateRate(0.02);
 		// Sets the team number
-		// NetworkTable.setTeam(2706); // Use this for the robit
+		NetworkTable.setTeam(2706); // Use this for the robit
 		// Enables DSClient
 		NetworkTable.setDSClientEnabled(true); // and this for the robit
 		// Sets the IP adress to connect to
-		NetworkTable.setIPAddress("localhost"); // Use this for testing
+		//NetworkTable.setIPAddress("localhost"); // Use this for testing
 		// Initilizes NetworkTables
 		NetworkTable.initialize();
 	}
