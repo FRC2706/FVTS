@@ -36,9 +36,6 @@ public class MainThread extends Thread {
 
 		frame = new Mat();
 
-		// Open a connection to the camera
-		VideoCapture camera = null;
-
 		// Whether to use a camera, or load an image file from disk.
 		if (visionParams.cameraSelect == -1) {
 			useCamera = false;
@@ -215,6 +212,45 @@ public class MainThread extends Thread {
 	}
 
 	public void updateParams(VisionParams params) {
+		
+		if(visionParams.cameraSelect != params.cameraSelect) {
+			useCamera = true;
+			if (visionParams.cameraSelect == -1) {
+				useCamera = false;
+			}
+
+			if (useCamera) {
+				// Initilizes the camera
+				camera = new VideoCapture(visionParams.cameraSelect);
+
+				// Sets camera parameters
+				int fourcc = VideoWriter.fourcc('M', 'J', 'P', 'G');
+				camera.set(Videoio.CAP_PROP_FOURCC, fourcc);
+				camera.set(Videoio.CAP_PROP_FRAME_WIDTH, visionParams.width);
+				camera.set(Videoio.CAP_PROP_FRAME_HEIGHT, visionParams.height);
+
+				camera.read(frame);
+
+				if (!camera.isOpened()) {
+					// If the camera didn't open throw an error
+					System.err.println("Error: Can not connect to camera");
+					// Exit
+					System.exit(1);
+				}
+
+				// Set up the camera feed
+				camera.read(frame);
+			} else {
+				// load the image from file.
+				try {
+					frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
+				} catch (IOException e) {
+					e.printStackTrace();
+					frame = new Mat();
+				}
+			}
+		}
+		
 		this.visionParams = params;
 	}
 

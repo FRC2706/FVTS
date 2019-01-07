@@ -181,13 +181,13 @@ public class Main {
 
 			File configFile = new File("visionParams.properties");
 
-			List<String> lists = FjsonParser.listLists(configFile);
+			List<String> lists = ConfigParser.listLists(configFile);
 
 			for (String s : lists) {
 
 				VisionParams visionParams = new VisionParams();
 
-				Map<String, String> data = FjsonParser.getProperties(configFile, s);
+				Map<String, String> data = ConfigParser.getProperties(configFile, s);
 
 				visionParams.name = s;
 
@@ -215,10 +215,9 @@ public class Main {
 				visionParams.width = Integer.valueOf(resolution.split("x")[0]);
 				visionParams.height = Integer.valueOf(resolution.split("x")[1]);
 
-
 				// Set the vision parameters size
 				visionParams.sz = new Size(visionParams.width, visionParams.height);
-				
+
 				visionParams.table = NetworkTable.getTable("vision-" + s);
 
 				visionParams.outputPath = data.get("imgDumpPath");
@@ -246,34 +245,7 @@ public class Main {
 
 			for (VisionParams params : visionParamsList) {
 
-				Map<String, String> data = new HashMap<String, String>();
-
-				data.put("cameraSelect", String.valueOf(params.cameraSelect));
-
-				data.put("minHue", String.valueOf(params.minHue));
-				data.put("maxHue", String.valueOf(params.maxHue));
-				data.put("minSaturation", String.valueOf(params.minSaturation));
-				data.put("maxSaturation", String.valueOf(params.maxSaturation));
-				data.put("minValue", String.valueOf(params.minValue));
-				data.put("maxValue", String.valueOf(params.maxValue));
-
-				data.put("aspectRatioThresh", String.valueOf(params.aspectRatioThresh));
-
-				data.put("distToCenterImportance", String.valueOf(params.distToCentreImportance));
-
-				data.put("imageFile", params.imageFile);
-
-				data.put("minArea", String.valueOf(params.minArea));
-
-				data.put("erodeDilateIterations", String.valueOf(params.erodeDilateIterations));
-
-				data.put("resolution", params.width + "x" + params.height);
-
-				data.put("imgDumpPath", params.outputPath);
-
-				data.put("imgDumpTime", String.valueOf(params.secondsBetweenImageDumps));
-
-				FjsonParser.saveList(new File("visionParams.properties"), params.name, data);
+				saveVisionParams(params);
 
 			}
 
@@ -281,6 +253,37 @@ public class Main {
 			e1.printStackTrace();
 			System.exit(1);
 		}
+	}
+
+	public static void saveVisionParams(VisionParams params) throws Exception {
+		Map<String, String> data = new HashMap<String, String>();
+
+		data.put("cameraSelect", String.valueOf(params.cameraSelect));
+
+		data.put("minHue", String.valueOf(params.minHue));
+		data.put("maxHue", String.valueOf(params.maxHue));
+		data.put("minSaturation", String.valueOf(params.minSaturation));
+		data.put("maxSaturation", String.valueOf(params.maxSaturation));
+		data.put("minValue", String.valueOf(params.minValue));
+		data.put("maxValue", String.valueOf(params.maxValue));
+
+		data.put("aspectRatioThresh", String.valueOf(params.aspectRatioThresh));
+
+		data.put("distToCenterImportance", String.valueOf(params.distToCentreImportance));
+
+		data.put("imageFile", params.imageFile);
+
+		data.put("minArea", String.valueOf(params.minArea));
+
+		data.put("erodeDilateIterations", String.valueOf(params.erodeDilateIterations));
+
+		data.put("resolution", params.width + "x" + params.height);
+
+		data.put("imgDumpPath", params.outputPath);
+
+		data.put("imgDumpTime", String.valueOf(params.secondsBetweenImageDumps));
+
+		ConfigParser.saveList(new File("visionParams.properties"), params.name, data);
 	}
 
 	/**
@@ -372,6 +375,7 @@ public class Main {
 	 * @param The command line arguments
 	 */
 	public static void main(String[] args) {
+
 		// Must be included!
 		// Loads OpenCV
 		System.loadLibrary("opencv_java310");
@@ -383,8 +387,6 @@ public class Main {
 		loadVisionParams();
 
 		ImageDumpScheduler.start();
-
-		new ParamsSelector();
 
 		for (VisionParams params : visionParamsList) {
 			MainThread thread = new MainThread(params);
