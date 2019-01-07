@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-public class FjsonParser {
+public class ConfigParser {
 
 	public static Map<String, String> getProperties(File f, String name) throws Exception {
 
@@ -175,8 +175,7 @@ public class FjsonParser {
 			
 			String value = data.get(key);
 			
-			newLines.add(key+"="+value);
-			
+			newLines.add("  "+key+"="+value);
 		}
 		
 		//Now we need to save it
