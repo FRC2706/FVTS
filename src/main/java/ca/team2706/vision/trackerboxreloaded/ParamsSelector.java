@@ -664,6 +664,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				// Update the distance to center importane text
 				txtDtci.setText("Distance To Center Importance: " + (visionParams.distToCentreImportance * 100) + "%");
 
+				visionParams.name = textField_7.getText();
+				
 				thread.updateParams(visionParams);
 				
 				// Sleep for 1ms
