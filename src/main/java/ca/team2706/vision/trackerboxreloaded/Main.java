@@ -39,7 +39,6 @@ public class Main {
 	public static int timestamp = 0;
 	public static File timestampfile;
 	public static BufferedImage currentImage;
-	public static VideoCapture camera;
 	public static VisionData lastData;
 	public static boolean process = true;
 	public static boolean showMiddle = false;
@@ -462,18 +461,19 @@ public class Main {
 
 		frame = new Mat();
 
-		// Open a connection to the camera
-		VideoCapture camera = null;
-
 		// Whether to use a camera, or load an image file from disk.
 		if (visionParams.cameraSelect == -1) {
 			useCamera = false;
 		}
 
 		if (useCamera) {
-			// Initilizes the camera
-			camera = new VideoCapture(visionParams.cameraSelect);
-
+			VideoCapture camera = CameraServer.cameras.get(visionParams.cameraSelect);
+			
+			if(camera == null) {
+				System.err.println("Failed to connect to camera!");
+				System.exit(1);
+			}
+			
 			// Sets camera parameters
 			int fourcc = VideoWriter.fourcc('M', 'J', 'P', 'G');
 			camera.set(Videoio.CAP_PROP_FOURCC, fourcc);
@@ -488,9 +488,6 @@ public class Main {
 				// Exit
 				System.exit(1);
 			}
-
-			// Set up the camera feed
-			camera.read(frame);
 		} else {
 			// load the image from file.
 			try {
@@ -512,10 +509,6 @@ public class Main {
 		}
 		// Set the vision parameters size
 		visionParams.sz = new Size(visionParams.width, visionParams.height);
-		if (use_GUI) {
-			// Resizes the frame to the vision parameters size
-			Imgproc.resize(frame, frame, visionParams.sz);
-		}
 		// Set up the GUI display windows
 		if (use_GUI) {
 			try {
@@ -537,8 +530,9 @@ public class Main {
 		while (b) {
 			if (useCamera) {
 				// Read the frame from the camera, if it fails try again
-				if (!camera.read(frame)) {
-					System.err.println("Error: Failed to get a frame from the camera");
+				frame = CameraServer.getFrame(visionParams.cameraSelect);
+				if(frame == null) {
+					System.err.println("Couldn't get frame from camera!");
 					continue;
 				}
 			} // else use the image from disk that we loaded above
@@ -645,33 +639,5 @@ public class Main {
 
 	public static void showMiddle() {
 		showMiddle = true;
-	}
-
-	public static VisionData forceProcess() {
-		Mat frame = new Mat();
-		camera.read(frame);
-		Imgproc.resize(frame, frame, visionParams.sz);
-
-		VisionData visionData = Pipeline.process(frame, visionParams, false);
-
-		Pipeline.selectPreferredTarget(visionData, visionParams);
-
-		return visionData;
-	}
-
-	public static VisionData forceProcess(Mat frame) {
-		Imgproc.resize(frame, frame, visionParams.sz);
-
-		VisionData visionData = Pipeline.process(frame, visionParams, false);
-
-		Pipeline.selectPreferredTarget(visionData, visionParams);
-
-		return visionData;
-	}
-
-	public static Mat getFrame() {
-		Mat frame = new Mat();
-		camera.read(frame);
-		return frame;
 	}
 }
