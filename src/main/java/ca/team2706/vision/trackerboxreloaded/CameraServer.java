@@ -1,5 +1,8 @@
 package ca.team2706.vision.trackerboxreloaded;
 
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,6 +63,54 @@ public class CameraServer extends Thread{
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+		}
+		
+	}
+	
+	private class SenderThread extends Thread{
+		
+		public static final int PORT = 1190;
+		
+		private Map<InetAddress,Integer> ips = new HashMap<InetAddress,Integer>();
+		
+		@Override
+		public void run() {
+			
+			try {
+				new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						
+					}
+					
+				}).start();
+				ServerSocket ss = new ServerSocket(PORT);
+				
+				while(!ss.isClosed()) {
+					
+					final Socket s = ss.accept();
+					
+					new Thread(new Runnable() {
+
+						@Override
+						public void run() {
+							
+							
+							
+						}
+						
+					}).start();
+					
+				}
+				
+				ss.close();
+				
+			}catch(Exception e) {
+				//This is bad!!!
+				e.printStackTrace();
+			}
+			
 		}
 		
 	}
