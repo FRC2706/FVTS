@@ -1,27 +1,25 @@
 package ca.team2706.vision.trackerboxreloaded;
 
-import org.opencv.core.Size;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.Properties;
 
-public class ParamsSelector extends JFrame implements Runnable, ActionListener, KeyListener {
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+
+import org.opencv.core.Size;
+
+import ca.team2706.vision.trackerboxreloaded.Main.VisionParams;;
+
+public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 
 	private static final long serialVersionUID = 1L;
-	
-	public boolean stop = false;
-	
-	private JButton btnOpenImage;
-	private File f = null;
-	private int index = 0;
-	public boolean b = true;
+
+	private VisionParams visionParams;
 	/**
 	 * The content panel
 	 */
@@ -41,27 +39,27 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 	/**
 	 * Minimum hue slider
 	 */
-	JSlider sMinHue; //Minimum Hue
+	JSlider sMinHue; // Minimum Hue
 	/**
 	 * Maximum hue slider
 	 */
-	JSlider sMaxHue; //Maximum Hue
+	JSlider sMaxHue; // Maximum Hue
 	/**
 	 * Minimum saturation slider
 	 */
-	JSlider sMinSat; //Minimum Saturation
+	JSlider sMinSat; // Minimum Saturation
 	/**
 	 * Maximum saturation slider
 	 */
-	JSlider sMaxSat; //Maximum Saturation
+	JSlider sMaxSat; // Maximum Saturation
 	/**
 	 * Minimum value slider
 	 */
-	JSlider sMinVal; //Minimum Value
+	JSlider sMinVal; // Minimum Value
 	/**
 	 * Maximum value slider
 	 */
-	JSlider sMaxVal; //Maximum Value
+	JSlider sMaxVal; // Maximum Value
 	/**
 	 * Distance to center importance slider
 	 */
@@ -73,7 +71,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 	/**
 	 * The Text Field that holds the erode dilate iterations
 	 */
-	private JTextField textField_1; //Erode Dilate Iterations
+	private JTextField textField_1; // Erode Dilate Iterations
 	/**
 	 * The Text Field that says "Minimum Area:"
 	 */
@@ -81,7 +79,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 	/**
 	 * The Text Field that holds the minimum area
 	 */
-	JTextField minArea; //Minimum Area
+	JTextField minArea; // Minimum Area
 	/**
 	 * The Text Field for displaying the hue value
 	 */
@@ -138,436 +136,463 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 	 * The Text Field that says "Height:"
 	 */
 	private JTextField txtHeight;
+	private JTextField textField_6;
+	private JTextField textField_7;
 	
+	private MainThread thread = null;
+	private JButton btnNewButton_1;
+
 	/**
 	 * Creates a new Parameters Selector
 	 */
-	public ParamsSelector(boolean show, boolean b) {
-		this.b = b;
-		//Makes the program exit when the X button on the window is pressed
+	public ParamsSelector() {
+
+		visionParams = new VisionParams();
+		
+		thread = new MainThread(visionParams);
+
+		// Makes the program exit when the X button on the window is pressed
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//Sets the size of the window
+		// Sets the size of the window
 		setBounds(100, 100, 600, 300);
-		
-		//Initilizes the content panel
+
+		// Initilizes the content panel
 		contentPane = new JPanel();
-		//Sets the window border
+		// Sets the window border
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		//Sets the layout to a abstract layout
+		// Sets the layout to a abstract layout
 		contentPane.setLayout(null);
-		//Sets the content pane to the content pane
+		// Sets the content pane to the content pane
 		setContentPane(contentPane);
-		
-		//Initilizes the minimum hue slider
+
+		// Initilizes the minimum hue slider
 		sMinHue = new JSlider();
-		//Sets the tooltip
+		// Sets the tooltip
 		sMinHue.setToolTipText("Minimum Hue");
-		//Paints the tick marks
+		// Paints the tick marks
 		sMinHue.setPaintTicks(true);
-		//Sets the value
+		// Sets the value
 		sMinHue.setValue(0);
-		//Sets the orientation
+		// Sets the orientation
 		sMinHue.setOrientation(SwingConstants.VERTICAL);
-		//Sets the maximum value
+		// Sets the maximum value
 		sMinHue.setMaximum(255);
-		//Sets the size
+		// Sets the size
 		sMinHue.setBounds(10, 0, 31, 95);
-		//Adds it to the window
+		// Adds it to the window
 		contentPane.add(sMinHue);
-		
-		//Initilizes the maximum hue slider
+
+		// Initilizes the maximum hue slider
 		sMaxHue = new JSlider();
-		//Sets the value
+		// Sets the value
 		sMaxHue.setValue(0);
-		//Sets the tooltip
+		// Sets the tooltip
 		sMaxHue.setToolTipText("Maximum Hue");
-		//Paints the tick marks
+		// Paints the tick marks
 		sMaxHue.setPaintTicks(true);
-		//Sets the orientation
+		// Sets the orientation
 		sMaxHue.setOrientation(SwingConstants.VERTICAL);
-		//Sets the maximum value
+		// Sets the maximum value
 		sMaxHue.setMaximum(255);
-		//Sets the size
+		// Sets the size
 		sMaxHue.setBounds(10, 106, 31, 95);
-		//Adds it to the window
+		// Adds it to the window
 		contentPane.add(sMaxHue);
-		
-		//Initilizes the minimum saturation slider
+
+		// Initilizes the minimum saturation slider
 		sMinSat = new JSlider();
-		//Sets the value
+		// Sets the value
 		sMinSat.setValue(0);
-		//Sets the tooltip
+		// Sets the tooltip
 		sMinSat.setToolTipText("Minimum Saturation");
-		//Paints the tick marks
+		// Paints the tick marks
 		sMinSat.setPaintTicks(true);
-		//Sets the orientation
+		// Sets the orientation
 		sMinSat.setOrientation(SwingConstants.VERTICAL);
-		//Sets the maximum value
+		// Sets the maximum value
 		sMinSat.setMaximum(255);
-		//Sets the size
+		// Sets the size
 		sMinSat.setBounds(42, 0, 31, 95);
-		//Add it to the window
+		// Add it to the window
 		contentPane.add(sMinSat);
-		
-		//Initilizes the maximum saturation slider
+
+		// Initilizes the maximum saturation slider
 		sMaxSat = new JSlider();
-		//Sets the value
+		// Sets the value
 		sMaxSat.setValue(0);
-		//Sets the tooltip
+		// Sets the tooltip
 		sMaxSat.setToolTipText("Maximum Saturation");
-		//Paints the tick marks
+		// Paints the tick marks
 		sMaxSat.setPaintTicks(true);
-		//Sets the orientation
+		// Sets the orientation
 		sMaxSat.setOrientation(SwingConstants.VERTICAL);
-		//Sets the maximum value
+		// Sets the maximum value
 		sMaxSat.setMaximum(255);
-		//Sets the size
+		// Sets the size
 		sMaxSat.setBounds(42, 106, 31, 95);
-		//Adds it to the window
+		// Adds it to the window
 		contentPane.add(sMaxSat);
-		
-		//Initilizes the minimum value slider
+
+		// Initilizes the minimum value slider
 		sMinVal = new JSlider();
-		//Sets the value
+		// Sets the value
 		sMinVal.setValue(0);
-		//Sets the tooltip
+		// Sets the tooltip
 		sMinVal.setToolTipText("Minimum Value");
-		//Paints the tick marks
+		// Paints the tick marks
 		sMinVal.setPaintTicks(true);
-		//Sets the orientation
+		// Sets the orientation
 		sMinVal.setOrientation(SwingConstants.VERTICAL);
-		//Sets the maximum value
+		// Sets the maximum value
 		sMinVal.setMaximum(255);
-		//Sets the size
+		// Sets the size
 		sMinVal.setBounds(74, 0, 31, 95);
-		//Adds it to the window
+		// Adds it to the window
 		contentPane.add(sMinVal);
-		
-		//Initilizes the maximum value slider
+
+		// Initilizes the maximum value slider
 		sMaxVal = new JSlider();
-		//Sets the value
+		// Sets the value
 		sMaxVal.setValue(0);
-		//Sets the tooltip
+		// Sets the tooltip
 		sMaxVal.setToolTipText("Maximum Value");
-		//Paints the tick marks
+		// Paints the tick marks
 		sMaxVal.setPaintTicks(true);
-		//Sets the orientation
+		// Sets the orientation
 		sMaxVal.setOrientation(SwingConstants.VERTICAL);
-		//Sets the maximum value
+		// Sets the maximum value
 		sMaxVal.setMaximum(255);
-		//Sets the size
+		// Sets the size
 		sMaxVal.setBounds(74, 106, 31, 95);
-		//Add it to the window
+		// Add it to the window
 		contentPane.add(sMaxVal);
-		
-		//Init the camera select text field
-		textField = new JTextField(String.valueOf(Main.visionParams.cameraSelect));
-		//Set the size
+
+		// Init the camera select text field
+		textField = new JTextField();
+		// Set the size
 		textField.setBounds(115, 32, 86, 20);
-		//Add it to the window
+		// Add it to the window
 		contentPane.add(textField);
-		//Set the number of columns
+		// Set the number of columns
 		textField.setColumns(10);
-		
-		//Init the camera text field
+
+		// Init the camera text field
 		txtCamera = new JTextField();
-		//Set the text
+		// Set the text
 		txtCamera.setText("Camera #:");
-		//Sets the size
+		// Sets the size
 		txtCamera.setBounds(115, 10, 86, 20);
-		//Makes it not editable
+		// Makes it not editable
 		txtCamera.setEditable(false);
-		//Add it to the window
+		// Add it to the window
 		contentPane.add(txtCamera);
-		//Set the number of columns
+		// Set the number of columns
 		txtCamera.setColumns(10);
-		
-		//Init the save button
+
+		// Init the save button
 		btnSave = new JButton("Save");
-		//Set the size
+		// Set the size
 		btnSave.setBounds(151, 178, 89, 23);
-		//Add this as a listener 
+		// Add this as a listener
 		btnSave.addActionListener(this);
-		//Add it to the window
+		// Add it to the window
 		contentPane.add(btnSave);
-		
-		//Init the iterations text field
+
+		// Init the iterations text field
 		txtIterations = new JTextField();
-		//Set the text
+		// Set the text
 		txtIterations.setText("Iterations:");
-		//Set the size
+		// Set the size
 		txtIterations.setBounds(115, 102, 86, 20);
-		//Makes it not editable
+		// Makes it not editable
 		txtIterations.setEditable(false);
-		//Adds it to the window
+		// Adds it to the window
 		contentPane.add(txtIterations);
-		//Sets the number of columns
+		// Sets the number of columns
 		txtIterations.setColumns(10);
-		
-		//Inits the erode dilate iterations text field
+
+		// Inits the erode dilate iterations text field
 		textField_1 = new JTextField();
-		//Sets the text
+		// Sets the text
 		textField_1.setText("0");
-		//Sets the size
+		// Sets the size
 		textField_1.setBounds(115, 119, 86, 20);
-		//Add it to the window
+		// Add it to the window
 		contentPane.add(textField_1);
-		//Set the number of columns
+		// Set the number of columns
 		textField_1.setColumns(10);
-		
-		//Inits the minimum area text field
+
+		// Inits the minimum area text field
 		txtMinimumArea = new JTextField();
-		//Sets the text
+		// Sets the text
 		txtMinimumArea.setText("Minimum Area:");
-		//Make it not editable
+		// Make it not editable
 		txtMinimumArea.setEditable(false);
-		//Set the size
+		// Set the size
 		txtMinimumArea.setBounds(115, 55, 86, 20);
-		//Add it to the window
+		// Add it to the window
 		contentPane.add(txtMinimumArea);
-		//Set the number of columns
+		// Set the number of columns
 		txtMinimumArea.setColumns(10);
-		
-		//Inits the minimum area text field
+
+		// Inits the minimum area text field
 		minArea = new JTextField();
-		//Set the size
+		// Set the size
 		minArea.setBounds(115, 75, 86, 20);
-		//Add it to the window
+		// Add it to the window
 		contentPane.add(minArea);
-		//Set the number of columns
+		// Set the number of columns
 		minArea.setColumns(10);
-		
-		//Inits a Properties object;
-		Properties properties = new Properties();
-		try {
-			//Loads the vision parameters
-			properties.load(new FileInputStream(new File("visionParams.properties")));
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		//Sets the minimum hue value
-		sMinHue.setValue(Integer.valueOf(properties.getProperty("minHue")));
-		//Sets the maximum hue value
-		sMaxHue.setValue(Integer.valueOf(properties.getProperty("maxHue")));
-		//Sets the minimum saturation value
-		sMinSat.setValue(Integer.valueOf(properties.getProperty("minSaturation")));
-		//Sets the maximum saturation value
-		sMaxSat.setValue(Integer.valueOf(properties.getProperty("maxSaturation")));
-		//Sets the minimum value value
-		sMinVal.setValue(Integer.valueOf(properties.getProperty("minValue")));
-		//Sets the maximum value value
-		sMaxVal.setValue(Integer.valueOf(properties.getProperty("maxValue")));
-		//Sets the camera select value
-		textField.setText(properties.getProperty("CameraSelect"));
-		//Sets the erode dilate iterations value
-		textField_1.setText(properties.getProperty("erodeDilateIterations"));
-		//Sets the minimum area value
-		minArea.setText(properties.getProperty("minArea"));
-		
-		//Inits the hue text field
+
+		// Inits the hue text field
 		txtHue = new JTextField();
-		//Sets the text
+		// Sets the text
 		txtHue.setText("Hue: ");
-		//Make it not editable
+		// Make it not editable
 		txtHue.setEditable(false);
-		//Sets the size
+		// Sets the size
 		txtHue.setBounds(4, 212, 123, 20);
-		//Add it to the window
+		// Add it to the window
 		contentPane.add(txtHue);
-		//Set the number of columns
+		// Set the number of columns
 		txtHue.setColumns(10);
-		
-		//Inits the saturation text field
+
+		// Inits the saturation text field
 		txtSaturation = new JTextField();
-		//Make it not editable
+		// Make it not editable
 		txtSaturation.setEditable(false);
-		//Sets the text
+		// Sets the text
 		txtSaturation.setText("Saturation:");
-		//Sets the size
+		// Sets the size
 		txtSaturation.setBounds(151, 212, 131, 20);
-		//Add it to the window
+		// Add it to the window
 		contentPane.add(txtSaturation);
-		//Set the number of columns
+		// Set the number of columns
 		txtSaturation.setColumns(10);
-		
-		//Inits the value text field
+
+		// Inits the value text field
 		txtValue = new JTextField();
-		//Makes it not editable
+		// Makes it not editable
 		txtValue.setEditable(false);
-		//Sets the text
+		// Sets the text
 		txtValue.setText("Value:");
-		//Sets the size
+		// Sets the size
 		txtValue.setBounds(288, 212, 123, 20);
-		//Add it to the window
+		// Add it to the window
 		contentPane.add(txtValue);
-		//Sets the number of columns
+		// Sets the number of columns
 		txtValue.setColumns(10);
-		
-		//Inits the output path text field
+
+		// Inits the output path text field
 		txtOutputPath = new JTextField();
-		//Make it not editable
+		// Make it not editable
 		txtOutputPath.setEditable(false);
-		//Sets the text
+		// Sets the text
 		txtOutputPath.setText("Output Path:");
-		//Set the size
+		// Set the size
 		txtOutputPath.setBounds(348, 102, 86, 20);
-		//Add it to the window
+		// Add it to the window
 		contentPane.add(txtOutputPath);
-		//Set the number of columns
+		// Set the number of columns
 		txtOutputPath.setColumns(10);
-		
-		//Inits the image dump path text field
+
+		// Inits the image dump path text field
 		textField_5 = new JTextField();
-		//Sets the size
+		// Sets the size
 		textField_5.setBounds(348, 130, 214, 20);
-		//Add it to the window
+		// Add it to the window
 		contentPane.add(textField_5);
-		//Set the number of columns
+		// Set the number of columns
 		textField_5.setColumns(10);
-		//Set the text
-		textField_5.setText(properties.getProperty("imgDumpPath"));
 		
-		//Inits the time between captures text field
+		// Inits the time between captures text field
 		txtTimeBetweenCaptures = new JTextField();
-		//Makes it not editable
+		// Makes it not editable
 		txtTimeBetweenCaptures.setEditable(false);
-		//Sets the text
+		// Sets the text
 		txtTimeBetweenCaptures.setText("Time Between Captures:");
-		//Sets the size
+		// Sets the size
 		txtTimeBetweenCaptures.setBounds(431, 24, 131, 20);
-		//Add it to the window
+		// Add it to the window
 		contentPane.add(txtTimeBetweenCaptures);
-		//Sets the number of columns
+		// Sets the number of columns
 		txtTimeBetweenCaptures.setColumns(10);
-		
-		//Inits the image dump wait text field
+
+		// Inits the image dump wait text field
 		textField_4 = new JTextField();
-		//Sets the size
+		// Sets the size
 		textField_4.setBounds(431, 44, 86, 20);
-		//Adds it to the window
+		// Adds it to the window
 		contentPane.add(textField_4);
-		//Sets the number of columns
+		// Sets the number of columns
 		textField_4.setColumns(10);
-		//Sets the text
-		textField_4.setText(properties.getProperty("imgDumpWait"));
 		
-		//Inits the distance to center importance slider
+		// Inits the distance to center importance slider
 		slider = new JSlider();
-		//Sets the value
-		slider.setValue((int) (Double.valueOf(properties.getProperty("distToCentreImportance"))*100));
-		//Sets the orientation
+		// Sets the orientation
 		slider.setOrientation(SwingConstants.VERTICAL);
-		//Sets the tooltip
+		// Sets the tooltip
 		slider.setToolTipText("Distance to center importance");
-		//Sets the size
+		// Sets the size
 		slider.setBounds(211, 32, 31, 143);
-		//Adds it to the window
+		// Adds it to the window
 		contentPane.add(slider);
-		
-		//Inits the distance to center importance text field
+
+		// Inits the distance to center importance text field
 		txtDtci = new JTextField();
-		//Sets the text
+		// Sets the text
 		txtDtci.setText("Distance To Center Importance:");
-		//Sets the size
+		// Sets the size
 		txtDtci.setBounds(4, 230, 278, 20);
-		//Makes it not editable
+		// Makes it not editable
 		txtDtci.setEditable(false);
-		//Adds it to the window
+		// Adds it to the window
 		contentPane.add(txtDtci);
-		//Sets the number of columns
+		// Sets the number of columns
 		txtDtci.setColumns(10);
-		
-		//Inits the double cube detection range slider
+
+		// Inits the double cube detection range slider
 		slider_1 = new JSlider();
-		//Sets the value
+		// Sets the value
 		slider_1.setValue(0);
-		//Sets the tooltip
+		// Sets the tooltip
 		slider_1.setToolTipText("Double cube detection range");
-		//Sets the value
-		slider_1.setValue((int) (Double.valueOf(properties.getProperty("aspectRatioThresh"))*100));
-		//Sets the size
+		// Sets the size
 		slider_1.setBounds(211, 0, 200, 26);
-		//Adds it to the window
+		// Adds it to the window
 		contentPane.add(slider_1);
-		
-		//Inits the double cube detection text field
+
+		// Inits the double cube detection text field
 		txtDoubleCubeDetection = new JTextField();
-		//Makes it not editable
+		// Makes it not editable
 		txtDoubleCubeDetection.setEditable(false);
-		//Sets the text
-		txtDoubleCubeDetection.setText("Double Cube Detection: "+slider_1.getValue()+"%");
-		//Sets the size
+		// Sets the text
+		txtDoubleCubeDetection.setText("Double Cube Detection: " + slider_1.getValue() + "%");
+		// Sets the size
 		txtDoubleCubeDetection.setBounds(245, 179, 179, 20);
-		//Adds it to the window
+		// Adds it to the window
 		contentPane.add(txtDoubleCubeDetection);
-		//Sets the number of columns
+		// Sets the number of columns
 		txtDoubleCubeDetection.setColumns(10);
-		
-		//Inits the width text field
+
+		// Inits the width text field
 		txtResolutionWidth = new JTextField();
-		//Sets the tooltip
+		// Sets the tooltip
 		txtResolutionWidth.setToolTipText("The width the program resizes the frame to");
-		//Makes it not editable
+		// Makes it not editable
 		txtResolutionWidth.setEditable(false);
-		//Sets the text
+		// Sets the text
 		txtResolutionWidth.setText("Width:");
-		//Sets the size
+		// Sets the size
 		txtResolutionWidth.setBounds(252, 37, 86, 20);
-		//Adds it to the window
+		// Adds it to the window
 		contentPane.add(txtResolutionWidth);
-		//Sets the number of columns
+		// Sets the number of columns
 		txtResolutionWidth.setColumns(10);
-		
-		//Inits the width text field
+
+		// Inits the width text field
 		textField_2 = new JTextField();
-		//Sets the size
+		// Sets the size
 		textField_2.setBounds(252, 55, 86, 20);
-		//Adds it to the window
+		// Adds it to the window
 		contentPane.add(textField_2);
-		//Sets the number of columns
+		// Sets the number of columns
 		textField_2.setColumns(10);
-		//Sets the text
-		textField_2.setText(String.valueOf(Main.visionParams.width));
-		
-		//Inits the height text field
+		// Sets the text
+		textField_2.setText("");
+
+		// Inits the height text field
 		txtHeight = new JTextField();
-		//Sets the tooltip
+		// Sets the tooltip
 		txtHeight.setToolTipText("Sets the height for the frame in the program");
-		//Makes it not editable
+		// Makes it not editable
 		txtHeight.setEditable(false);
-		//Sets the text
+		// Sets the text
 		txtHeight.setText("Height:");
-		//Sets the size
+		// Sets the size
 		txtHeight.setBounds(252, 92, 86, 20);
-		//Adds it to the window
+		// Adds it to the window
 		contentPane.add(txtHeight);
-		//Sets the number of columns
+		// Sets the number of columns
 		txtHeight.setColumns(10);
-		
-		//Inits the height text field
+
+		// Inits the height text field
 		textField_3 = new JTextField();
-		//Sets the size
+		// Sets the size
 		textField_3.setBounds(252, 119, 86, 20);
-		//Adds it to the window
+		// Adds it to the window
 		contentPane.add(textField_3);
-		//Sets the number of columns
+		// Sets the number of columns
 		textField_3.setColumns(10);
-		//Sets the text
-		textField_3.setText(String.valueOf(Main.visionParams.height));
+		// Sets the text
+		textField_3.setText("");
+
+		textField_6 = new JTextField("Config Name:");
+		textField_6.setBounds(298, 244, 114, 18);
+		textField_6.setEditable(false);
+		contentPane.add(textField_6);
+		textField_6.setColumns(10);
+
+		textField_7 = new JTextField();
+		textField_7.setBounds(415, 244, 163, 18);
+		contentPane.add(textField_7);
+		textField_7.setColumns(10);
+
+		JButton btnNewButton = new JButton("Load");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+
+				Main.loadVisionParams();
+
+				for (VisionParams p : Main.visionParamsList) {
+					if (p.name.equals(textField_7.getText())) {
+
+						visionParams = p;
+
+						textField.setText("" + visionParams.cameraSelect);
+						textField_1.setText("" + visionParams.erodeDilateIterations);
+						minArea.setText("" + visionParams.minArea);
+						textField_2.setText("" + visionParams.width);
+						textField_3.setText("" + visionParams.height);
+
+						sMinHue.setValue(visionParams.minHue);
+						sMaxHue.setValue(visionParams.maxHue);
+						sMinSat.setValue(visionParams.minSaturation);
+						sMaxSat.setValue(visionParams.maxSaturation);
+						sMinVal.setValue(visionParams.minValue);
+						sMaxVal.setValue(visionParams.maxValue);
+
+						textField_4.setText(""+visionParams.secondsBetweenImageDumps);
+						
+						textField_5.setText(visionParams.outputPath);
+						
+						slider.setValue((int) (visionParams.distToCentreImportance * 100));
+
+						slider_1.setValue((int) (visionParams.aspectRatioThresh * 100));
+
+						break;
+
+					}
+				}
+
+			}
+		});
+		btnNewButton.setBounds(480, 210, 98, 24);
+		contentPane.add(btnNewButton);
 		
-		
-		btnOpenImage = new JButton("Open Image");
-		btnOpenImage.setBounds(431, 178, 116, 23);
-		btnOpenImage.addActionListener(this);
-		contentPane.add(btnOpenImage);
-		
-		this.addKeyListener(this);
-		
-		//Makes the window visible
-		setVisible(show);
-		
-		//Starts the update thread
+		btnNewButton_1 = new JButton("Start");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				thread.start();
+			}
+		});
+		btnNewButton_1.setBounds(480, 162, 98, 24);
+		contentPane.add(btnNewButton_1);
+
+		// Makes the window visible
+		setVisible(true);
+
+		// Starts the update thread
 		new Thread(this).start();
 	}
 
@@ -576,81 +601,86 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 	 */
 	@Override
 	public void run() {
-		while(b){
-			if(stop) {
-				b = false;
-			}
-			try{
-				//If the camera number is a number
-				if(isInt(textField.getText())){
-					//Update the camera number
-					Main.visionParams.cameraSelect = Integer.valueOf(Integer.valueOf(textField.getText()));
+		while (true) {
+			try {
+				// If the camera number is a number
+				if (isInt(textField.getText())) {
+					// Update the camera number
+					visionParams.cameraSelect = Integer.valueOf(Integer.valueOf(textField.getText()));
 				}
-				//If the erode dilate iterations is a number
-				if(isInt(textField_1.getText())){
-					//Update the erode dilate iterations
-					Main.visionParams.erodeDilateIterations = Integer.valueOf(textField_1.getText());
+				// If the erode dilate iterations is a number
+				if (isInt(textField_1.getText())) {
+					// Update the erode dilate iterations
+					visionParams.erodeDilateIterations = Integer.valueOf(textField_1.getText());
 				}
-				//If the minimum area is a number
-				if(isDouble(minArea.getText())){
-					//Update the minimum area
-					Main.visionParams.minArea = Double.valueOf(minArea.getText());
+				// If the minimum area is a number
+				if (isDouble(minArea.getText())) {
+					// Update the minimum area
+					visionParams.minArea = Double.valueOf(minArea.getText());
 				}
-				//If the output path is not blank
-				if(!textField_5.getText().equals("")){
-					//Update the output path
-					Main.outputPath = textField_5.getText();
+
+				// If the seconds between image dumps is a number
+				if (isInt(textField_4.getText())) {
+					// Update the seconds between image dumps
+					visionParams.secondsBetweenImageDumps = Integer.valueOf(textField_4.getText());
 				}
-				//If the seconds between image dumps is a number
-				if(isInt(textField_4.getText())) {
-					//Update the seconds between image dumps
-					Main.seconds_between_img_dumps = Integer.valueOf(textField_4.getText());
+				// If the width is a number
+				if (isInt(textField_2.getText())) {
+					// Update the width
+					visionParams.width = Integer.valueOf(textField_2.getText());
+					// Update the size
+					visionParams.sz = new Size(visionParams.width, visionParams.height);
 				}
-				//If the width is a number
-				if(isInt(textField_2.getText())){
-					//Update the width
-					Main.visionParams.width = Integer.valueOf(textField_2.getText());
-					//Update the size
-					Main.visionParams.sz = new Size(Main.visionParams.width,Main.visionParams.height);
+				// If the height is a number
+				if (isInt(textField_3.getText())) {
+					// Update the height
+					visionParams.height = Integer.valueOf(textField_3.getText());
+					// Update the size
+					visionParams.sz = new Size(visionParams.width, visionParams.height);
 				}
-				//If the height is a number
-				if(isInt(textField_3.getText())){
-					//Update the height
-					Main.visionParams.height = Integer.valueOf(textField_3.getText());
-					//Update the size
-					Main.visionParams.sz = new Size(Main.visionParams.width,Main.visionParams.height);
-				}
-				//Update the minimum hue
-				Main.visionParams.minHue = sMinHue.getValue();
-				//Update the maximum hue
-				Main.visionParams.maxHue = sMaxHue.getValue();
-				//Update the minimum saturation
-				Main.visionParams.minSaturation = sMinSat.getValue();
-				//Update the maximum saturation
-				Main.visionParams.maxSaturation = sMaxSat.getValue();
-				//Update the minimum value
-				Main.visionParams.minValue = sMinVal.getValue();
-				//Update the maximum value
-				Main.visionParams.maxValue = sMaxVal.getValue();
-				//Update the distance to center importance
-				Main.visionParams.distToCentreImportance = ((double) slider.getValue())/100;
-				//Update the aspect ratio threshold
-				Main.visionParams.aspectRatioThresh = ((double) slider_1.getValue())/100;
-				//Update the hue text
-				txtHue.setText("Hue: "+Main.visionParams.minHue+"-"+Main.visionParams.maxHue);
-				//Update the saturation text
-				txtSaturation.setText("Saturation: "+Main.visionParams.minSaturation+"-"+Main.visionParams.maxSaturation);
-				//Update the value text
-				txtValue.setText("Value: "+Main.visionParams.minValue+"-"+Main.visionParams.maxValue);
-				//Update the distance to center importane text
-				txtDtci.setText("Distance To Center Importance: "+(Main.visionParams.distToCentreImportance*100)+"%");
+				visionParams.outputPath = textField_5.getText();
+				// Update the minimum hue
+				visionParams.minHue = sMinHue.getValue();
+				// Update the maximum hue
+				visionParams.maxHue = sMaxHue.getValue();
+				// Update the minimum saturation
+				visionParams.minSaturation = sMinSat.getValue();
+				// Update the maximum saturation
+				visionParams.maxSaturation = sMaxSat.getValue();
+				// Update the minimum value
+				visionParams.minValue = sMinVal.getValue();
+				// Update the maximum value
+				visionParams.maxValue = sMaxVal.getValue();
+				// Update the distance to center importance
+				visionParams.distToCentreImportance = ((double) slider.getValue()) / 100;
+				// Update the aspect ratio threshold
+				visionParams.aspectRatioThresh = ((double) slider_1.getValue()) / 100;
+				// Update the hue text
+				txtHue.setText("Hue: " + visionParams.minHue + "-" + visionParams.maxHue);
+				// Update the saturation text
+				txtSaturation.setText("Saturation: " + visionParams.minSaturation + "-" + visionParams.maxSaturation);
+				// Update the value text
+				txtValue.setText("Value: " + visionParams.minValue + "-" + visionParams.maxValue);
+				// Update the distance to center importane text
+				txtDtci.setText("Distance To Center Importance: " + (visionParams.distToCentreImportance * 100) + "%");
+
+				visionParams.name = textField_7.getText();
 				
-				//Sleep for 1ms
+				thread.updateParams(visionParams);
+				
+				// Sleep for 1ms
 				Thread.sleep(5);
-			}catch(Exception e){
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static void main(String[] args) {
+		// Must be included!
+		// Loads OpenCV
+		System.loadLibrary("opencv_java310");
+		new ParamsSelector();
 	}
 
 	/**
@@ -658,94 +688,50 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 	 */
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		//If save button pressed
-		if(arg0.getSource() == btnSave){
-			//Save vision parameters
-			Main.saveVisionParams();
-		}
-		if(arg0.getSource() == btnOpenImage){
-			JFileChooser chooser = new JFileChooser();
-			if(f != null){
-				chooser.setCurrentDirectory(f.getParentFile());
-			}
-			chooser.showOpenDialog(contentPane);
-			if(chooser.getSelectedFile() != null){
-				f = chooser.getSelectedFile();
-				Main.filename = f.getName();
-				Main.useCamera = false;
-				Main.visionParams.imageFile= f.getAbsolutePath();
-				for(int i = 0; i < f.getParentFile().listFiles().length;i++) {
-					String path = f.getParentFile().listFiles()[i].getAbsolutePath();
-					if(path.equals(f.getAbsolutePath())) {
-						index = i;
-						break;
-					}
-				}
+		// If save button pressed
+		if (arg0.getSource() == btnSave) {
+			// Save vision parameters
+			try {
+				Main.saveVisionParams(visionParams);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}
+
 	/**
 	 * Checks if a string is a valid integer
+	 * 
 	 * @param s the string
 	 * @return if the string is a integer
 	 */
-	public static boolean isInt(String s){
-		try{
-			//Test if it is a int
+	public static boolean isInt(String s) {
+		try {
+			// Test if it is a int
 			Integer.valueOf(s);
-			//Success
+			// Success
 			return true;
-		}catch(NumberFormatException e){
-			//Fail
+		} catch (NumberFormatException e) {
+			// Fail
 			return false;
 		}
 	}
+
 	/**
 	 * Checks if a string is a valid double
+	 * 
 	 * @param s the string
 	 * @return if the string is a double
 	 */
-	public static boolean isDouble(String s){
-		try{
-			//Test if it is a double
+	public static boolean isDouble(String s) {
+		try {
+			// Test if it is a double
 			Double.valueOf(s);
-			//Success
+			// Success
 			return true;
-		}catch(NumberFormatException e){
-			//Fail
+		} catch (NumberFormatException e) {
+			// Fail
 			return false;
 		}
-	}
-
-	@Override
-	public void keyPressed(KeyEvent key) {
-		System.out.println(key.getKeyCode());
-		if(key.getKeyCode() == KeyEvent.VK_LEFT) {
-			if(f != null && index != f.getParentFile().listFiles().length) {
-				index++;
-				f = f.getParentFile().listFiles()[index];
-				Main.filename = f.getName();
-				Main.useCamera = false;
-				Main.visionParams.imageFile= f.getAbsolutePath();
-			}
-		}else if(key.getKeyCode() == KeyEvent.VK_RIGHT) {
-			if(f != null && index != 0) {
-				index--;
-				f = f.getParentFile().listFiles()[index];
-				Main.filename = f.getName();
-				Main.useCamera = false;
-				Main.visionParams.imageFile= f.getAbsolutePath();
-			}
-		}
-	}
-
-	@Override
-	public void keyReleased(KeyEvent arg0) {
-		
-	}
-
-	@Override
-	public void keyTyped(KeyEvent arg0) {
-		
 	}
 }

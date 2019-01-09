@@ -23,10 +23,13 @@ public class CameraServer extends Thread{
 		VideoCapture capture = new VideoCapture(id);
 		
 		cameras.put(id,capture);
+		capture.read(frame1);
+		frames.put(id, frame1);
 		
 		
 	}
 	
+	private static Mat frame1;
 	private static Map<Integer,Mat> frames = new HashMap<Integer,Mat>();
 	
 	public static Mat getFrame(int camera) {

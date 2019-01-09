@@ -23,11 +23,10 @@ public class Pipeline {
      * @param visionParams Parameters for visionTable
      * @return All the data!
      */
-	@SuppressWarnings("unused")
 	public static VisionData process(Mat src, VisionParams visionParams, boolean use_GUI) {
 
 		// As a memory footprint optimization, when running on a Pi, re-use one working image in memory
-		Mat dilated, erodeOne, erodeTwo, workingImg;
+		Mat dilated, erodeOne, erodeTwo;
 		//If using the guis
 		if (use_GUI) {
 			//Make new Mats
@@ -47,6 +46,7 @@ public class Pipeline {
 		// For example, any numbers that we want to return to the roboRIO.
 		VisionData visionData = new VisionData();
 
+		visionData.params = visionParams;
 
 		// Colour threshold
 		Mat hsvThreshold = new Mat();
@@ -80,9 +80,7 @@ public class Pipeline {
 				 * if the x length of the rectangle is 2 times the Y length then it is safe to say there are 2 cubes
 				 * this code also gives a 25% range for error (still detect if X length is 2.25 / 1.75 times the Y length)
 				 */
-				int target1CtrX, target1CtrY, target2CtrX, target2CtrY;
-				double target1AreaNorm, target2AreaNorm;
-                if ((boundingRect.width <= (2 + visionParams.aspectRatioThresh) * boundingRect.height) && (boundingRect.width >= (2 - visionParams.aspectRatioThresh) * boundingRect.height)) {
+				if ((boundingRect.width <= (2 + visionParams.aspectRatioThresh) * boundingRect.height) && (boundingRect.width >= (2 - visionParams.aspectRatioThresh) * boundingRect.height)) {
 
 					// Detect 2 targets rather than 1 big bounding box
 
