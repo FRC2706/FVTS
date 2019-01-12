@@ -11,7 +11,6 @@ public class CameraServer extends Thread {
 
 	public static void startServer() {
 		new CameraServer().start();
-		new SenderThread().start();
 	}
 
 	public static void initCamera(int id) throws Exception {
