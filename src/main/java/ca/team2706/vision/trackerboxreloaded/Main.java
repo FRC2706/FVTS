@@ -566,6 +566,10 @@ public class Main {
 			long pipelineEnd = System.nanoTime();
 			// Selects the prefered target
 			Pipeline.selectPreferredTarget(visionData, visionParams);
+			
+			if(visionData.preferredTarget != null)
+				System.out.println("angle: "+visionData.preferredTarget.angle);
+			
 			// Creates the raw output image object
 			Mat rawOutputImg;
 			if (use_GUI) {

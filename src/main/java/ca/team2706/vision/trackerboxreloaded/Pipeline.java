@@ -80,19 +80,19 @@ public class Pipeline {
 
 			if (areaNorm >= visionParams.minArea) {
 
-				double a = Double.NEGATIVE_INFINITY, b = Double.NEGATIVE_INFINITY, c = Double.NEGATIVE_INFINITY,
-						d = Double.NEGATIVE_INFINITY;
+				double a = Double.POSITIVE_INFINITY, b = Double.POSITIVE_INFINITY, c = Double.POSITIVE_INFINITY,
+						d = Double.POSITIVE_INFINITY;
 
 				double x1, x2, x3, x4, y1, y2, y3, y4;
 
-				x1 = 0;
-				y1 = 0;
-				x2 = boundingRect.width;
-				y2 = 0;
-				x3 = boundingRect.width;
-				y3 = boundingRect.height;
-				x4 = 0;
-				y4 = boundingRect.height;
+				x1 = boundingRect.x;
+				y1 = boundingRect.y;
+				x2 = boundingRect.width+boundingRect.x;
+				y2 = boundingRect.y;
+				x3 = boundingRect.width+boundingRect.x;
+				y3 = boundingRect.height+boundingRect.y;
+				x4 = boundingRect.x;
+				y4 = boundingRect.height+boundingRect.y;
 
 				for (Point point : points) {
 
@@ -100,7 +100,7 @@ public class Pipeline {
 					double b1 = Math.sqrt(Math.pow(point.x - x2, 2) + Math.pow(point.y - y2, 2));
 					double c1 = Math.sqrt(Math.pow(point.x - x3, 2) + Math.pow(point.y - y3, 2));
 					double d1 = Math.sqrt(Math.pow(point.x - x4, 2) + Math.pow(point.y - y4, 2));
-
+					
 					if (a1 < a) {
 						a = a1;
 						continue;
@@ -154,7 +154,7 @@ public class Pipeline {
 					angle = Math.toDegrees(Math.atan(height / width));
 
 				} catch (Exception e) {
-
+					e.printStackTrace();
 				}
 
 				VisionData.Target target = new VisionData.Target();
