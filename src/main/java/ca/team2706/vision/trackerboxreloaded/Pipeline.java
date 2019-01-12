@@ -150,11 +150,19 @@ public class Pipeline {
 					
 					double height = D.y - A.y;
 					double width = Math.abs(D.x - A.x);
+					
+					if(width == 0) {
+						width = 1;
+					}
+					if(height == 0) {
+						height = 1;
+					}
 
 					angle = Math.toDegrees(Math.atan(height / width));
 					
-					if(A.x == D.x) {
-						angle = 90;
+					if(D.x < A.x) {
+						//Angle is negative
+						angle = -angle;
 					}
 
 				} catch (Exception e) {
