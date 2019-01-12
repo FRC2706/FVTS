@@ -147,11 +147,15 @@ public class Pipeline {
 
 					Point A = orderedPoints.get(0);
 					Point D = orderedPoints.get(orderedPoints.size() - 1);
-
+					
 					double height = D.y - A.y;
 					double width = Math.abs(D.x - A.x);
 
 					angle = Math.toDegrees(Math.atan(height / width));
+					
+					if(A.x == D.x) {
+						angle = 90;
+					}
 
 				} catch (Exception e) {
 					e.printStackTrace();
