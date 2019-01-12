@@ -128,6 +128,7 @@ public class Main {
 	public static class VisionData {
 
 		public static class Target {
+			double angle;
 			/** The x center of the target in the image **/
 			int xCentre;
 			/**
