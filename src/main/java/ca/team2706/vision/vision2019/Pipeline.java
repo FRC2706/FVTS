@@ -1,9 +1,10 @@
-package ca.team2706.vision.trackerboxreloaded;
+package ca.team2706.vision.vision2019;
 
-import ca.team2706.vision.trackerboxreloaded.Main.VisionData;
-import ca.team2706.vision.trackerboxreloaded.Main.VisionParams;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
+
+import ca.team2706.vision.vision2019.Main.VisionData;
+import ca.team2706.vision.vision2019.Main.VisionParams;
 
 import java.util.ArrayList;
 import java.util.List;

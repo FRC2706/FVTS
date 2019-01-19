@@ -1,4 +1,4 @@
-package ca.team2706.vision.trackerboxreloaded;
+package ca.team2706.vision.vision2019;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -12,8 +12,8 @@ import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.VideoWriter;
 import org.opencv.videoio.Videoio;
 
-import ca.team2706.vision.trackerboxreloaded.Main.VisionData;
-import ca.team2706.vision.trackerboxreloaded.Main.VisionParams;
+import ca.team2706.vision.vision2019.Main.VisionData;
+import ca.team2706.vision.vision2019.Main.VisionParams;
 
 public class MainThread extends Thread {
 

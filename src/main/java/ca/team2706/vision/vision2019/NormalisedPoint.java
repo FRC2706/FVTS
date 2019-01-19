@@ -1,4 +1,4 @@
-package ca.team2706.vision.trackerboxreloaded;
+package ca.team2706.vision.vision2019;
 
 /**
  * A class to hold a x and y position
