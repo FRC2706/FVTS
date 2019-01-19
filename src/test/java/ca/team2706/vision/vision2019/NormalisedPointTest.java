@@ -1,8 +1,10 @@
-package ca.team2706.vision.trackerboxreloaded;
+package ca.team2706.vision.vision2019;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import ca.team2706.vision.vision2019.NormalisedPoint;
 
 public class NormalisedPointTest {
 

@@ -1,4 +1,4 @@
-package ca.team2706.vision.trackerboxreloaded;
+package ca.team2706.vision.vision2019;
 
 import org.opencv.core.Size;
 
@@ -264,7 +264,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 		textField = new JTextField(String.valueOf(Main.visionParams.cameraSelect));
 		//Set the size
 		textField.setBounds(115, 32, 86, 20);
-		//Add it to the window
+		//Add it to the window 
 		contentPane.add(textField);
 		//Set the number of columns
 		textField.setColumns(10);

@@ -1,10 +1,13 @@
-package ca.team2706.vision.trackerboxreloaded;
+package ca.team2706.vision.vision2019;
 
 import static org.junit.Assert.*;
 
 import java.awt.image.BufferedImage;
 
 import org.junit.Test;
+
+import ca.team2706.vision.vision2019.Bundle;
+import ca.team2706.vision.vision2019.ImageDumpScheduler;
 
 public class ImageDumpSchedulerTest {
 

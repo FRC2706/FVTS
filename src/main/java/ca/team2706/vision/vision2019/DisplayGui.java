@@ -1,6 +1,7 @@
-package ca.team2706.vision.trackerboxreloaded;
+package ca.team2706.vision.vision2019;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;

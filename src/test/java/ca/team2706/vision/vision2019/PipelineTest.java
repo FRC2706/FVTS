@@ -1,4 +1,4 @@
-package ca.team2706.vision.trackerboxreloaded;
+package ca.team2706.vision.vision2019;
 
 import static org.junit.Assert.fail;
 
@@ -8,9 +8,10 @@ import org.junit.Test;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
-import ca.team2706.vision.trackerboxreloaded.Main.VisionData;
-import ca.team2706.vision.trackerboxreloaded.Main.VisionData.Target;
-import ca.team2706.vision.trackerboxreloaded.Main.VisionParams;
+import ca.team2706.vision.vision2019.Pipeline;
+import ca.team2706.vision.vision2019.Main.VisionData;
+import ca.team2706.vision.vision2019.Main.VisionParams;
+import ca.team2706.vision.vision2019.Main.VisionData.Target;
 
 public class PipelineTest {
 
