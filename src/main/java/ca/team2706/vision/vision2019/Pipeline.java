@@ -205,8 +205,6 @@ public class Pipeline {
 				continue;
 			}
 			
-			double minDist = Double.MAX_VALUE;
-			
 			Target minTarget = null;
 			
 			for (Target target2 : visionData.targetsFound) {
@@ -415,8 +413,8 @@ public class Pipeline {
 			double x = target.boundingBox.x < minTarget.boundingBox.x ? target.boundingBox.x : minTarget.boundingBox.x;
 			double y = target.boundingBox.y < minTarget.boundingBox.y ? target.boundingBox.y : minTarget.boundingBox.y;
 			
-			double width = Math.abs(target.boundingBox.x-minTarget.boundingBox.x);
-			double height = Math.abs(target.boundingBox.y-minTarget.boundingBox.y);
+			double width = Math.abs(target.boundingBox.x-minTarget.boundingBox.x)+minTarget.boundingBox.width;
+			double height = Math.abs(target.boundingBox.y-minTarget.boundingBox.y)+minTarget.boundingBox.height;
 			
 			target3.boundingBox = new Rect((int) x,(int) y,(int) width,(int) height);
 			target3.xCentre = (int) (x + (width / 2));
