@@ -1,6 +1,7 @@
 package ca.team2706.vision.vision2019;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.opencv.core.Core;
@@ -166,7 +167,7 @@ public class Pipeline {
 				}
 
 			}
-			List<Point> orderedPoints = new ArrayList<Point>();
+			List<OrderedPoint> orderedPoints = new ArrayList<OrderedPoint>();
 			for (Point point : target.contour.toArray()) {
 
 				double a1 = Math.sqrt(Math.pow(point.x - x1, 2) + Math.pow(point.y - y1, 2));
@@ -175,26 +176,28 @@ public class Pipeline {
 				double d1 = Math.sqrt(Math.pow(point.x - x4, 2) + Math.pow(point.y - y4, 2));
 
 				if (a1 == a) {
-					orderedPoints.add(point);
+					orderedPoints.add(new OrderedPoint(point,1));
 				}
 				if (b1 == b) {
-					orderedPoints.add(point);
+					orderedPoints.add(new OrderedPoint(point,2));
 				}
 				if (c1 == c) {
-					orderedPoints.add(point);
+					orderedPoints.add(new OrderedPoint(point,3));
 				}
 				if (d1 == d) {
-					orderedPoints.add(point);
+					orderedPoints.add(new OrderedPoint(point,4));
 				}
 			}
+			
+			Collections.sort(orderedPoints);
 
 			double slope = 0;
 			double b2 = 0;
 			
 			try {
 
-				Point A = orderedPoints.get(0);
-				Point D = orderedPoints.get(orderedPoints.size() - 1);
+				Point A = orderedPoints.get(0).getP();
+				Point D = orderedPoints.get(orderedPoints.size() - 1).getP();
 
 				slope = (A.x - D.x) / (A.y - D.y);
 				b2 = slope*A.x;
@@ -206,6 +209,7 @@ public class Pipeline {
 			}
 			
 			Target minTarget = null;
+			double minDist = Double.MAX_VALUE;
 			
 			for (Target target2 : visionData.targetsFound) {
 
@@ -255,7 +259,7 @@ public class Pipeline {
 					
 					
 					
-					List<Point> orderedPoints1 = new ArrayList<Point>();
+					List<OrderedPoint> orderedPoints1 = new ArrayList<OrderedPoint>();
 					for (Point point : target2.contour.toArray()) {
 
 						double a11 = Math.sqrt(Math.pow(point.x - x11, 2) + Math.pow(point.y - y11, 2));
@@ -264,36 +268,40 @@ public class Pipeline {
 						double d11 = Math.sqrt(Math.pow(point.x - x41, 2) + Math.pow(point.y - y41, 2));
 	
 						if (a11 == a1) {
-							orderedPoints1.add(point);
+							orderedPoints1.add(new OrderedPoint(point,1));
 						}
 						if (b11 == b1) {
-							orderedPoints1.add(point);
+							orderedPoints1.add(new OrderedPoint(point,2));
 						}
 						if (c11 == c1) {
-							orderedPoints1.add(point);
+							orderedPoints1.add(new OrderedPoint(point,3));
 						}
 						if (d11 == d1) {
-							orderedPoints1.add(point);
+							orderedPoints1.add(new OrderedPoint(point,4));
 						}
 					}
 					
-					
+					Collections.sort(orderedPoints1);
 
 					double slope1 = 0;
 					double b21 = 0;
 
 					try {
 
-						Point A = orderedPoints1.get(0);
-						Point D = orderedPoints1.get(orderedPoints1.size() - 1);
+						Point A = orderedPoints1.get(0).getP();
+						Point D = orderedPoints1.get(orderedPoints1.size() - 1).getP();
 
 						slope1 = (A.x - D.x) / (A.y - D.y);
 						b21 = slope*A.x;
 						b21 = A.y-b21;
 						
-						if(slope1 < 0 && slope > 0) {
+						double dist = Math.sqrt(Math.pow(Math.abs(target.xCentre-target2.xCentre), 2)+Math.pow(Math.abs(target.yCentre-target2.yCentre), 2));
+						
+						if(slope1 < 0 && slope > 0 && dist < minDist) {
 							
 							minTarget = target2;
+							
+							minDist = dist;
 							
 						}
 						
@@ -353,42 +361,44 @@ public class Pipeline {
 						}
 
 					}
-					List<Point> orderedPoints1 = new ArrayList<Point>();
+					List<OrderedPoint> orderedPoints1 = new ArrayList<OrderedPoint>();
 					for (Point point : target2.contour.toArray()) {
 
 						double a11 = Math.sqrt(Math.pow(point.x - x11, 2) + Math.pow(point.y - y11, 2));
 						double b11 = Math.sqrt(Math.pow(point.x - x21, 2) + Math.pow(point.y - y21, 2));
 						double c11 = Math.sqrt(Math.pow(point.x - x31, 2) + Math.pow(point.y - y31, 2));
 						double d11 = Math.sqrt(Math.pow(point.x - x41, 2) + Math.pow(point.y - y41, 2));
-
+	
 						if (a11 == a1) {
-							orderedPoints1.add(point);
+							orderedPoints1.add(new OrderedPoint(point,1));
 						}
 						if (b11 == b1) {
-							orderedPoints1.add(point);
+							orderedPoints1.add(new OrderedPoint(point,2));
 						}
 						if (c11 == c1) {
-							orderedPoints1.add(point);
+							orderedPoints1.add(new OrderedPoint(point,3));
 						}
 						if (d11 == d1) {
-							orderedPoints1.add(point);
+							orderedPoints1.add(new OrderedPoint(point,4));
 						}
 					}
+					
+					Collections.sort(orderedPoints1);
 
 					double slope1 = 0;
 					double b21 = 0;
 
 					try {
-						Point A = orderedPoints1.get(0);
-						Point D = orderedPoints1.get(orderedPoints1.size() - 1);
+						Point A = orderedPoints1.get(0).getP();
+						Point D = orderedPoints1.get(orderedPoints1.size() - 1).getP();
 
 						slope1 = (A.x - D.x) / (A.y - D.y);
 						b21 = slope*A.x;
 						b21 = A.y-b21;
 						
-						if(slope1 < 0 && slope > 0) {
-							
-						}else {
+						double dist = Math.sqrt(Math.pow(Math.abs(target.xCentre-target2.xCentre), 2)+Math.pow(Math.abs(target.yCentre-target2.yCentre), 2));
+						
+						if(!(slope1 < 0) && !(slope > 0) && dist < minDist) {
 							missingPair = true;
 						}
 						
@@ -402,7 +412,7 @@ public class Pipeline {
 				
 			}
 			
-			if(missingPair || minTarget == null) {
+			if(minTarget == null || missingPair) {
 				
 				continue;
 				
