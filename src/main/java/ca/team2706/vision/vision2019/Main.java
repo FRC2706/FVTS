@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -22,6 +23,7 @@ import javax.imageio.ImageIO;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -128,7 +130,9 @@ public class Main {
 	public static class VisionData {
 
 		public static class Target {
-			double angle;
+			
+			MatOfPoint contour;
+			
 			/** The x center of the target in the image **/
 			int xCentre;
 			/**
@@ -152,7 +156,7 @@ public class Main {
 		}
 
 		/** The List of all the targets in the image **/
-		ArrayList<Target> targetsFound = new ArrayList<Target>();
+		List<Target> targetsFound = new ArrayList<Target>();
 		/**
 		 * The target that is the most appealing, how it is chosen depends on
 		 * the distToCenterImportance value in the vision parameters
@@ -567,8 +571,6 @@ public class Main {
 			// Selects the prefered target
 			Pipeline.selectPreferredTarget(visionData, visionParams);
 			
-			if(visionData.preferredTarget != null)
-				System.out.println("angle: "+visionData.preferredTarget.angle);
 			
 			// Creates the raw output image object
 			Mat rawOutputImg;

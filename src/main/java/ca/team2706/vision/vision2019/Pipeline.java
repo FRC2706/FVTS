@@ -1,13 +1,19 @@
 package ca.team2706.vision.vision2019;
 
-import org.opencv.core.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import ca.team2706.vision.vision2019.Main.VisionData;
+import ca.team2706.vision.vision2019.Main.VisionData.Target;
 import ca.team2706.vision.vision2019.Main.VisionParams;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Pipeline {
 
@@ -81,103 +87,14 @@ public class Pipeline {
 
 			if (areaNorm >= visionParams.minArea) {
 
-				double a = Double.POSITIVE_INFINITY, b = Double.POSITIVE_INFINITY, c = Double.POSITIVE_INFINITY,
-						d = Double.POSITIVE_INFINITY;
-
-				double x1, x2, x3, x4, y1, y2, y3, y4;
-
-				x1 = boundingRect.x;
-				y1 = boundingRect.y;
-				x2 = boundingRect.width+boundingRect.x;
-				y2 = boundingRect.y;
-				x3 = boundingRect.width+boundingRect.x;
-				y3 = boundingRect.height+boundingRect.y;
-				x4 = boundingRect.x;
-				y4 = boundingRect.height+boundingRect.y;
-
-				for (Point point : points) {
-
-					double a1 = Math.sqrt(Math.pow(point.x - x1, 2) + Math.pow(point.y - y1, 2));
-					double b1 = Math.sqrt(Math.pow(point.x - x2, 2) + Math.pow(point.y - y2, 2));
-					double c1 = Math.sqrt(Math.pow(point.x - x3, 2) + Math.pow(point.y - y3, 2));
-					double d1 = Math.sqrt(Math.pow(point.x - x4, 2) + Math.pow(point.y - y4, 2));
-					
-					if (a1 < a) {
-						a = a1;
-						continue;
-					}
-					if (b1 < b) {
-						b = b1;
-						continue;
-					}
-					if (c1 < c) {
-						c = c1;
-						continue;
-					}
-					if (d1 < d) {
-						d = d1;
-						continue;
-					}
-
-				}
-				List<Point> orderedPoints = new ArrayList<Point>();
-				for (Point point : points) {
-
-					double a1 = Math.sqrt(Math.pow(point.x - x1, 2) + Math.pow(point.y - y1, 2));
-					double b1 = Math.sqrt(Math.pow(point.x - x2, 2) + Math.pow(point.y - y2, 2));
-					double c1 = Math.sqrt(Math.pow(point.x - x3, 2) + Math.pow(point.y - y3, 2));
-					double d1 = Math.sqrt(Math.pow(point.x - x4, 2) + Math.pow(point.y - y4, 2));
-
-					if (a1 == a) {
-						orderedPoints.add(point);
-					}
-					if (b1 == b) {
-						orderedPoints.add(point);
-					}
-					if (c1 == c) {
-						orderedPoints.add(point);
-					}
-					if (d1 == d) {
-						orderedPoints.add(point);
-					}
-				}
-
-				double angle = 90;
-
-				try {
-
-					Point A = orderedPoints.get(0);
-					Point D = orderedPoints.get(orderedPoints.size() - 1);
-					
-					double height = D.y - A.y;
-					double width = Math.abs(D.x - A.x);
-					
-					if(width == 0) {
-						width = 1;
-					}
-					if(height == 0) {
-						height = 1;
-					}
-
-					angle = Math.toDegrees(Math.atan(height / width));
-					
-					if(D.x < A.x) {
-						//Angle is negative
-						angle = -angle;
-					}
-
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
 				VisionData.Target target = new VisionData.Target();
 				target.boundingBox = boundingRect;
+				target.contour = contour;
 				target.xCentre = target.boundingBox.x + (target.boundingBox.width / 2);
 				target.xCentreNorm = ((double) target.xCentre - (src.width() / 2)) / (src.width() / 2);
 				target.yCentre = target.boundingBox.y + (target.boundingBox.height / 2);
 				target.yCentreNorm = ((double) target.yCentre - (src.height() / 2)) / (src.height() / 2);
 				target.areaNorm = (target.boundingBox.height * target.boundingBox.width) / ((double) imgArea);
-				target.angle = angle;
 				visionData.targetsFound.add(target);
 			}
 			// else
@@ -203,6 +120,316 @@ public class Pipeline {
 		if (visionData.targetsFound.size() == 0) {
 			return;
 		}
+
+		List<Target> newTargets = new ArrayList<Target>();
+
+		for (VisionData.Target target : visionData.targetsFound) {
+
+			Rect boundingRect = target.boundingBox;
+
+			double a = Double.POSITIVE_INFINITY, b = Double.POSITIVE_INFINITY, c = Double.POSITIVE_INFINITY,
+					d = Double.POSITIVE_INFINITY;
+
+			double x1, x2, x3, x4, y1, y2, y3, y4;
+
+			x1 = boundingRect.x;
+			y1 = boundingRect.y;
+			x2 = boundingRect.width + boundingRect.x;
+			y2 = boundingRect.y;
+			x3 = boundingRect.width + boundingRect.x;
+			y3 = boundingRect.height + boundingRect.y;
+			x4 = boundingRect.x;
+			y4 = boundingRect.height + boundingRect.y;
+
+			for (Point point : target.contour.toArray()) {
+
+				double a1 = Math.sqrt(Math.pow(point.x - x1, 2) + Math.pow(point.y - y1, 2));
+				double b1 = Math.sqrt(Math.pow(point.x - x2, 2) + Math.pow(point.y - y2, 2));
+				double c1 = Math.sqrt(Math.pow(point.x - x3, 2) + Math.pow(point.y - y3, 2));
+				double d1 = Math.sqrt(Math.pow(point.x - x4, 2) + Math.pow(point.y - y4, 2));
+
+				if (a1 < a) {
+					a = a1;
+					continue;
+				}
+				if (b1 < b) {
+					b = b1;
+					continue;
+				}
+				if (c1 < c) {
+					c = c1;
+					continue;
+				}
+				if (d1 < d) {
+					d = d1;
+					continue;
+				}
+
+			}
+			List<Point> orderedPoints = new ArrayList<Point>();
+			for (Point point : target.contour.toArray()) {
+
+				double a1 = Math.sqrt(Math.pow(point.x - x1, 2) + Math.pow(point.y - y1, 2));
+				double b1 = Math.sqrt(Math.pow(point.x - x2, 2) + Math.pow(point.y - y2, 2));
+				double c1 = Math.sqrt(Math.pow(point.x - x3, 2) + Math.pow(point.y - y3, 2));
+				double d1 = Math.sqrt(Math.pow(point.x - x4, 2) + Math.pow(point.y - y4, 2));
+
+				if (a1 == a) {
+					orderedPoints.add(point);
+				}
+				if (b1 == b) {
+					orderedPoints.add(point);
+				}
+				if (c1 == c) {
+					orderedPoints.add(point);
+				}
+				if (d1 == d) {
+					orderedPoints.add(point);
+				}
+			}
+
+			double slope = 0;
+			double b2 = 0;
+			
+			try {
+
+				Point A = orderedPoints.get(0);
+				Point D = orderedPoints.get(orderedPoints.size() - 1);
+
+				slope = (A.x - D.x) / (A.y - D.y);
+				b2 = slope*A.x;
+				b2 = A.y-b2;
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				continue;
+			}
+			
+			double minDist = Double.MAX_VALUE;
+			
+			Target minTarget = null;
+			
+			for (Target target2 : visionData.targetsFound) {
+
+				if (target2 != target) {
+
+					Rect boundingRect1 = target2.boundingBox;
+
+					double a1 = Double.POSITIVE_INFINITY, b1 = Double.POSITIVE_INFINITY, c1 = Double.POSITIVE_INFINITY,
+							d1 = Double.POSITIVE_INFINITY;
+
+					double x11, x21, x31, x41, y11, y21, y31, y41;
+
+					x11 = boundingRect1.x;
+					y11 = boundingRect1.y;
+					x21 = boundingRect1.width + boundingRect1.x;
+					y21 = boundingRect1.y;
+					x31 = boundingRect1.width + boundingRect1.x;
+					y31 = boundingRect1.height + boundingRect1.y;
+					x41 = boundingRect1.x;
+					y41 = boundingRect1.height + boundingRect1.y;
+				
+					for (Point point : target2.contour.toArray()) {
+
+						double a11 = Math.sqrt(Math.pow(point.x - x11, 2) + Math.pow(point.y - y11, 2));
+						double b11 = Math.sqrt(Math.pow(point.x - x21, 2) + Math.pow(point.y - y21, 2));
+						double c11 = Math.sqrt(Math.pow(point.x - x31, 2) + Math.pow(point.y - y31, 2));
+						double d11 = Math.sqrt(Math.pow(point.x - x41, 2) + Math.pow(point.y - y41, 2));
+
+						if (a11 < a1) {
+							a1 = a11;
+							continue;
+						}
+						if (b11 < b1) {
+							b1 = b11;
+							continue;
+						}
+						if (c11 < c1) {
+							c1 = c11;
+							continue;
+						}
+						if (d11 < d1) {
+							d1 = d11;
+							continue;
+						}
+
+					}
+					
+					
+					
+					List<Point> orderedPoints1 = new ArrayList<Point>();
+					for (Point point : target2.contour.toArray()) {
+
+						double a11 = Math.sqrt(Math.pow(point.x - x11, 2) + Math.pow(point.y - y11, 2));
+						double b11 = Math.sqrt(Math.pow(point.x - x21, 2) + Math.pow(point.y - y21, 2));
+						double c11 = Math.sqrt(Math.pow(point.x - x31, 2) + Math.pow(point.y - y31, 2));
+						double d11 = Math.sqrt(Math.pow(point.x - x41, 2) + Math.pow(point.y - y41, 2));
+	
+						if (a11 == a1) {
+							orderedPoints1.add(point);
+						}
+						if (b11 == b1) {
+							orderedPoints1.add(point);
+						}
+						if (c11 == c1) {
+							orderedPoints1.add(point);
+						}
+						if (d11 == d1) {
+							orderedPoints1.add(point);
+						}
+					}
+					
+					
+
+					double slope1 = 0;
+					double b21 = 0;
+
+					try {
+
+						Point A = orderedPoints1.get(0);
+						Point D = orderedPoints1.get(orderedPoints1.size() - 1);
+
+						slope1 = (A.x - D.x) / (A.y - D.y);
+						b21 = slope*A.x;
+						b21 = A.y-b21;
+						
+						if(slope1 < 0 && slope > 0) {
+							
+							minTarget = target2;
+							
+						}
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+						continue;
+					}
+					
+				}
+				
+			}
+			
+			boolean missingPair = false;
+			
+			for (Target target2 : visionData.targetsFound) {
+
+				if (target2 != target && !missingPair) {
+
+					Rect boundingRect1 = target2.boundingBox;
+
+					double a1 = Double.POSITIVE_INFINITY, b1 = Double.POSITIVE_INFINITY, c1 = Double.POSITIVE_INFINITY,
+							d1 = Double.POSITIVE_INFINITY;
+
+					double x11, x21, x31, x41, y11, y21, y31, y41;
+
+					x11 = boundingRect1.x;
+					y11 = boundingRect1.y;
+					x21 = boundingRect1.width + boundingRect1.x;
+					y21 = boundingRect1.y;
+					x31 = boundingRect1.width + boundingRect1.x;
+					y31 = boundingRect1.height + boundingRect1.y;
+					x41 = boundingRect1.x;
+					y41 = boundingRect1.height + boundingRect1.y;
+
+					for (Point point : target2.contour.toArray()) {
+
+						double a11 = Math.sqrt(Math.pow(point.x - x11, 2) + Math.pow(point.y - y11, 2));
+						double b11 = Math.sqrt(Math.pow(point.x - x21, 2) + Math.pow(point.y - y21, 2));
+						double c11 = Math.sqrt(Math.pow(point.x - x31, 2) + Math.pow(point.y - y31, 2));
+						double d11 = Math.sqrt(Math.pow(point.x - x41, 2) + Math.pow(point.y - y41, 2));
+
+						if (a11 < a1) {
+							a1 = a11;
+							continue;
+						}
+						if (b11 < b1) {
+							b1 = b11;
+							continue;
+						}
+						if (c11 < c1) {
+							c1 = c11;
+							continue;
+						}
+						if (d11 < d1) {
+							d1 = d11;
+							continue;
+						}
+
+					}
+					List<Point> orderedPoints1 = new ArrayList<Point>();
+					for (Point point : target2.contour.toArray()) {
+
+						double a11 = Math.sqrt(Math.pow(point.x - x11, 2) + Math.pow(point.y - y11, 2));
+						double b11 = Math.sqrt(Math.pow(point.x - x21, 2) + Math.pow(point.y - y21, 2));
+						double c11 = Math.sqrt(Math.pow(point.x - x31, 2) + Math.pow(point.y - y31, 2));
+						double d11 = Math.sqrt(Math.pow(point.x - x41, 2) + Math.pow(point.y - y41, 2));
+
+						if (a11 == a1) {
+							orderedPoints1.add(point);
+						}
+						if (b11 == b1) {
+							orderedPoints1.add(point);
+						}
+						if (c11 == c1) {
+							orderedPoints1.add(point);
+						}
+						if (d11 == d1) {
+							orderedPoints1.add(point);
+						}
+					}
+
+					double slope1 = 0;
+					double b21 = 0;
+
+					try {
+						Point A = orderedPoints1.get(0);
+						Point D = orderedPoints1.get(orderedPoints1.size() - 1);
+
+						slope1 = (A.x - D.x) / (A.y - D.y);
+						b21 = slope*A.x;
+						b21 = A.y-b21;
+						
+						if(slope1 < 0 && slope > 0) {
+							
+						}else {
+							missingPair = true;
+						}
+						
+					} catch (Exception e) {e.printStackTrace();
+						continue;
+					}
+					
+					
+					
+				}
+				
+			}
+			
+			if(missingPair || minTarget == null) {
+				
+				continue;
+				
+			}
+			
+			Target target3 = new Target();
+			
+			double x = target.boundingBox.x < minTarget.boundingBox.x ? target.boundingBox.x : minTarget.boundingBox.x;
+			double y = target.boundingBox.y < minTarget.boundingBox.y ? target.boundingBox.y : minTarget.boundingBox.y;
+			
+			double width = Math.abs(target.boundingBox.x-minTarget.boundingBox.x);
+			double height = Math.abs(target.boundingBox.y-minTarget.boundingBox.y);
+			
+			target3.boundingBox = new Rect((int) x,(int) y,(int) width,(int) height);
+			target3.xCentre = (int) (x + (width / 2));
+			target3.xCentreNorm = ((double) target3.xCentre - (visionData.binMask.width() / 2)) / (visionData.binMask.width() / 2);
+			target3.yCentre = (int) (y + (height / 2));
+			target3.yCentreNorm = ((double) target3.yCentre - (visionData.binMask.height() / 2)) / (visionData.binMask.height() / 2);
+			target3.areaNorm = (target3.boundingBox.height * target3.boundingBox.width) / ((double) visionData.binMask.width()*visionData.binMask.height());
+			
+			newTargets.add(target3);
+			
+		}
+
+		visionData.targetsFound = newTargets;
 
 		// loop over the targets to find the largest area of any target found.
 		// this is so we can give the largest a score of 1.0, and each other target a
