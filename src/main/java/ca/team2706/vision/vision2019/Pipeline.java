@@ -31,12 +31,12 @@ public class Pipeline {
 	 * @param visionParams Parameters for visionTable
 	 * @return All the data!
 	 */
-	@SuppressWarnings("unused")
+	
 	public static VisionData process(Mat src, VisionParams visionParams, boolean use_GUI) {
 
 		// As a memory footprint optimization, when running on a Pi, re-use one working
 		// image in memory
-		Mat dilated, erodeOne, erodeTwo, workingImg;
+		Mat dilated, erodeOne, erodeTwo;
 		// If using the guis
 		if (use_GUI) {
 			// Make new Mats
@@ -80,9 +80,7 @@ public class Pipeline {
 		for (MatOfPoint contour : contours) {
 
 			Rect boundingRect = Imgproc.boundingRect(contour);
-
-			List<Point> points = contour.toList();
-
+			
 			// height * width for area (easier and less CPU cycles than contour.area)
 			double areaNorm = ((double) boundingRect.width * boundingRect.height) / imgArea;
 
@@ -199,12 +197,26 @@ public class Pipeline {
 				Point A = orderedPoints.get(0).getP();
 				Point D = orderedPoints.get(orderedPoints.size() - 1).getP();
 
-				slope = (A.x - D.x) / (A.y - D.y);
+				double rise = (A.y - D.y);
+				double run = (A.x - D.x);
+				
+				if(rise == 0) {
+					rise = 1;
+				}
+				if(run == 0) {
+					run = 1;
+				}
+				
+				slope = rise/run;
 				b2 = slope*A.x;
 				b2 = A.y-b2;
 				
 			} catch (Exception e) {
 				e.printStackTrace();
+				continue;
+			}
+			
+			if(slope > 0) {
 				continue;
 			}
 			
@@ -256,9 +268,7 @@ public class Pipeline {
 						}
 
 					}
-					
-					
-					
+										
 					List<OrderedPoint> orderedPoints1 = new ArrayList<OrderedPoint>();
 					for (Point point : target2.contour.toArray()) {
 
@@ -291,13 +301,13 @@ public class Pipeline {
 						Point A = orderedPoints1.get(0).getP();
 						Point D = orderedPoints1.get(orderedPoints1.size() - 1).getP();
 
-						slope1 = (A.x - D.x) / (A.y - D.y);
+						slope1 = (A.y - D.y)/(A.x - D.x);
 						b21 = slope*A.x;
 						b21 = A.y-b21;
 						
 						double dist = Math.sqrt(Math.pow(Math.abs(target.xCentre-target2.xCentre), 2)+Math.pow(Math.abs(target.yCentre-target2.yCentre), 2));
 						
-						if(slope1 < 0 && slope > 0 && dist < minDist) {
+						if(slope1 > 0 && slope < 0 && dist < minDist) {
 							
 							minTarget = target2;
 							
@@ -392,21 +402,29 @@ public class Pipeline {
 						Point A = orderedPoints1.get(0).getP();
 						Point D = orderedPoints1.get(orderedPoints1.size() - 1).getP();
 
-						slope1 = (A.x - D.x) / (A.y - D.y);
+						double rise = (A.y - D.y);
+						double run = (A.x - D.x);
+						
+						if(rise == 0) {
+							rise = 1;
+						}
+						if(run == 0) {
+							run = 1;
+						}
+						
+						slope1 = rise/run;
 						b21 = slope*A.x;
 						b21 = A.y-b21;
 						
 						double dist = Math.sqrt(Math.pow(Math.abs(target.xCentre-target2.xCentre), 2)+Math.pow(Math.abs(target.yCentre-target2.yCentre), 2));
 						
-						if(!(slope1 < 0) && !(slope > 0) && dist < minDist) {
+						if(!(slope1 > 0) && !(slope < 0) && dist < minDist) {
 							missingPair = true;
 						}
 						
 					} catch (Exception e) {e.printStackTrace();
 						continue;
 					}
-					
-					
 					
 				}
 				
