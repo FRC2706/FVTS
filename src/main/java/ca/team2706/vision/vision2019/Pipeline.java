@@ -23,21 +23,20 @@ public class Pipeline {
 
 	/** The fps timer **/
 	public static long fpsTimer = System.nanoTime();
-
-	/**
-	 * The visionTable pipeline!
-	 *
-	 * @param src          Raw source image to process
-	 * @param visionParams Parameters for visionTable
-	 * @return All the data!
-	 */
 	
+	 /**
+     * The visionTable pipeline!
+     *
+     * @param src Raw source image to process
+     * @param visionParams Parameters for visionTable
+     * @return All the data!
+     */
 	public static VisionData process(Mat src, VisionParams visionParams, boolean use_GUI) {
 
-		// As a memory footprint optimization, when running on a Pi, re-use one working
-		// image in memory
+		// As a memory footprint optimization, when running on a Pi, re-use one working image in memory
 		Mat dilated, erodeOne, erodeTwo;
-		// If using the guis
+		//If using the guis
+		
 		if (use_GUI) {
 			// Make new Mats
 			dilated = new Mat();
@@ -56,6 +55,8 @@ public class Pipeline {
 		// to the VisionData class
 		// For example, any numbers that we want to return to the roboRIO.
 		VisionData visionData = new VisionData();
+
+		visionData.params = visionParams;
 
 		// Colour threshold
 		Mat hsvThreshold = new Mat();

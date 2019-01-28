@@ -14,7 +14,7 @@ public class BundleTest {
 	public void getRaw() {
 		try {
 			BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
-			Bundle bundle = new Bundle(image, null, null, 0);
+			Bundle bundle = new Bundle(image, null, null, 0,null);
 			if (!(bundle.getRaw() == image)) {
 				fail();
 			}
@@ -27,7 +27,7 @@ public class BundleTest {
 	public void getOutput() {
 		try {
 			BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
-			Bundle bundle = new Bundle(null, null, image, 0);
+			Bundle bundle = new Bundle(null, null, image, 0,null);
 			if (!(bundle.getOutput() == image)) {
 				fail();
 			}
@@ -40,7 +40,7 @@ public class BundleTest {
 	public void getBinMask() {
 		try {
 			BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
-			Bundle bundle = new Bundle(null, image, null, 0);
+			Bundle bundle = new Bundle(null, image, null, 0,null);
 			if (!(bundle.getBinMask() == image)) {
 				fail();
 			}
@@ -53,7 +53,7 @@ public class BundleTest {
 	public void getTimeStamp() {
 		try {
 			int i = 99;
-			Bundle bundle = new Bundle(null, null, null, i);
+			Bundle bundle = new Bundle(null, null, null, i,null);
 			if (!(bundle.getTimeStamp() == i)) {
 				fail();
 			}
@@ -66,7 +66,7 @@ public class BundleTest {
 	public void Bundle() {
 		try {
 			@SuppressWarnings("unused")
-			Bundle bundle = new Bundle(null, null, null, 0);
+			Bundle bundle = new Bundle(null, null, null, 0,null);
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}

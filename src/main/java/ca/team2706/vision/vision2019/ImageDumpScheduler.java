@@ -23,9 +23,9 @@ public class ImageDumpScheduler implements Runnable{
 				}
 				
 				try {
-					Main.imgDump(b.getRaw(), "raw",b.getTimeStamp());
-					Main.imgDump(b.getBinMask(), "binMask", b.getTimeStamp());
-					Main.imgDump(b.getOutput(), "output", b.getTimeStamp());
+					Main.imgDump(b.getRaw(), "raw",b.getTimeStamp(),b.getParams());
+					Main.imgDump(b.getBinMask(), "binMask", b.getTimeStamp(),b.getParams());
+					Main.imgDump(b.getOutput(), "output", b.getTimeStamp(),b.getParams());
 				} catch (Exception e) {
 					//Non fatal error
 				}
