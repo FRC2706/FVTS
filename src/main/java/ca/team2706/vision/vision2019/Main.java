@@ -399,5 +399,4 @@ public class Main {
 		}
 
 	} // end main video processing loop
-
 }

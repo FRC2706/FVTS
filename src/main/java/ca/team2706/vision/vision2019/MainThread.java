@@ -8,9 +8,6 @@ import javax.imageio.ImageIO;
 
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.videoio.VideoCapture;
-import org.opencv.videoio.VideoWriter;
-import org.opencv.videoio.Videoio;
 
 import ca.team2706.vision.vision2019.Main.VisionData;
 import ca.team2706.vision.vision2019.Main.VisionParams;
@@ -26,7 +23,6 @@ public class MainThread extends Thread {
 	public Mat frame;
 	public double current_time_seconds;
 	public boolean useCamera = true;
-	public VideoCapture camera;
 	public static int timestamp = 0;
 
 	@Override
@@ -42,26 +38,13 @@ public class MainThread extends Thread {
 		}
 
 		if (useCamera) {
-			// Initilizes the camera
-			camera = new VideoCapture(visionParams.cameraSelect);
-
-			// Sets camera parameters
-			int fourcc = VideoWriter.fourcc('M', 'J', 'P', 'G');
-			camera.set(Videoio.CAP_PROP_FOURCC, fourcc);
-			camera.set(Videoio.CAP_PROP_FRAME_WIDTH, visionParams.width);
-			camera.set(Videoio.CAP_PROP_FRAME_HEIGHT, visionParams.height);
-
-			camera.read(frame);
-
-			if (!camera.isOpened()) {
-				// If the camera didn't open throw an error
-				System.err.println("Error: Can not connect to camera");
-				// Exit
-				System.exit(1);
+			try {
+				CameraServer.initCamera(visionParams.cameraSelect);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 
-			// Set up the camera feed
-			camera.read(frame);
+		
 		} else {
 			// load the image from file.
 			try {
@@ -104,10 +87,7 @@ public class MainThread extends Thread {
 			try {
 				if (useCamera) {
 					// Read the frame from the camera, if it fails try again
-					if (!camera.read(frame)) {
-						System.err.println("Error: Failed to get a frame from the camera");
-						continue;
-					}
+					frame = CameraServer.getFrame(visionParams.cameraSelect);
 				} // else use the image from disk that we loaded above
 				else {
 					// load the image from file.
@@ -221,25 +201,13 @@ public class MainThread extends Thread {
 
 			if (useCamera) {
 				// Initilizes the camera
-				camera = new VideoCapture(visionParams.cameraSelect);
-
-				// Sets camera parameters
-				int fourcc = VideoWriter.fourcc('M', 'J', 'P', 'G');
-				camera.set(Videoio.CAP_PROP_FOURCC, fourcc);
-				camera.set(Videoio.CAP_PROP_FRAME_WIDTH, visionParams.width);
-				camera.set(Videoio.CAP_PROP_FRAME_HEIGHT, visionParams.height);
-
-				camera.read(frame);
-
-				if (!camera.isOpened()) {
-					// If the camera didn't open throw an error
-					System.err.println("Error: Can not connect to camera");
-					// Exit
-					System.exit(1);
+				try {
+					CameraServer.initCamera(visionParams.cameraSelect);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 
-				// Set up the camera feed
-				camera.read(frame);
+				
 			} else {
 				// load the image from file.
 				try {
