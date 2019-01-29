@@ -47,7 +47,7 @@ public class CameraServer extends Thread {
 	public void run() {
 
 		while (true) {
-
+			
 			for (int i : cameras.keySet()) {
 				
 				VideoCapture capture = cameras.get(i);

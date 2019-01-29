@@ -74,7 +74,6 @@ public class MainThread extends Thread {
 				guiRawImg = new DisplayGui(Main.matToBufferedImage(frame), "Raw-" + visionParams.name, true);
 				// Initilizes the window to display the processed image
 				guiProcessedImg = new DisplayGui(Main.matToBufferedImage(frame), "Processed-" + visionParams.name,true);
-				new ParamsSelector();
 			} catch (IOException e) {
 				// means mat2BufferedImage broke
 				// non-fatal error, let the program continue

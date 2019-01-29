@@ -143,7 +143,7 @@ public class ConfigParser {
 				}
 
 			} else {
-
+				
 				if (!s.startsWith("  ")) {
 					endLine = i;
 					break;
@@ -159,12 +159,17 @@ public class ConfigParser {
 		
 		List<String> newLines = new ArrayList<String>();
 		
+		if(foundStart) {
+		
 		for(int i = 0; i < lines.size(); i++) {
 			
-			if(!(i >= startLine) && !(i < endLine)) {
+			if(i < startLine || i > endLine) {
 				newLines.add(lines.get(i));
 			}
 			
+		}
+		}else {
+			newLines = lines;
 		}
 		
 		//We have the fjson file minus the list we want to save

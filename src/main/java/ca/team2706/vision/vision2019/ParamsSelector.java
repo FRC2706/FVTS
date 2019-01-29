@@ -582,6 +582,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		btnNewButton_1 = new JButton("Start");
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				thread.visionParams = visionParams;
 				thread.start();
 			}
 		});
@@ -665,6 +666,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 
 				visionParams.name = textField_7.getText();
 				
+				setTitle("ParamsSelector-"+visionParams.name);
+				
 				thread.updateParams(visionParams);
 				
 				// Sleep for 1ms
@@ -679,6 +682,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		// Must be included!
 		// Loads OpenCV
 		System.loadLibrary("opencv_java310");
+		CameraServer.startServer();
 		new ParamsSelector();
 	}
 
