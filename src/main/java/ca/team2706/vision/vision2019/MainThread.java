@@ -64,10 +64,9 @@ public class MainThread extends Thread {
 		if (System.getProperty("os.name").toLowerCase().indexOf("raspbian") != -1) {
 			use_GUI = false;
 		}
-		if (use_GUI) {
-			// Resizes the frame to the vision parameters size
-			Imgproc.resize(frame, frame, visionParams.sz);
-		}
+		
+		frame = CameraServer.getFrame(visionParams.cameraSelect);
+		
 		// Set up the GUI display windows
 		if (use_GUI) {
 			try {
@@ -139,6 +138,7 @@ public class MainThread extends Thread {
 					} catch (IOException e) {
 						// means mat2BufferedImage broke
 						// non-fatal error, let the program continue
+						e.printStackTrace();
 						continue;
 					} catch (NullPointerException e) {
 						e.printStackTrace();

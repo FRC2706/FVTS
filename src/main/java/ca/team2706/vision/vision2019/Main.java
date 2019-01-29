@@ -392,6 +392,8 @@ public class Main {
 
 		ImageDumpScheduler.start();
 
+		CameraServer.startServer();
+		
 		for (VisionParams params : visionParamsList) {
 			MainThread thread = new MainThread(params);
 			thread.start();

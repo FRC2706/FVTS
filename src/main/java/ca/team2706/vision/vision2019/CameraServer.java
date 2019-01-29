@@ -22,6 +22,11 @@ public class CameraServer extends Thread {
 		VideoCapture capture = new VideoCapture(id);
 
 		cameras.put(id, capture);
+		
+		if(frame1 == null) {
+			frame1 = new Mat();
+		}
+		
 		capture.read(frame1);
 		frames.put(id, frame1);
 
@@ -44,9 +49,13 @@ public class CameraServer extends Thread {
 		while (true) {
 
 			for (int i : cameras.keySet()) {
-
+				
 				VideoCapture capture = cameras.get(i);
 
+				if(frame == null) {
+					frame = new Mat();
+				}
+				
 				capture.read(frame);
 
 				frames.put(i, frame);
