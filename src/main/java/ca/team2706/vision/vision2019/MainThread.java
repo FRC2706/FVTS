@@ -220,5 +220,15 @@ public class MainThread extends Thread {
 		
 		this.visionParams = params;
 	}
+	
+	public VisionData forceProcess() {
+		
+		VisionData visionData = Pipeline.process(frame, visionParams, false);
+		
+		Pipeline.selectPreferredTarget(visionData, visionParams);
+		
+		return visionData;
+		
+	}
 
 }

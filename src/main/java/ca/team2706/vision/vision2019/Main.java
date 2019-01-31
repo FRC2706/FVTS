@@ -75,6 +75,9 @@ public class Main {
 		 * This is how many times the pipeline will erode dilate the camera image
 		 **/
 		int erodeDilateIterations;
+		
+		double slope,yIntercept;
+		
 		/** This is the id of the camera that will be used to get images **/
 		int cameraSelect;
 		/**
@@ -117,6 +120,8 @@ public class Main {
 	public static class VisionData {
 
 		public static class Target {
+			
+			double distance;
 			
 			MatOfPoint contour;
 			

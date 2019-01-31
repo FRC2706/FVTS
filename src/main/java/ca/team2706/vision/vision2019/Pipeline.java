@@ -100,6 +100,31 @@ public class Pipeline {
 			// else
 			// skip this contour because it's too small
 		}
+		
+		/*
+		 * 
+		 * Time to math the distance
+		 * y = height of cube
+		 * x = distance from cube
+		 * |
+		 * |
+		 * |
+		 * |
+		 * |
+		 * -------------------
+		 * 
+		 * using y = mx+b we can determine that the formula to 
+		 * calculate x from y is x = (y-b)/m
+		 * 
+		 */
+		
+		double y = visionData.preferredTarget.boundingBox.height;
+		
+		double x = (y - visionParams.yIntercept) / visionParams.slope;
+		
+		//Now we have the distance in cm!!!
+		
+		visionData.preferredTarget.distance = x;
 
 		long now = System.nanoTime();
 		visionData.fps = ((double) NANOSECONDS_PER_SECOND) / (now - fpsTimer);

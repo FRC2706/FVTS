@@ -13,6 +13,7 @@ import javax.swing.border.EmptyBorder;
 
 import org.opencv.core.Size;
 
+import ca.team2706.vision.vision2019.Main.VisionData;
 import ca.team2706.vision.vision2019.Main.VisionParams;
 
 public class ParamsSelector extends JFrame implements Runnable, ActionListener {
@@ -141,6 +142,12 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	
 	private MainThread thread = null;
 	private JButton btnNewButton_1;
+
+	private JTextField textField_8;
+
+	private JButton btnDistance;
+	
+	private VisionData frame;
 
 	/**
 	 * Creates a new Parameters Selector
@@ -588,6 +595,17 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		});
 		btnNewButton_1.setBounds(480, 162, 98, 24);
 		contentPane.add(btnNewButton_1);
+		
+		textField_8 = new JTextField("Place cube in intake");
+		textField_8.setBounds(348, 244, 114, 18);
+		contentPane.add(textField_6);
+		textField_8.setColumns(10);
+		textField_8.setEditable(false);
+
+		btnDistance = new JButton("Distance");
+		btnDistance.setBounds(479, 228, 98, 24);
+		contentPane.add(btnDistance);
+		btnDistance.addActionListener(this);
 
 		// Makes the window visible
 		setVisible(true);
@@ -698,6 +716,50 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				Main.saveVisionParams(visionParams);
 			} catch (Exception e) {
 				e.printStackTrace();
+			}
+		}
+		if (arg0.getSource() == btnDistance) {
+
+			if (textField_8.getText().equals("Place cube in intake")) {
+
+				visionParams.slope = 1;
+
+				frame = thread.forceProcess();
+				
+				textField_8.setText("Place cube 1m away");
+
+			} else {
+				
+				visionParams.slope = 1;
+
+				VisionData frame2 = thread.forceProcess();
+				
+				double height1 = frame.preferredTarget.boundingBox.height;
+				double height2 = frame2.preferredTarget.boundingBox.height;
+				
+				/*Calculate the slope using 
+				*y2-y1
+				*-----
+				*x2-x1
+				*
+				*and x1 is 0 because the distance is 0cm from the camera
+				*and x2 is always 100 because it is 100cm from the camera
+				*then just measure the height of the cube in both images
+				*and calculate the slope
+				*
+				*also the y intercept is equal to the height of the cube when it is in the intake because math
+				*
+				*/
+				
+				double slope = (height2-height1)/100;
+				double yIntercept = height1;
+				
+				visionParams.slope = slope;
+				visionParams.yIntercept = yIntercept;
+				
+				
+				textField_8.setText("Place cube in intake");
+				
 			}
 		}
 	}
