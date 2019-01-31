@@ -603,7 +603,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		textField_8.setEditable(false);
 
 		btnDistance = new JButton("Distance");
-		btnDistance.setBounds(479, 228, 98, 24);
+		btnDistance.setBounds(245, 151, 98, 24);
 		contentPane.add(btnDistance);
 		btnDistance.addActionListener(this);
 
