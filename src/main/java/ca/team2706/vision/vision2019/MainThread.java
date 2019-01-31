@@ -28,7 +28,7 @@ public class MainThread extends Thread {
 	@Override
 	public void run() {
 
-		// Initilizes a Matrix to hold the frame
+		// Initializes a Matrix to hold the frame
 
 		frame = new Mat();
 
