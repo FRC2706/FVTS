@@ -720,13 +720,13 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		}
 		if (arg0.getSource() == btnDistance) {
 
-			if (textField_8.getText().equals("Place cube in intake")) {
+			if (textField_8.getText().equals("Place object 4m away")) {
 
 				visionParams.slope = 1;
 
 				frame = thread.forceProcess();
 				
-				textField_8.setText("Place cube 1m away");
+				textField_8.setText("Place object 1m away");
 
 			} else {
 				
@@ -742,7 +742,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				*-----
 				*x2-x1
 				*
-				*and x1 is 0 because the distance is 0cm from the camera
+				*and x1 is 400 because the distance is 400cm from the camera
 				*and x2 is always 100 because it is 100cm from the camera
 				*then just measure the height of the cube in both images
 				*and calculate the slope
@@ -751,14 +751,14 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				*
 				*/
 				
-				double slope = (height2-height1)/100;
-				double yIntercept = height1;
+				double slope = (height2-height1)/(100-400);
+				double yIntercept = height1-slope*400;
 				
 				visionParams.slope = slope;
 				visionParams.yIntercept = yIntercept;
 				
 				
-				textField_8.setText("Place cube in intake");
+				textField_8.setText("Place object 4m away");
 				
 			}
 		}
