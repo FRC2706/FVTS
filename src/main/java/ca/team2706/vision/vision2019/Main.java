@@ -233,6 +233,10 @@ public class Main {
 
 				visionParams.secondsBetweenImageDumps = Double.valueOf(data.get("imgDumpTime"));
 
+				visionParams.slope = Double.valueOf(data.get("slope"));
+				
+				visionParams.yIntercept = Double.valueOf(data.get("yIntercept"));
+				
 				visionParamsList.add(visionParams);
 
 			}
@@ -291,6 +295,10 @@ public class Main {
 		data.put("imgDumpPath", params.outputPath);
 
 		data.put("imgDumpTime", String.valueOf(params.secondsBetweenImageDumps));
+		
+		data.put("slope", String.valueOf(params.slope));
+		
+		data.put("yIntercept", String.valueOf(params.yIntercept));
 
 		ConfigParser.saveList(new File("visionParams.properties"), params.name, data);
 	}

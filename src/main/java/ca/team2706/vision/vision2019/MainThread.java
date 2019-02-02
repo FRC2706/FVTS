@@ -24,6 +24,7 @@ public class MainThread extends Thread {
 	public double current_time_seconds;
 	public boolean useCamera = true;
 	public static int timestamp = 0;
+	public double lastDist = 0;
 
 	@Override
 	public void run() {
@@ -122,6 +123,10 @@ public class MainThread extends Thread {
 					// Sets the raw image to the frame
 					rawOutputImg = frame;
 				}
+				
+				if(visionData.preferredTarget != null)
+					lastDist = visionData.preferredTarget.distance;
+				
 				// Sends the data to the vision table
 				Main.sendVisionDataOverNetworkTables(visionData);
 

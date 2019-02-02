@@ -596,7 +596,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		btnNewButton_1.setBounds(480, 162, 98, 24);
 		contentPane.add(btnNewButton_1);
 		
-		textField_8 = new JTextField("Place cube in intake");
+		textField_8 = new JTextField("Place object 4m away");
 		textField_8.setBounds(348, 244, 114, 18);
 		contentPane.add(textField_6);
 		textField_8.setColumns(10);
@@ -605,6 +605,24 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		btnDistance = new JButton("Distance");
 		btnDistance.setBounds(245, 151, 98, 24);
 		contentPane.add(btnDistance);
+		
+		textField_9 = new JTextField();
+		textField_9.setBounds(348, 75, 114, 19);
+		contentPane.add(textField_9);
+		textField_9.setColumns(10);
+		textField_9.setEditable(false);
+		
+		textField_10 = new JTextField();
+		textField_10.setBounds(474, 76, 114, 19);
+		contentPane.add(textField_10);
+		textField_10.setColumns(10);
+		textField_10.setEditable(false);
+		
+		textField_11 = new JTextField();
+		textField_11.setBounds(348, 156, 114, 19);
+		contentPane.add(textField_11);
+		textField_11.setColumns(10);
+		textField_11.setEditable(false);
 		btnDistance.addActionListener(this);
 
 		// Makes the window visible
@@ -613,6 +631,11 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		// Starts the update thread
 		new Thread(this).start();
 	}
+	
+	private boolean secondPress = false;
+	private JTextField textField_9;
+	private JTextField textField_10;
+	private JTextField textField_11;
 
 	/**
 	 * The method used for updating the values
@@ -682,6 +705,10 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				// Update the distance to center importane text
 				txtDtci.setText("Distance To Center Importance: " + (visionParams.distToCentreImportance * 100) + "%");
 
+				textField_9.setText("Slope: "+visionParams.slope);
+				textField_10.setText("Y Intercept: "+visionParams.yIntercept);
+				textField_11.setText("Distance: "+thread.lastDist);
+				
 				visionParams.name = textField_7.getText();
 				
 				setTitle("ParamsSelector-"+visionParams.name);
@@ -719,8 +746,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 			}
 		}
 		if (arg0.getSource() == btnDistance) {
-
-			if (textField_8.getText().equals("Place object 4m away")) {
+			
+			if (!secondPress) {
 
 				visionParams.slope = 1;
 
@@ -728,6 +755,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				
 				textField_8.setText("Place object 1m away");
 
+				secondPress = true;
+				
 			} else {
 				
 				visionParams.slope = 1;
@@ -752,6 +781,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				*/
 				
 				double slope = (height2-height1)/(100-400);
+				slope = -slope;
 				double yIntercept = height1-slope*400;
 				
 				visionParams.slope = slope;
@@ -759,6 +789,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				
 				
 				textField_8.setText("Place object 4m away");
+				
+				secondPress = false;
 				
 			}
 		}
