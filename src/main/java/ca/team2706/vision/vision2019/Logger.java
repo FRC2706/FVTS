@@ -45,6 +45,13 @@ public class Logger {
 
 			File logFile = new File(LOG_FOLDER, logFileNum + ".log");
 
+			if(!logFile.exists()) {
+				
+				logFile.getParentFile().mkdirs();
+				logFile.createNewFile();
+				
+			}
+			
 			PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
 
 			out.println(log);
