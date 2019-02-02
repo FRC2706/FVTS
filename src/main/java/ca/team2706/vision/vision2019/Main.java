@@ -59,6 +59,9 @@ public class Main {
 	 * A class to hold calibration parameters for the image processing algorithm
 	 */
 	public static class VisionParams {
+		
+		int group;
+		
 		/** This is the minimum hue that the pipeline will recognize **/
 		int minHue;
 		/** This is the maximum hue that the pipeline will recognize **/
@@ -237,6 +240,8 @@ public class Main {
 				
 				visionParams.yIntercept = Double.valueOf(data.get("yIntercept"));
 				
+				visionParams.group = Integer.valueOf(data.get("group"));
+				
 				visionParamsList.add(visionParams);
 
 			}
@@ -299,6 +304,8 @@ public class Main {
 		data.put("slope", String.valueOf(params.slope));
 		
 		data.put("yIntercept", String.valueOf(params.yIntercept));
+		
+		data.put("group", String.valueOf(params.group));
 
 		ConfigParser.saveList(new File("visionParams.properties"), params.name, data);
 	}

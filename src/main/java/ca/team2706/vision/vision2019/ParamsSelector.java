@@ -771,24 +771,21 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				*-----
 				*x2-x1
 				*
-				*and x1 is 400 because the distance is 400cm from the camera
+				*and x1 is 200 because the distance is 200cm from the camera
 				*and x2 is always 100 because it is 100cm from the camera
 				*then just measure the height of the cube in both images
 				*and calculate the slope
-				*
-				*also the y intercept is equal to the height of the cube when it is in the intake because math
-				*
 				*/
 				
-				double slope = (height2-height1)/(100-400);
+				double slope = (height2-height1)/(100-200);
 				slope = -slope;
-				double yIntercept = height1-slope*400;
+				double yIntercept = height1-slope*200;
 				
 				visionParams.slope = slope;
 				visionParams.yIntercept = yIntercept;
 				
 				
-				textField_8.setText("Place object 4m away");
+				textField_8.setText("Place object 2m away");
 				
 				secondPress = false;
 				
