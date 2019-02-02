@@ -511,9 +511,9 @@ public class Pipeline {
 		if (visionData.preferredTarget != null) {
 
 			double y = visionData.preferredTarget.boundingBox.height;
-
+			
 			double x = (y - visionParams.yIntercept) / visionParams.slope;
-
+			
 			// Now we have the distance in cm!!!
 
 			visionData.preferredTarget.distance = x;
