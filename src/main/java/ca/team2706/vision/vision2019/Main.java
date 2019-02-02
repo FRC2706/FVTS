@@ -280,7 +280,7 @@ public class Main {
 			}
 		} catch (Exception e1) {
 			e1.printStackTrace();
-			System.err.println("\n\nError reading the params file, check if the file is corrupt?");
+			Logger.e("\n\nError reading the params file, check if the file is corrupt?");
 			System.exit(1);
 		}
 	}
@@ -484,7 +484,7 @@ public class Main {
 
 			if (!camera.isOpened()) {
 				// If the camera didn't open throw an error
-				System.err.println("Error: Can not connect to camera");
+				Logger.e("Error: Can not connect to camera");
 				// Exit
 				System.exit(1);
 			}
@@ -538,7 +538,7 @@ public class Main {
 			if (useCamera) {
 				// Read the frame from the camera, if it fails try again
 				if (!camera.read(frame)) {
-					System.err.println("Error: Failed to get a frame from the camera");
+					Logger.e("Error: Failed to get a frame from the camera");
 					continue;
 				}
 			} // else use the image from disk that we loaded above
@@ -601,7 +601,7 @@ public class Main {
 					continue;
 				} catch (NullPointerException e) {
 					e.printStackTrace();
-					System.out.println("Window closed");
+					Logger.w("Window closed");
 					Runtime.getRuntime().halt(0);
 				} catch (Exception e) {
 					// just in case
@@ -635,7 +635,7 @@ public class Main {
 			}
 			// Display the frame rate onto the console
 			double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND) * 1000;
-			System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime);
+			Logger.i("Vision FPS: "+visionData.fps+", pipeline took: "+pipelineTime+" ms\n");
 		}
 	} // end main video processing loop
 

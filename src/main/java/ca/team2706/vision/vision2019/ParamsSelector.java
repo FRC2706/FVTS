@@ -719,7 +719,6 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener, 
 
 	@Override
 	public void keyPressed(KeyEvent key) {
-		System.out.println(key.getKeyCode());
 		if(key.getKeyCode() == KeyEvent.VK_LEFT) {
 			if(f != null && index != f.getParentFile().listFiles().length) {
 				index++;
