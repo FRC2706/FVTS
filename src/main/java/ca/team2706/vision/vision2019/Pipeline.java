@@ -261,7 +261,9 @@ public class Pipeline {
 			double dist = Math.sqrt(Math.pow(Math.abs(target.xCentre - target2.xCentre), 2)
 					+ Math.pow(Math.abs(target.yCentre - target2.yCentre), 2));
 
-			if (slope1 > 0 && slope < 0 && dist < minDist) {
+			boolean toHigh = target.yCentre+target.yCentre*0.2 < target2.yCentre ? true : false || target.yCentre-target.yCentre*0.2 > target2.yCentre ? true : false;
+			
+			if (slope1 > 0 && slope < 0 && dist < minDist && !toHigh) {
 
 				minTarget1 = target2;
 
