@@ -59,9 +59,9 @@ public class Main {
 	 * A class to hold calibration parameters for the image processing algorithm
 	 */
 	public static class VisionParams {
-		
+
 		int group;
-		
+
 		/** This is the minimum hue that the pipeline will recognize **/
 		int minHue;
 		/** This is the maximum hue that the pipeline will recognize **/
@@ -78,9 +78,9 @@ public class Main {
 		 * This is how many times the pipeline will erode dilate the camera image
 		 **/
 		int erodeDilateIterations;
-		
-		double slope,yIntercept;
-		
+
+		double slope, yIntercept;
+
 		/** This is the id of the camera that will be used to get images **/
 		int cameraSelect;
 		/**
@@ -123,11 +123,11 @@ public class Main {
 	public static class VisionData {
 
 		public static class Target {
-			
+
 			double distance;
-			
+
 			MatOfPoint contour;
-			
+
 			/** The x center of the target in the image **/
 			int xCentre;
 			/**
@@ -174,12 +174,27 @@ public class Main {
 		NetworkTable.setClientMode();
 		// Sets the interval for updating NetworkTables
 		NetworkTable.setUpdateRate(0.02);
-		// Sets the team number
-		NetworkTable.setTeam(2706); // Use this for the robit
-		// Enables DSClient
-		NetworkTable.setDSClientEnabled(true); // and this for the robit
-		// Sets the IP adress to connect to
-		//NetworkTable.setIPAddress("localhost"); //Use this for testing
+
+		boolean use_GUI = true;
+		// If on Linux don't use guis
+		if (System.getProperty("os.name").toLowerCase().indexOf("raspbian") != -1) {
+			use_GUI = false;
+		}
+
+		if (!use_GUI) {
+
+			// Sets the team number
+			NetworkTable.setTeam(2706); // Use this for the robit
+			// Enables DSClient
+			NetworkTable.setDSClientEnabled(true); // and this for the robit
+
+		} else {
+
+			// Sets the IP adress to connect to
+			NetworkTable.setIPAddress("localhost"); // Use this for testing
+
+		}
+
 		// Initilizes NetworkTables
 		NetworkTable.initialize();
 	}
@@ -237,11 +252,11 @@ public class Main {
 				visionParams.secondsBetweenImageDumps = Double.valueOf(data.get("imgDumpTime"));
 
 				visionParams.slope = Double.valueOf(data.get("slope"));
-				
+
 				visionParams.yIntercept = Double.valueOf(data.get("yIntercept"));
-				
+
 				visionParams.group = Integer.valueOf(data.get("group"));
-				
+
 				visionParamsList.add(visionParams);
 
 			}
@@ -300,11 +315,11 @@ public class Main {
 		data.put("imgDumpPath", params.outputPath);
 
 		data.put("imgDumpTime", String.valueOf(params.secondsBetweenImageDumps));
-		
+
 		data.put("slope", String.valueOf(params.slope));
-		
+
 		data.put("yIntercept", String.valueOf(params.yIntercept));
-		
+
 		data.put("group", String.valueOf(params.group));
 
 		ConfigParser.saveList(new File("visionParams.properties"), params.name, data);
@@ -413,7 +428,7 @@ public class Main {
 		ImageDumpScheduler.start();
 
 		CameraServer.startServer();
-		
+
 		for (VisionParams params : visionParamsList) {
 			MainThread thread = new MainThread(params);
 			thread.start();
