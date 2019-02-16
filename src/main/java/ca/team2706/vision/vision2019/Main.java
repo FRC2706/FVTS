@@ -347,6 +347,8 @@ public class Main {
 			visionTable.putNumber("ctrX", visionData.preferredTarget.xCentreNorm);
 			// Puts the normalized area into the vision table
 			visionTable.putNumber("area", visionData.preferredTarget.areaNorm);
+			
+			visionTable.putNumber("angle", visionData.preferredTarget.xCentreNorm*90);
 		}
 	}
 
