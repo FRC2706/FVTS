@@ -723,14 +723,6 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 			}
 		}
 	}
-	
-	public static void main(String[] args) {
-		// Must be included!
-		// Loads OpenCV
-		System.loadLibrary("opencv_java310");
-		CameraServer.startServer();
-		new ParamsSelector();
-	}
 
 	/**
 	 * The method used for detecting button presses
