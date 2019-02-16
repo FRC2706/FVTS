@@ -36,19 +36,10 @@ public class Pipeline {
 		// As a memory footprint optimization, when running on a Pi, re-use one working
 		// image in memory
 		Mat dilated, erodeOne, erodeTwo;
-		// If using the guis
-
-		if (use_GUI) {
-			// Make new Mats
-			dilated = new Mat();
-			erodeOne = new Mat();
-			erodeTwo = new Mat();
-		} else {
-			// Else re use them
-			dilated = new Mat();
-			erodeOne = dilated;
-			erodeTwo = dilated;
-		}
+		
+		dilated = new Mat();
+		erodeOne = dilated;
+		erodeTwo = dilated;
 		// Calculate the image area
 		int imgArea = src.height() * src.width();
 
@@ -72,7 +63,7 @@ public class Pipeline {
 		Imgproc.erode(dilated, erodeTwo, new Mat(), new Point(), visionParams.erodeDilateIterations,
 				Core.BORDER_CONSTANT, new Scalar(0));
 
-		visionData.binMask = erodeTwo.clone();
+		visionData.binMask = erodeTwo;
 
 		// Find contours
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();

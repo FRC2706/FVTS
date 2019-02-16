@@ -117,7 +117,11 @@ public class MainThread extends Thread {
 				if (use_GUI) {
 					// If use gui then draw the prefered target
 					// Sets the raw image to the frame
-					rawOutputImg = frame.clone();
+					if(useCamera) {
+						rawOutputImg = frame;
+					}else {
+						rawOutputImg = frame.clone();
+					}
 					// Draws the preffered target
 					Pipeline.drawPreferredTarget(rawOutputImg, visionData);
 				} else {
@@ -161,16 +165,12 @@ public class MainThread extends Thread {
 					// If the elapsed time is more that the seconds between image
 					// dumps
 					// then dump images asynchronously
-					if (elapsedTime >= visionParams.secondsBetweenImageDumps) {
+					if (elapsedTime >= visionParams.secondsBetweenImageDumps && visionParams.secondsBetweenImageDumps != -1) {
 						// Sets the current number of seconds
 						current_time_seconds = (((double) System.currentTimeMillis()) / 1000);
-						// Clones the frame
-						Mat finalFrame = frame.clone();
 						try {
-							Mat draw = finalFrame.clone();
-							Pipeline.drawPreferredTarget(draw, visionData);
-							Bundle b = new Bundle(Main.matToBufferedImage(finalFrame),
-									Main.matToBufferedImage(visionData.binMask), Main.matToBufferedImage(draw),
+							Bundle b = new Bundle(Main.matToBufferedImage(frame),
+									Main.matToBufferedImage(visionData.binMask), Main.matToBufferedImage(rawOutputImg),
 									timestamp, visionParams);
 							ImageDumpScheduler.schedule(b);
 							timestamp++;
