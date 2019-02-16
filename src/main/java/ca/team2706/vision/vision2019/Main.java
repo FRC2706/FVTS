@@ -180,7 +180,7 @@ public class Main {
 		if (System.getProperty("os.name").toLowerCase().indexOf("raspbian") != -1) {
 			use_GUI = false;
 		}
-
+		
 		if (!use_GUI) {
 
 			// Sets the team number

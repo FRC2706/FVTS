@@ -293,6 +293,7 @@ public class Pipeline {
 			return m;
 		}
 
+		@SuppressWarnings("unused")
 		public double getB() {
 			return b;
 		}
