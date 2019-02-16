@@ -741,6 +741,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		if (arg0.getSource() == btnSave) {
 			// Save vision parameters
 			try {
+				
 				btnSave.setEnabled(false);
 				Main.saveVisionParams(visionParams);
 				btnSave.setEnabled(true);
