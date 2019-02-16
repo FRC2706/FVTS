@@ -15,7 +15,7 @@ public class CameraServer extends Thread {
 
 	public static void initCamera(int id) throws Exception {
 
-		if (cameras.keySet().contains(id)) {
+		if (cameras.keySet().contains(id) || id == -1) {
 			return;
 		}
 

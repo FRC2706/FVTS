@@ -45,7 +45,6 @@ public class MainThread extends Thread {
 				e.printStackTrace();
 			}
 
-		
 		} else {
 			// load the image from file.
 			try {
@@ -65,16 +64,28 @@ public class MainThread extends Thread {
 		if (System.getProperty("os.name").toLowerCase().indexOf("raspbian") != -1) {
 			use_GUI = false;
 		}
-		
-		frame = CameraServer.getFrame(visionParams.cameraSelect);
-		
+
+		if (useCamera) {
+
+			frame = CameraServer.getFrame(visionParams.cameraSelect);
+
+		} else {
+			try {
+				frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		}
+
 		// Set up the GUI display windows
 		if (use_GUI) {
 			try {
 				// Initilizes the window to display the raw image
 				guiRawImg = new DisplayGui(Main.matToBufferedImage(frame), "Raw-" + visionParams.name, true);
 				// Initilizes the window to display the processed image
-				guiProcessedImg = new DisplayGui(Main.matToBufferedImage(frame), "Processed-" + visionParams.name,true);
+				guiProcessedImg = new DisplayGui(Main.matToBufferedImage(frame), "Processed-" + visionParams.name,
+						true);
 			} catch (IOException e) {
 				// means mat2BufferedImage broke
 				// non-fatal error, let the program continue
@@ -88,16 +99,6 @@ public class MainThread extends Thread {
 					// Read the frame from the camera, if it fails try again
 					frame = CameraServer.getFrame(visionParams.cameraSelect);
 				} // else use the image from disk that we loaded above
-				else {
-					// load the image from file.
-					try {
-						frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
-					} catch (IOException e) {
-						e.printStackTrace();
-						frame = new Mat();
-					}
-
-				}
 				if (use_GUI) {
 					// Resize the frame
 					Imgproc.resize(frame, frame, visionParams.sz);
@@ -110,7 +111,7 @@ public class MainThread extends Thread {
 				// Log when the pipeline stops
 				long pipelineEnd = System.nanoTime();
 				// Selects the prefered target
-				Pipeline.selectPreferredTarget(visionData, visionParams,visionParams.group == 1 ? true : false);
+				Pipeline.selectPreferredTarget(visionData, visionParams, visionParams.group == 1 ? true : false);
 				// Creates the raw output image object
 				Mat rawOutputImg;
 				if (use_GUI) {
@@ -123,10 +124,10 @@ public class MainThread extends Thread {
 					// Sets the raw image to the frame
 					rawOutputImg = frame;
 				}
-				
-				if(visionData.preferredTarget != null)
+
+				if (visionData.preferredTarget != null)
 					lastDist = visionData.preferredTarget.distance;
-				
+
 				// Sends the data to the vision table
 				Main.sendVisionDataOverNetworkTables(visionData);
 
@@ -196,8 +197,8 @@ public class MainThread extends Thread {
 	}
 
 	public void updateParams(VisionParams params) {
-		
-		if(visionParams.cameraSelect != params.cameraSelect) {
+
+		if (visionParams.cameraSelect != params.cameraSelect) {
 			useCamera = true;
 			if (visionParams.cameraSelect == -1) {
 				useCamera = false;
@@ -211,7 +212,6 @@ public class MainThread extends Thread {
 					e.printStackTrace();
 				}
 
-				
 			} else {
 				// load the image from file.
 				try {
@@ -222,18 +222,18 @@ public class MainThread extends Thread {
 				}
 			}
 		}
-		
+
 		this.visionParams = params;
 	}
-	
+
 	public VisionData forceProcess() {
-		
+
 		VisionData visionData = Pipeline.process(frame, visionParams, false);
-		
-		Pipeline.selectPreferredTarget(visionData, visionParams,visionParams.group == 1 ? true : false);
-		
+
+		Pipeline.selectPreferredTarget(visionData, visionParams, visionParams.group == 1 ? true : false);
+
 		return visionData;
-		
+
 	}
 
 }
