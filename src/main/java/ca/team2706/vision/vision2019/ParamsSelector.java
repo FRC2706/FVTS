@@ -604,6 +604,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 
 		btnDistance = new JButton("Distance");
 		btnDistance.setBounds(245, 151, 98, 24);
+		btnDistance.setEnabled(false);
+		btnDistance.addActionListener(this);
 		contentPane.add(btnDistance);
 		
 		textField_9 = new JTextField();
@@ -623,7 +625,6 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		contentPane.add(textField_11);
 		textField_11.setColumns(10);
 		textField_11.setEditable(false);
-		btnDistance.addActionListener(this);
 
 		// Makes the window visible
 		setVisible(true);
@@ -740,7 +741,9 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		if (arg0.getSource() == btnSave) {
 			// Save vision parameters
 			try {
+				btnSave.setEnabled(false);
 				Main.saveVisionParams(visionParams);
+				btnSave.setEnabled(true);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
