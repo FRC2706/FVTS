@@ -24,6 +24,4 @@ fi
 
 # SSH to the pi and restart the vision process
 echo "Restarting vision process on ${PI_USER}@${PI_ADDR}"
-ssh ${PI_USER}@${PI_ADDR} "sudo systemctl stop vision.service"
-ssh ${PI_USER}@${PI_ADDR} "sudo systemctl daemon-reload"
-ssh ${PI_USER}@${PI_ADDR} "sudo systemctl start vision.service"
+ssh ${PI_USER}@${PI_ADDR} "sudo systemctl stop vision.service && sudo systemctl daemon-reload && sudo systemctl start vision.service"
