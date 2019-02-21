@@ -545,12 +545,14 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		textField_7.setColumns(10);
 
 		JButton btnNewButton = new JButton("Load");
+		
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 
 				Main.loadVisionParams();
-
+				
 				for (VisionParams p : Main.visionParamsList) {
+					
 					if (p.name.equals(textField_7.getText())) {
 
 						visionParams = p;
@@ -716,8 +718,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				
 				thread.updateParams(visionParams);
 				
-				// Sleep for 1ms
-				Thread.sleep(5);
+				// Sleep for 100ms
+				Thread.sleep(100);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
