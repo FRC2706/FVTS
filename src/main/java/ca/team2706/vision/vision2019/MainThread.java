@@ -80,16 +80,10 @@ public class MainThread extends Thread {
 
 		// Set up the GUI display windows
 		if (use_GUI) {
-			try {
-				// Initilizes the window to display the raw image
-				guiRawImg = new DisplayGui(Main.matToBufferedImage(frame), "Raw-" + visionParams.name, true);
-				// Initilizes the window to display the processed image
-				guiProcessedImg = new DisplayGui(Main.matToBufferedImage(frame), "Processed-" + visionParams.name,
-						true);
-			} catch (IOException e) {
-				// means mat2BufferedImage broke
-				// non-fatal error, let the program continue
-			}
+			// Initilizes the window to display the raw image
+			guiRawImg = new DisplayGui(1, 1, "Raw-" + visionParams.name, true);
+			// Initilizes the window to display the processed image
+			guiProcessedImg = new DisplayGui(1, 1, "Processed-" + visionParams.name, true);
 		}
 
 		// Main video processing loop
