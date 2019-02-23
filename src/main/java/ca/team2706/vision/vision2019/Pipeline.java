@@ -137,12 +137,47 @@ public class Pipeline {
 				
 				rect.angle = rect.angle+40;
 				
-				if(rect.angle < 0) {
+				if(rect.angle > 0) {
 					continue;
 				}
 				
 				Target minTarget = null;
 				double minDist = Double.MAX_VALUE;
+				
+				for(Target target2 : visionData.targetsFound) {
+					
+					if(target2 != target){
+						
+						if(target2.xCentre < target.xCentre) {
+							continue;
+						}
+						
+						MatOfPoint2f contour2 = new MatOfPoint2f(target2.contour.toArray());
+						
+						RotatedRect rect2 = Imgproc.minAreaRect(contour2);
+						rect2.angle = rect2.angle + 40;
+						
+						if(rect2.angle < 0) {
+							continue;
+						}
+						
+						double w = Math.abs(target.xCentre-target2.xCentre);
+						double h = Math.abs(target.yCentre-target2.yCentre);
+						
+						double dist = Math.sqrt(Math.pow(w, 2)+Math.pow(h, 2));
+						
+						if(dist < minDist) {
+							
+							minDist = dist;
+							minTarget = target2;
+							
+						}
+						
+					}
+					
+				}
+				
+				boolean missing = false;
 				
 				for(Target target2 : visionData.targetsFound) {
 					
@@ -168,8 +203,7 @@ public class Pipeline {
 						
 						if(dist < minDist) {
 							
-							minDist = dist;
-							minTarget = target2;
+							missing = true;
 							
 						}
 						
@@ -177,7 +211,7 @@ public class Pipeline {
 					
 				}
 				
-				if(minTarget == null) {
+				if(minTarget == null || missing) {
 					continue;
 				}
 				
