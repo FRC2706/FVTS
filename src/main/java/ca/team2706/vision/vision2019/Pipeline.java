@@ -61,6 +61,9 @@ public class Pipeline {
 
 		// Colour threshold
 		Mat hsvThreshold = new Mat();
+		
+		System.out.println(hsvThreshold+" "+src);
+		
 		Core.inRange(src, new Scalar(visionParams.minHue, visionParams.minSaturation, visionParams.minValue),
 				new Scalar(visionParams.maxHue, visionParams.maxSaturation, visionParams.maxValue), hsvThreshold);
 

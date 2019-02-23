@@ -60,8 +60,9 @@ public class MainThread extends Thread {
 		DisplayGui guiProcessedImg = null;
 		// Wether to open the guis
 		boolean use_GUI = true;
+
 		// If on Linux don't use guis
-		if (System.getProperty("os.name").toLowerCase().indexOf("raspbian") != -1) {
+		if (System.getProperty("os.arch").toLowerCase().indexOf("arm") != -1) {
 			use_GUI = false;
 		}
 
