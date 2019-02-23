@@ -45,7 +45,14 @@ public class NewWindow extends JFrame implements ActionListener {
 	public static void main(String[] args) {
 		System.loadLibrary("opencv_java310");
 		CameraServer.startServer();
-		Main.initNetworkTables();
+		
+		String ip = "";
+		
+		if(args.length > 0) {
+			ip = args[0];
+		}
+		
+		Main.initNetworkTables(ip);
 		new NewWindow();
 	}
 

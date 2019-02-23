@@ -169,7 +169,7 @@ public class Main {
 	 * Initilizes the Network Tables WARNING! Change 127.0.0.1 to the robot ip
 	 * before it is on master or it will not be fun :)
 	 */
-	public static void initNetworkTables() {
+	public static void initNetworkTables(String ip) {
 		// Tells the NetworkTable class that this is a client
 		NetworkTable.setClientMode();
 		// Sets the interval for updating NetworkTables
@@ -182,7 +182,7 @@ public class Main {
 			use_GUI = false;
 		}
 		
-		if (!use_GUI) {
+		if (!use_GUI && ip.equals("")) {
 
 			// Sets the team number
 			NetworkTable.setTeam(2706); // Use this for the robit
@@ -192,7 +192,7 @@ public class Main {
 		} else {
 
 			// Sets the IP adress to connect to
-			NetworkTable.setIPAddress("localhost"); // Use this for testing
+			NetworkTable.setIPAddress(ip); // Use this for testing
 
 		}
 
@@ -422,8 +422,14 @@ public class Main {
 		// Loads OpenCV
 		System.loadLibrary("opencv_java310");
 
+		String ip = "";
+		
+		if(args.length > 0) {
+			ip = args[0];
+		}
+		
 		// Connect NetworkTables, and get access to the publishing table
-		initNetworkTables();
+		initNetworkTables(ip);
 
 		// read the vision calibration values from file.
 		loadVisionParams();
