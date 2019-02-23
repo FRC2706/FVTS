@@ -443,9 +443,14 @@ public class Main {
 		CameraServer.startServer();
 
 		for (VisionParams params : visionParamsList) {
-			MainThread thread = new MainThread(params);
-			thread.start();
-			threads.add(thread);
+			try {
+				CameraServer.initCamera(params.cameraSelect);
+				MainThread thread = new MainThread(params);
+				thread.start();
+				threads.add(thread);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 	} // end main video processing loop
