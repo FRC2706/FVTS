@@ -191,6 +191,10 @@ public class Main {
 
 		} else {
 
+			if(ip.equals("")) {
+				ip = "localhost";
+			}
+			
 			// Sets the IP adress to connect to
 			NetworkTable.setIPAddress(ip); // Use this for testing
 
