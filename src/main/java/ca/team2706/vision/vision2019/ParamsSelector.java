@@ -549,6 +549,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 
+				loading = true;
+				
 				Main.loadVisionParams();
 				
 				for (VisionParams p : Main.visionParamsList) {
@@ -577,11 +579,13 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 						slider.setValue((int) (visionParams.distToCentreImportance * 100));
 
 						slider_1.setValue((int) (visionParams.aspectRatioThresh * 100));
-
+						
 						break;
 
 					}
 				}
+				
+				loading = false;
 
 			}
 		});
@@ -635,6 +639,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		new Thread(this).start();
 	}
 	
+	private boolean loading = false;
 	private boolean secondPress = false;
 	private JTextField textField_9;
 	private JTextField textField_10;
@@ -647,6 +652,9 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	public void run() {
 		while (true) {
 			try {
+				if(loading) {
+					continue;
+				}
 				// If the camera number is a number
 				if (isInt(textField.getText())) {
 					// Update the camera number

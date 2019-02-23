@@ -265,12 +265,43 @@ public class Main {
 				visionParamsList.add(visionParams);
 
 			}
+			
+			sendVisionParams();
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.err.println("\n\nError reading the params file, check if the file is corrupt?");
 			System.exit(1);
 		}
+	}
+	
+	private static void sendVisionParams() {
+		
+		for(VisionParams params : visionParamsList) {
+			
+			NetworkTable visionTable = NetworkTable.getTable("vision-" + params.name+"/params");
+			
+			visionTable.putNumber("group", params.group);
+			visionTable.putNumber("yIntercept", params.yIntercept);
+			visionTable.putNumber("slope", params.slope);
+			visionTable.putNumber("secondsBetweenImageDumps", params.secondsBetweenImageDumps);
+			visionTable.putNumber("height", params.height);
+			visionTable.putNumber("width", params.width);
+			visionTable.putNumber("erodeDilateIterations", params.erodeDilateIterations);
+			visionTable.putNumber("minArea", params.minArea);
+			visionTable.putString("imageFile", params.imageFile);
+			visionTable.putNumber("distToCenterImportance", params.distToCentreImportance);
+			visionTable.putNumber("aspectRatioThresh", params.aspectRatioThresh);
+			visionTable.putNumber("cameraSelect", params.cameraSelect);
+			visionTable.putNumber("minHue", params.minHue);
+			visionTable.putNumber("maxHue", params.maxHue);
+			visionTable.putNumber("minSaturation", params.minSaturation);
+			visionTable.putNumber("maxSaturation", params.maxSaturation);
+			visionTable.putNumber("minValue", params.minValue);
+			visionTable.putNumber("maxValue", params.maxValue);
+			
+		}
+		
 	}
 
 	/**
@@ -353,7 +384,7 @@ public class Main {
 			// Puts the normalized area into the vision table
 			visionTable.putNumber("area", visionData.preferredTarget.areaNorm);
 			
-			visionTable.putNumber("angle", visionData.preferredTarget.xCentreNorm*90);
+			visionTable.putNumber("angle", visionData.preferredTarget.xCentreNorm*45);
 		}
 	}
 
