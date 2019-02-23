@@ -41,6 +41,7 @@ public class MainThread extends Thread {
 		if (useCamera) {
 			try {
 				CameraServer.initCamera(visionParams.cameraSelect);
+				CameraServer.update();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -94,10 +95,8 @@ public class MainThread extends Thread {
 					// Read the frame from the camera, if it fails try again
 					frame = CameraServer.getFrame(visionParams.cameraSelect);
 				} // else use the image from disk that we loaded above
-				if (use_GUI) {
-					// Resize the frame
-					Imgproc.resize(frame, frame, visionParams.sz);
-				}
+				// Resize the frame
+				Imgproc.resize(frame, frame, visionParams.sz);
 				// Process the frame!
 				// Log when the pipeline starts
 				long pipelineStart = System.nanoTime();
@@ -112,7 +111,7 @@ public class MainThread extends Thread {
 				if (use_GUI) {
 					// If use gui then draw the prefered target
 					// Sets the raw image to the frame
-					rawOutputImg = frame.clone();
+					rawOutputImg = frame;
 					// Draws the preffered target
 					Pipeline.drawPreferredTarget(rawOutputImg, visionData);
 				} else {
@@ -155,16 +154,15 @@ public class MainThread extends Thread {
 					double elapsedTime = ((double) System.currentTimeMillis() / 1000) - current_time_seconds;
 					// If the elapsed time is more that the seconds between image
 					// dumps
+					
 					// then dump images asynchronously
-					if (elapsedTime >= visionParams.secondsBetweenImageDumps) {
+					if (elapsedTime >= visionParams.secondsBetweenImageDumps && visionParams.secondsBetweenImageDumps != -1) {
 						// Sets the current number of seconds
 						current_time_seconds = (((double) System.currentTimeMillis()) / 1000);
-						// Clones the frame
-						Mat finalFrame = frame.clone();
 						try {
-							Mat draw = finalFrame.clone();
+							Mat draw = frame.clone();
 							Pipeline.drawPreferredTarget(draw, visionData);
-							Bundle b = new Bundle(Main.matToBufferedImage(finalFrame),
+							Bundle b = new Bundle(Main.matToBufferedImage(frame),
 									Main.matToBufferedImage(visionData.binMask), Main.matToBufferedImage(draw),
 									timestamp, visionParams);
 							ImageDumpScheduler.schedule(b);

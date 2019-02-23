@@ -7,8 +7,10 @@ import java.util.List;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
@@ -62,8 +64,6 @@ public class Pipeline {
 		// Colour threshold
 		Mat hsvThreshold = new Mat();
 		
-		System.out.println(hsvThreshold+" "+src);
-		
 		Core.inRange(src, new Scalar(visionParams.minHue, visionParams.minSaturation, visionParams.minValue),
 				new Scalar(visionParams.maxHue, visionParams.maxSaturation, visionParams.maxValue), hsvThreshold);
 
@@ -75,7 +75,7 @@ public class Pipeline {
 		Imgproc.erode(dilated, erodeTwo, new Mat(), new Point(), visionParams.erodeDilateIterations,
 				Core.BORDER_CONSTANT, new Scalar(0));
 
-		visionData.binMask = erodeTwo.clone();
+		visionData.binMask = erodeTwo;
 
 		// Find contours
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
@@ -85,7 +85,7 @@ public class Pipeline {
 		for (MatOfPoint contour : contours) {
 
 			Rect boundingRect = Imgproc.boundingRect(contour);
-
+			
 			// height * width for area (easier and less CPU cycles than contour.area)
 			double areaNorm = ((double) boundingRect.width * boundingRect.height) / imgArea;
 
@@ -113,228 +113,6 @@ public class Pipeline {
 		return visionData;
 	}
 
-	private static List<OrderedPoint> sortTargetPoints(Target in) {
-
-		Rect boundingRect = in.boundingBox;
-
-		double a = Double.POSITIVE_INFINITY, b = Double.POSITIVE_INFINITY, c = Double.POSITIVE_INFINITY,
-				d = Double.POSITIVE_INFINITY;
-
-		double x1, x2, x3, x4, y1, y2, y3, y4;
-
-		x1 = boundingRect.x;
-		y1 = boundingRect.y;
-		x2 = boundingRect.width + boundingRect.x;
-		y2 = boundingRect.y;
-		x3 = boundingRect.width + boundingRect.x;
-		y3 = boundingRect.height + boundingRect.y;
-		x4 = boundingRect.x;
-		y4 = boundingRect.height + boundingRect.y;
-
-		for (Point point : in.contour.toArray()) {
-
-			double a1 = Math.sqrt(Math.pow(point.x - x1, 2) + Math.pow(point.y - y1, 2));
-			double b1 = Math.sqrt(Math.pow(point.x - x2, 2) + Math.pow(point.y - y2, 2));
-			double c1 = Math.sqrt(Math.pow(point.x - x3, 2) + Math.pow(point.y - y3, 2));
-			double d1 = Math.sqrt(Math.pow(point.x - x4, 2) + Math.pow(point.y - y4, 2));
-
-			if (a1 < a) {
-				a = a1;
-				continue;
-			}
-			if (b1 < b) {
-				b = b1;
-				continue;
-			}
-			if (c1 < c) {
-				c = c1;
-				continue;
-			}
-			if (d1 < d) {
-				d = d1;
-				continue;
-			}
-
-		}
-		List<OrderedPoint> orderedPoints = new ArrayList<OrderedPoint>();
-		for (Point point : in.contour.toArray()) {
-
-			double a1 = Math.sqrt(Math.pow(point.x - x1, 2) + Math.pow(point.y - y1, 2));
-			double b1 = Math.sqrt(Math.pow(point.x - x2, 2) + Math.pow(point.y - y2, 2));
-			double c1 = Math.sqrt(Math.pow(point.x - x3, 2) + Math.pow(point.y - y3, 2));
-			double d1 = Math.sqrt(Math.pow(point.x - x4, 2) + Math.pow(point.y - y4, 2));
-
-			if (a1 == a) {
-				orderedPoints.add(new OrderedPoint(point, 1));
-			}
-			if (b1 == b) {
-				orderedPoints.add(new OrderedPoint(point, 2));
-			}
-			if (c1 == c) {
-				orderedPoints.add(new OrderedPoint(point, 3));
-			}
-			if (d1 == d) {
-				orderedPoints.add(new OrderedPoint(point, 4));
-			}
-		}
-
-		Collections.sort(orderedPoints);
-
-		return orderedPoints;
-
-	}
-	
-	private static boolean isMissingPair(List<OrderedPoint> orderedPoints1, double slope, double minDist, Target target, Target target2) {
-		
-		double slope1 = 0;
-		double b21 = 0;
-		
-		boolean missingPair = false;
-
-		try {
-			Point A = orderedPoints1.get(0).getP();
-			Point D = orderedPoints1.get(orderedPoints1.size() - 1).getP();
-
-			double rise = (A.y - D.y);
-			double run = (A.x - D.x);
-
-			if (rise == 0) {
-				rise = 1;
-			}
-			if (run == 0) {
-				run = 1;
-			}
-
-			slope1 = rise / run;
-			b21 = slope * A.x;
-			b21 = A.y - b21;
-
-			double dist = Math.sqrt(Math.pow(Math.abs(target.xCentre - target2.xCentre), 2)
-					+ Math.pow(Math.abs(target.yCentre - target2.yCentre), 2));
-
-			if (!(slope1 < 0) && !(slope > 0) && dist < minDist) {
-				missingPair = true;
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return missingPair;
-		
-	}
-	
-	private static class TargetContainer{
-		
-		private double dist;
-		private Target target;
-		
-		public TargetContainer(double dist, Target target) {
-			this.target = target;
-			this.dist = dist;
-		}
-
-		public double getDist() {
-			return dist;
-		}
-
-		public Target getTarget() {
-			return target;
-		}
-		
-	}
-	
-	private static TargetContainer calcMinDist(Target target, Target target2, List<OrderedPoint> orderedPoints1, double slope, double minDist) {
-		
-		double slope1 = 0;
-		double b21 = 0;
-		
-		double minDist1 = Double.MAX_VALUE;
-		Target minTarget1 = null;
-
-		try {
-
-			Point A = orderedPoints1.get(0).getP();
-			Point D = orderedPoints1.get(orderedPoints1.size() - 1).getP();
-
-			slope1 = (A.y - D.y) / (A.x - D.x);
-			b21 = slope * A.x;
-			b21 = A.y - b21;
-
-			double dist = Math.sqrt(Math.pow(Math.abs(target.xCentre - target2.xCentre), 2)
-					+ Math.pow(Math.abs(target.yCentre - target2.yCentre), 2));
-
-			boolean toHigh = target.yCentre+target.yCentre*0.2 < target2.yCentre ? true : false || target.yCentre-target.yCentre*0.2 > target2.yCentre ? true : false;
-			
-			if (slope1 < 0 && slope > 0 && dist < minDist && !toHigh) {
-
-				minTarget1 = target2;
-
-				minDist1 = dist;
-
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return new TargetContainer(minDist1, minTarget1);
-		
-	}
-	
-	private static class SlopeYIntPair{
-		
-		private double m,b;
-
-		public SlopeYIntPair(double m, double b) {
-			super();
-			this.m = m;
-			this.b = b;
-		}
-
-		public double getM() {
-			return m;
-		}
-
-		@SuppressWarnings("unused")
-		public double getB() {
-			return b;
-		}
-		
-	}
-	
-	private static SlopeYIntPair calcSlope(List<OrderedPoint> orderedPoints) {
-		
-		double slope = 0;
-		double b2 = 0;
-
-		try {
-
-			Point A = orderedPoints.get(0).getP();
-			Point D = orderedPoints.get(orderedPoints.size() - 1).getP();
-
-			double rise = (A.y - D.y);
-			double run = (A.x - D.x);
-
-			if (rise == 0) {
-				rise = 1;
-			}
-			if (run == 0) {
-				run = 1;
-			}
-
-			slope = rise / run;
-			b2 = slope * A.x;
-			b2 = A.y - b2;
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return new SlopeYIntPair(slope, b2);
-		
-	}
-
 	/**
 	 * From all the targets found in visionData.targetsFound, select the one that
 	 * we're going to send to the roboRIO.
@@ -352,65 +130,57 @@ public class Pipeline {
 			List<Target> newTargets = new ArrayList<Target>();
 			
 			for (Target target : visionData.targetsFound) {
-
 				
+				MatOfPoint2f contour = new MatOfPoint2f(target.contour.toArray());
 				
-				List<OrderedPoint> orderedPoints = sortTargetPoints(target);
-
-				SlopeYIntPair slopePair = calcSlope(orderedPoints);
+				RotatedRect rect = Imgproc.minAreaRect(contour);
 				
-				double slope = slopePair.getM();
-
-				if (slope < 0) {
+				rect.angle = rect.angle+40;
+				
+				if(rect.angle < 0) {
 					continue;
 				}
-
+				
 				Target minTarget = null;
 				double minDist = Double.MAX_VALUE;
-
-				for (Target target2 : visionData.targetsFound) {
-
-					if (target2 != target) {
-
-						List<OrderedPoint> orderedPoints1 = sortTargetPoints(target2);
-
-						TargetContainer targetContainer = calcMinDist(target, target2, orderedPoints1, slope, minDist);
+				
+				for(Target target2 : visionData.targetsFound) {
+					
+					if(target2 != target){
 						
-						if(targetContainer.getDist() < minDist) {
+						if(target2.xCentre < target.xCentre) {
+							continue;
+						}
+						
+						MatOfPoint2f contour2 = new MatOfPoint2f(target2.contour.toArray());
+						
+						RotatedRect rect2 = Imgproc.minAreaRect(contour2);
+						rect2.angle = rect2.angle + 40;
+						
+						if(rect2.angle > 0) {
+							continue;
+						}
+						
+						double w = Math.abs(target.xCentre-target2.xCentre);
+						double h = Math.abs(target.yCentre-target2.yCentre);
+						
+						double dist = Math.sqrt(Math.pow(w, 2)+Math.pow(h, 2));
+						
+						if(dist < minDist) {
 							
-							minDist = targetContainer.getDist();
-							minTarget = targetContainer.getTarget();
+							minDist = dist;
+							minTarget = target2;
 							
 						}
 						
 					}
-
+					
 				}
-
-				boolean missingPair = false;
-
-				for (Target target2 : visionData.targetsFound) {
-
-					if (target2 != target && !missingPair) {
-
-						List<OrderedPoint> orderedPoints1 = sortTargetPoints(target2);
-
-						boolean missingPair1 = isMissingPair(orderedPoints1, slope, minDist, target, target2);
-
-						if(missingPair1 == true) {
-							missingPair = true;
-						}
-						
-					}
-
-				}
-
-				if (minTarget == null || missingPair) {
-
+				
+				if(minTarget == null) {
 					continue;
-
 				}
-
+				
 				Target target3 = new Target();
 
 				double x = target.boundingBox.x < minTarget.boundingBox.x ? target.boundingBox.x

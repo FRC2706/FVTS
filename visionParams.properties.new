@@ -1,0 +1,19 @@
+tape:
+  minSaturation=139
+  maxValue=79
+  cameraSelect=0
+  erodeDilateIterations=0
+  distToCenterImportance=1.0
+  imgDumpPath=
+  slope=-1.3
+  resolution=160x120
+  minValue=0
+  imgDumpTime=-1
+  maxSaturation=211
+  yIntercept=110.0
+  aspectRatioThresh=0.0
+  imageFile=/home/thatmadhacker/FRC/PhotoNASASmall/IMG_5803.JPG
+  maxHue=148
+  minHue=63
+  minArea=0.001
+  group=1

@@ -20,14 +20,17 @@ public class CameraServer extends Thread {
 		}
 
 		VideoCapture capture = new VideoCapture(id);
-
-		cameras.put(id, capture);
 		
 		if(frame1 == null) {
 			frame1 = new Mat();
 		}
 		
-		capture.read(frame1);
+		while(!capture.read(frame1)) {
+			Thread.sleep(40);
+		}
+		
+		cameras.put(id, capture);
+		
 		frames.put(id, frame1);
 
 	}
@@ -56,10 +59,13 @@ public class CameraServer extends Thread {
 					frame = new Mat();
 				}
 				
-				capture.read(frame);
-
-				frames.put(i, frame);
-
+				if(capture.read(frame)) {
+					
+					frames.put(i, frame);
+					
+				}else {
+					System.err.println("Failed to read from camera "+i);
+				}
 			}
 
 			try {
@@ -69,6 +75,36 @@ public class CameraServer extends Thread {
 			}
 		}
 
+	}
+	
+	public static void update() {
+		
+		Mat frame = null;
+		
+		for (int i : cameras.keySet()) {
+			
+			VideoCapture capture = cameras.get(i);
+
+			if(frame == null) {
+				frame = new Mat();
+			}
+			
+			if(capture.read(frame)) {
+				
+				frames.put(i, frame);
+				
+			}else {
+				System.err.println("Failed to read from camera "+i);
+			}
+			
+
+		}
+
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
