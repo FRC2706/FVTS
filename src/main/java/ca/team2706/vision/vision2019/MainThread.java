@@ -91,6 +91,15 @@ public class MainThread extends Thread {
 		// Main video processing loop
 		while (true) {
 			try {
+				
+				if(!visionParams.enabled) {
+					
+					Thread.sleep(100);
+					
+					continue;
+					
+				}
+				
 				if (useCamera) {
 					// Read the frame from the camera, if it fails try again
 					frame = CameraServer.getFrame(visionParams.cameraSelect);

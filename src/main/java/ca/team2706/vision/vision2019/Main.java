@@ -114,6 +114,8 @@ public class Main {
 		public String outputPath;
 
 		public double secondsBetweenImageDumps;
+		
+		public boolean enabled;
 	}
 
 	/**
@@ -451,7 +453,7 @@ public class Main {
 	 * 
 	 * @param The command line arguments
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception{
 
 		// Must be included!
 		// Loads OpenCV
@@ -468,6 +470,23 @@ public class Main {
 
 		// read the vision calibration values from file.
 		loadVisionParams();
+		
+		Map<String,String> masterConfig = ConfigParser.getProperties(new File("master.cf"), "config");
+		
+		Map<String,String> masterEnabled = ConfigParser.getProperties(new File("master.cf"), "enabled");
+		
+		String allowOverride = masterConfig.get("allowOverride");
+		
+		if(allowOverride == null || allowOverride.equals("")) {
+			
+			allowOverride = "true";
+			
+		}
+		
+		boolean allowOverrideB = Boolean.valueOf(allowOverride);
+		
+		if(allowOverrideB)
+			NetworkTablesManager.init();
 
 		ImageDumpScheduler.start();
 
@@ -475,6 +494,17 @@ public class Main {
 
 		for (VisionParams params : visionParamsList) {
 			try {
+				
+				String s = masterEnabled.get(params.name);
+				
+				if(s == null || s.equals("")) {
+					s = "true";
+				}
+				
+				boolean enabled = Boolean.valueOf(s);
+				
+				params.enabled = enabled;
+				
 				CameraServer.initCamera(params.cameraSelect);
 				MainThread thread = new MainThread(params);
 				thread.start();
