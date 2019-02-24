@@ -490,7 +490,7 @@ public class Main {
 
 		ImageDumpScheduler.start();
 
-		CameraServer.startServer();
+		VisionCameraServer.startServer();
 
 		for (VisionParams params : visionParamsList) {
 			try {
@@ -505,7 +505,7 @@ public class Main {
 				
 				params.enabled = enabled;
 				
-				CameraServer.initCamera(params.cameraSelect);
+				VisionCameraServer.initCamera(params.cameraSelect);
 				MainThread thread = new MainThread(params);
 				if(enabled) {
 					thread.start();

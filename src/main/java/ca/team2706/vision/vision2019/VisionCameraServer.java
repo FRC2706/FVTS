@@ -5,12 +5,12 @@ import java.util.Map;
 import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
 
-public class CameraServer extends Thread {
+public class VisionCameraServer extends Thread {
 
 	public static Map<Integer, VideoCapture> cameras = new HashMap<Integer, VideoCapture>();
 
 	public static void startServer() {
-		new CameraServer().start();
+		new VisionCameraServer().start();
 	}
 
 	public static void initCamera(int id) throws Exception {

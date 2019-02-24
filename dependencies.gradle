@@ -29,6 +29,14 @@ ext.tntcoreDep = { ->
     return "edu.wpi.first.wpilib.networktables.java:NetworkTables:+:$classifier"
 }
 
+ext.cscoreDep = { ->
+    return "edu.wpi.cscore.java:cscore:+:all"
+}
+
+ext.tcscoreDep = { ->
+    return "edu.wpi.cscore.java:cscore:+:all"
+}
+
 ext.getOpenCvPlatformPackage = { ->
   if (buildType == "windows") {
     if (System.getProperty("os.arch") == "amd64") {

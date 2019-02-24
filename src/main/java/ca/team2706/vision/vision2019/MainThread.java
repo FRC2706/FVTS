@@ -40,8 +40,8 @@ public class MainThread extends Thread {
 
 		if (useCamera) {
 			try {
-				CameraServer.initCamera(visionParams.cameraSelect);
-				CameraServer.update();
+				VisionCameraServer.initCamera(visionParams.cameraSelect);
+				VisionCameraServer.update();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -69,7 +69,7 @@ public class MainThread extends Thread {
 
 		if (useCamera) {
 
-			frame = CameraServer.getFrame(visionParams.cameraSelect);
+			frame = VisionCameraServer.getFrame(visionParams.cameraSelect);
 
 		} else {
 			try {
@@ -106,7 +106,7 @@ public class MainThread extends Thread {
 				
 				if (useCamera) {
 					// Read the frame from the camera, if it fails try again
-					frame = CameraServer.getFrame(visionParams.cameraSelect);
+					frame = VisionCameraServer.getFrame(visionParams.cameraSelect);
 				} // else use the image from disk that we loaded above
 				// Resize the frame
 				Imgproc.resize(frame, frame, visionParams.sz);
@@ -213,7 +213,7 @@ public class MainThread extends Thread {
 			if (useCamera) {
 				// Initilizes the camera
 				try {
-					CameraServer.initCamera(visionParams.cameraSelect);
+					VisionCameraServer.initCamera(visionParams.cameraSelect);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
