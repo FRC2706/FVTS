@@ -1,5 +1,8 @@
 package ca.team2706.vision.vision2019;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ca.team2706.vision.vision2019.Main.VisionParams;
 
 public class NetworkTablesManager extends Thread{
@@ -21,15 +24,53 @@ public class NetworkTablesManager extends Thread{
 			
 			for(VisionParams params : Main.visionParamsList) {
 				
-				params.enabled = params.table.getBoolean("enabled", true);
+				boolean enabled = params.table.getBoolean("enabled", true);
 				
-				for(MainThread thread : Main.threads) {
+				if(params.enabled == false && enabled) {
+				
+					params.enabled = true;
 					
-					if(thread.visionParams.name.equals(params.name)) {
-						thread.updateParams(params);
+					List<MainThread> toRemove = new ArrayList<MainThread>();
+					List<MainThread> toAdd = new ArrayList<MainThread>();
+					
+					for(MainThread thread : Main.threads) {
+						
+						if(thread.visionParams.name.equals(params.name)) {
+							toRemove.add(thread);
+							MainThread thread1 = new MainThread(params);
+							toAdd.add(thread1);
+							thread1.start();
+						}
+						
+					}
+					
+					for(MainThread thread : toRemove) {
+						Main.threads.remove(thread);
+					}
+					
+					for(MainThread thread : toAdd) {
+						Main.threads.add(thread);
+					}
+					
+				}else if(params.enabled && !enabled) {
+				
+					params.enabled = false;
+
+					for(MainThread thread : Main.threads) {
+						
+						if(thread.visionParams.name.equals(params.name)) {
+							thread.updateParams(params);
+							try {
+								thread.join();
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+						
 					}
 					
 				}
+				
 				
 			}
 			

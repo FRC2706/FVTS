@@ -94,9 +94,13 @@ public class MainThread extends Thread {
 				
 				if(!visionParams.enabled) {
 					
-					Thread.sleep(100);
+					guiRawImg.b = false;
+					guiProcessedImg.b = false;
 					
-					continue;
+					guiRawImg.dispose();
+					guiProcessedImg.dispose();
+					
+					break;
 					
 				}
 				

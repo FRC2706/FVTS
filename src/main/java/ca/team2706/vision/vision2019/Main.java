@@ -507,7 +507,9 @@ public class Main {
 				
 				CameraServer.initCamera(params.cameraSelect);
 				MainThread thread = new MainThread(params);
-				thread.start();
+				if(enabled) {
+					thread.start();
+				}
 				threads.add(thread);
 			} catch (Exception e) {
 				e.printStackTrace();
