@@ -34,13 +34,13 @@ public class MainThread extends Thread {
 		frame = new Mat();
 
 		// Whether to use a camera, or load an image file from disk.
-		if (visionParams.cameraSelect == -1) {
+		if (visionParams.type.equals("usb") && Integer.valueOf(visionParams.identifier) == -1) {
 			useCamera = false;
 		}
 
 		if (useCamera) {
 			try {
-				VisionCameraServer.initCamera(visionParams.cameraSelect);
+				VisionCameraServer.initCamera(visionParams.type,visionParams.identifier);
 				VisionCameraServer.update();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -69,7 +69,7 @@ public class MainThread extends Thread {
 
 		if (useCamera) {
 
-			frame = VisionCameraServer.getFrame(visionParams.cameraSelect);
+			frame = VisionCameraServer.getFrame(visionParams.type,visionParams.identifier);
 
 		} else {
 			try {
@@ -106,7 +106,7 @@ public class MainThread extends Thread {
 				
 				if (useCamera) {
 					// Read the frame from the camera, if it fails try again
-					frame = VisionCameraServer.getFrame(visionParams.cameraSelect);
+					frame = VisionCameraServer.getFrame(visionParams.type,visionParams.identifier);
 				} // else use the image from disk that we loaded above
 				// Resize the frame
 				Imgproc.resize(frame, frame, visionParams.sz);
@@ -203,32 +203,6 @@ public class MainThread extends Thread {
 	}
 
 	public void updateParams(VisionParams params) {
-
-		if (visionParams.cameraSelect != params.cameraSelect) {
-			useCamera = true;
-			if (visionParams.cameraSelect == -1) {
-				useCamera = false;
-			}
-
-			if (useCamera) {
-				// Initilizes the camera
-				try {
-					VisionCameraServer.initCamera(visionParams.cameraSelect);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-			} else {
-				// load the image from file.
-				try {
-					frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
-				} catch (IOException e) {
-					e.printStackTrace();
-					frame = new Mat();
-				}
-			}
-		}
-
 		this.visionParams = params;
 	}
 

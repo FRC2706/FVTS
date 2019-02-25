@@ -81,8 +81,6 @@ public class Main {
 
 		double slope, yIntercept;
 
-		/** This is the id of the camera that will be used to get images **/
-		int cameraSelect;
 		/**
 		 * The threshold to detect one large cube as 2 cubes, this is a value between 0
 		 * and 1
@@ -116,6 +114,9 @@ public class Main {
 		public double secondsBetweenImageDumps;
 		
 		public boolean enabled;
+		
+		public String type,identifier;
+		
 	}
 
 	/**
@@ -225,8 +226,6 @@ public class Main {
 
 				visionParams.name = s;
 
-				visionParams.cameraSelect = Integer.valueOf(data.get("cameraSelect"));
-
 				visionParams.minHue = Integer.valueOf(data.get("minHue"));
 				visionParams.maxHue = Integer.valueOf(data.get("maxHue"));
 				visionParams.minSaturation = Integer.valueOf(data.get("minSaturation"));
@@ -263,7 +262,11 @@ public class Main {
 				visionParams.yIntercept = Double.valueOf(data.get("yIntercept"));
 
 				visionParams.group = Integer.valueOf(data.get("group"));
-
+				
+				visionParams.type = data.get("type");
+				
+				visionParams.identifier = data.get("identifier");
+				
 				visionParamsList.add(visionParams);
 
 			}
@@ -294,7 +297,8 @@ public class Main {
 			visionTable.putString("imageFile", params.imageFile);
 			visionTable.putNumber("distToCenterImportance", params.distToCentreImportance);
 			visionTable.putNumber("aspectRatioThresh", params.aspectRatioThresh);
-			visionTable.putNumber("cameraSelect", params.cameraSelect);
+			visionTable.putString("type", params.type);
+			visionTable.putString("identifier", params.identifier);
 			visionTable.putNumber("minHue", params.minHue);
 			visionTable.putNumber("maxHue", params.maxHue);
 			visionTable.putNumber("minSaturation", params.minSaturation);
@@ -329,8 +333,8 @@ public class Main {
 	public static void saveVisionParams(VisionParams params) throws Exception {
 		Map<String, String> data = new HashMap<String, String>();
 
-		data.put("cameraSelect", String.valueOf(params.cameraSelect));
-
+		data.put("type", params.type);
+		data.put("identifier", params.identifier);
 		data.put("minHue", String.valueOf(params.minHue));
 		data.put("maxHue", String.valueOf(params.maxHue));
 		data.put("minSaturation", String.valueOf(params.minSaturation));
@@ -505,7 +509,7 @@ public class Main {
 				
 				params.enabled = enabled;
 				
-				VisionCameraServer.initCamera(params.cameraSelect);
+				VisionCameraServer.initCamera(params.type,params.identifier);
 				MainThread thread = new MainThread(params);
 				if(enabled) {
 					thread.start();
