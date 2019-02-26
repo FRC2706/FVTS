@@ -81,8 +81,6 @@ public class Main {
 
 		double slope, yIntercept;
 
-		/** This is the id of the camera that will be used to get images **/
-		int cameraSelect;
 		/**
 		 * The threshold to detect one large cube as 2 cubes, this is a value between 0
 		 * and 1
@@ -114,6 +112,11 @@ public class Main {
 		public String outputPath;
 
 		public double secondsBetweenImageDumps;
+		
+		public boolean enabled;
+		
+		public String type,identifier;
+		
 	}
 
 	/**
@@ -169,19 +172,20 @@ public class Main {
 	 * Initilizes the Network Tables WARNING! Change 127.0.0.1 to the robot ip
 	 * before it is on master or it will not be fun :)
 	 */
-	public static void initNetworkTables() {
+	public static void initNetworkTables(String ip) {
 		// Tells the NetworkTable class that this is a client
 		NetworkTable.setClientMode();
 		// Sets the interval for updating NetworkTables
 		NetworkTable.setUpdateRate(0.02);
 
 		boolean use_GUI = true;
+		
 		// If on Linux don't use guis
-		if (System.getProperty("os.name").toLowerCase().indexOf("raspbian") != -1) {
+		if (System.getProperty("os.arch").toLowerCase().indexOf("arm") != -1) {
 			use_GUI = false;
 		}
-
-		if (!use_GUI) {
+		
+		if (!use_GUI && ip.equals("")) {
 
 			// Sets the team number
 			NetworkTable.setTeam(2706); // Use this for the robit
@@ -190,8 +194,12 @@ public class Main {
 
 		} else {
 
+			if(ip.equals("")) {
+				ip = "localhost";
+			}
+			
 			// Sets the IP adress to connect to
-			NetworkTable.setIPAddress("localhost"); // Use this for testing
+			NetworkTable.setIPAddress(ip); // Use this for testing
 
 		}
 
@@ -217,8 +225,6 @@ public class Main {
 				Map<String, String> data = ConfigParser.getProperties(configFile, s);
 
 				visionParams.name = s;
-
-				visionParams.cameraSelect = Integer.valueOf(data.get("cameraSelect"));
 
 				visionParams.minHue = Integer.valueOf(data.get("minHue"));
 				visionParams.maxHue = Integer.valueOf(data.get("maxHue"));
@@ -256,16 +262,52 @@ public class Main {
 				visionParams.yIntercept = Double.valueOf(data.get("yIntercept"));
 
 				visionParams.group = Integer.valueOf(data.get("group"));
-
+				
+				visionParams.type = data.get("type");
+				
+				visionParams.identifier = data.get("identifier");
+				
 				visionParamsList.add(visionParams);
 
 			}
+			
+			sendVisionParams();
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.err.println("\n\nError reading the params file, check if the file is corrupt?");
 			System.exit(1);
 		}
+	}
+	
+	private static void sendVisionParams() {
+		
+		for(VisionParams params : visionParamsList) {
+			
+			NetworkTable visionTable = NetworkTable.getTable("vision-" + params.name+"/params");
+			
+			visionTable.putNumber("group", params.group);
+			visionTable.putNumber("yIntercept", params.yIntercept);
+			visionTable.putNumber("slope", params.slope);
+			visionTable.putNumber("secondsBetweenImageDumps", params.secondsBetweenImageDumps);
+			visionTable.putNumber("height", params.height);
+			visionTable.putNumber("width", params.width);
+			visionTable.putNumber("erodeDilateIterations", params.erodeDilateIterations);
+			visionTable.putNumber("minArea", params.minArea);
+			visionTable.putString("imageFile", params.imageFile);
+			visionTable.putNumber("distToCenterImportance", params.distToCentreImportance);
+			visionTable.putNumber("aspectRatioThresh", params.aspectRatioThresh);
+			visionTable.putString("type", params.type);
+			visionTable.putString("identifier", params.identifier);
+			visionTable.putNumber("minHue", params.minHue);
+			visionTable.putNumber("maxHue", params.maxHue);
+			visionTable.putNumber("minSaturation", params.minSaturation);
+			visionTable.putNumber("maxSaturation", params.maxSaturation);
+			visionTable.putNumber("minValue", params.minValue);
+			visionTable.putNumber("maxValue", params.maxValue);
+			
+		}
+		
 	}
 
 	/**
@@ -291,8 +333,8 @@ public class Main {
 	public static void saveVisionParams(VisionParams params) throws Exception {
 		Map<String, String> data = new HashMap<String, String>();
 
-		data.put("cameraSelect", String.valueOf(params.cameraSelect));
-
+		data.put("type", params.type);
+		data.put("identifier", params.identifier);
 		data.put("minHue", String.valueOf(params.minHue));
 		data.put("maxHue", String.valueOf(params.maxHue));
 		data.put("minSaturation", String.valueOf(params.minSaturation));
@@ -347,6 +389,8 @@ public class Main {
 			visionTable.putNumber("ctrX", visionData.preferredTarget.xCentreNorm);
 			// Puts the normalized area into the vision table
 			visionTable.putNumber("area", visionData.preferredTarget.areaNorm);
+			
+			visionTable.putNumber("angle", visionData.preferredTarget.xCentreNorm*45);
 		}
 	}
 
@@ -413,26 +457,67 @@ public class Main {
 	 * 
 	 * @param The command line arguments
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception{
 
 		// Must be included!
 		// Loads OpenCV
 		System.loadLibrary("opencv_java310");
 
+		String ip = "";
+		
+		if(args.length > 0) {
+			ip = args[0];
+		}
+		
 		// Connect NetworkTables, and get access to the publishing table
-		initNetworkTables();
+		initNetworkTables(ip);
 
 		// read the vision calibration values from file.
 		loadVisionParams();
+		
+		Map<String,String> masterConfig = ConfigParser.getProperties(new File("master.cf"), "config");
+		
+		Map<String,String> masterEnabled = ConfigParser.getProperties(new File("master.cf"), "enabled");
+		
+		String allowOverride = masterConfig.get("allowOverride");
+		
+		if(allowOverride == null || allowOverride.equals("")) {
+			
+			allowOverride = "true";
+			
+		}
+		
+		boolean allowOverrideB = Boolean.valueOf(allowOverride);
+		
+		if(allowOverrideB)
+			NetworkTablesManager.init();
 
 		ImageDumpScheduler.start();
 
-		CameraServer.startServer();
+		VisionCameraServer.startServer();
 
 		for (VisionParams params : visionParamsList) {
-			MainThread thread = new MainThread(params);
-			thread.start();
-			threads.add(thread);
+			try {
+				
+				String s = masterEnabled.get(params.name);
+				
+				if(s == null || s.equals("")) {
+					s = "true";
+				}
+				
+				boolean enabled = Boolean.valueOf(s);
+				
+				params.enabled = enabled;
+				
+				VisionCameraServer.initCamera(params.type,params.identifier);
+				MainThread thread = new MainThread(params);
+				if(enabled) {
+					thread.start();
+				}
+				threads.add(thread);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 	} // end main video processing loop

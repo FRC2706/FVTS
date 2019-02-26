@@ -26,14 +26,6 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	 */
 	private JPanel contentPane;
 	/**
-	 * The camera selecting field
-	 */
-	private JTextField textField;
-	/**
-	 * The text field that says "Camera:"
-	 */
-	private JTextField txtCamera;
-	/**
 	 * Save button
 	 */
 	private JButton btnSave;
@@ -273,27 +265,6 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		sMaxVal.setBounds(74, 106, 31, 95);
 		// Add it to the window
 		contentPane.add(sMaxVal);
-
-		// Init the camera select text field
-		textField = new JTextField();
-		// Set the size
-		textField.setBounds(115, 32, 86, 20);
-		contentPane.add(textField);
-		// Set the number of columns
-		textField.setColumns(10);
-
-		// Init the camera text field
-		txtCamera = new JTextField();
-		// Set the text
-		txtCamera.setText("Camera #:");
-		// Sets the size
-		txtCamera.setBounds(115, 10, 86, 20);
-		// Makes it not editable
-		txtCamera.setEditable(false);
-		// Add it to the window
-		contentPane.add(txtCamera);
-		// Set the number of columns
-		txtCamera.setColumns(10);
 
 		// Init the save button
 		btnSave = new JButton("Save");
@@ -544,48 +515,6 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		contentPane.add(textField_7);
 		textField_7.setColumns(10);
 
-		JButton btnNewButton = new JButton("Load");
-		btnNewButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-
-				Main.loadVisionParams();
-
-				for (VisionParams p : Main.visionParamsList) {
-					if (p.name.equals(textField_7.getText())) {
-
-						visionParams = p;
-
-						textField.setText("" + visionParams.cameraSelect);
-						textField_1.setText("" + visionParams.erodeDilateIterations);
-						minArea.setText("" + visionParams.minArea);
-						textField_2.setText("" + visionParams.width);
-						textField_3.setText("" + visionParams.height);
-
-						sMinHue.setValue(visionParams.minHue);
-						sMaxHue.setValue(visionParams.maxHue);
-						sMinSat.setValue(visionParams.minSaturation);
-						sMaxSat.setValue(visionParams.maxSaturation);
-						sMinVal.setValue(visionParams.minValue);
-						sMaxVal.setValue(visionParams.maxValue);
-
-						textField_4.setText(""+visionParams.secondsBetweenImageDumps);
-						
-						textField_5.setText(visionParams.outputPath);
-						
-						slider.setValue((int) (visionParams.distToCentreImportance * 100));
-
-						slider_1.setValue((int) (visionParams.aspectRatioThresh * 100));
-
-						break;
-
-					}
-				}
-
-			}
-		});
-		btnNewButton.setBounds(480, 210, 98, 24);
-		contentPane.add(btnNewButton);
-		
 		btnNewButton_1 = new JButton("Start");
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -625,6 +554,67 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		contentPane.add(textField_11);
 		textField_11.setColumns(10);
 		textField_11.setEditable(false);
+		
+		textField = new JTextField();
+		textField.setToolTipText("Camera type");
+		textField.setBounds(91, 10, 114, 18);
+		contentPane.add(textField);
+		textField.setColumns(10);
+		
+		textField_12 = new JTextField();
+		textField_12.setToolTipText("Camera id");
+		textField_12.setBounds(92, 39, 114, 18);
+		contentPane.add(textField_12);
+		textField_12.setColumns(10);
+		
+		JButton btnNewButton = new JButton("Load");
+		
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+
+				loading = true;
+				
+				Main.loadVisionParams();
+				
+				for (VisionParams p : Main.visionParamsList) {
+					
+					if (p.name.equals(textField_7.getText())) {
+
+						visionParams = p;
+
+						textField.setText(visionParams.type);
+						textField_12.setText(visionParams.identifier);
+						textField_1.setText("" + visionParams.erodeDilateIterations);
+						minArea.setText("" + visionParams.minArea);
+						textField_2.setText("" + visionParams.width);
+						textField_3.setText("" + visionParams.height);
+
+						sMinHue.setValue(visionParams.minHue);
+						sMaxHue.setValue(visionParams.maxHue);
+						sMinSat.setValue(visionParams.minSaturation);
+						sMaxSat.setValue(visionParams.maxSaturation);
+						sMinVal.setValue(visionParams.minValue);
+						sMaxVal.setValue(visionParams.maxValue);
+
+						textField_4.setText(""+visionParams.secondsBetweenImageDumps);
+						
+						textField_5.setText(visionParams.outputPath);
+						
+						slider.setValue((int) (visionParams.distToCentreImportance * 100));
+
+						slider_1.setValue((int) (visionParams.aspectRatioThresh * 100));
+						
+						break;
+
+					}
+				}
+				
+				loading = false;
+
+			}
+		});
+		btnNewButton.setBounds(480, 210, 98, 24);
+		contentPane.add(btnNewButton);
 
 		// Makes the window visible
 		setVisible(true);
@@ -633,10 +623,13 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 		new Thread(this).start();
 	}
 	
+	private boolean loading = false;
 	private boolean secondPress = false;
 	private JTextField textField_9;
 	private JTextField textField_10;
 	private JTextField textField_11;
+	private JTextField textField;
+	private JTextField textField_12;
 
 	/**
 	 * The method used for updating the values
@@ -645,10 +638,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 	public void run() {
 		while (true) {
 			try {
-				// If the camera number is a number
-				if (isInt(textField.getText())) {
-					// Update the camera number
-					visionParams.cameraSelect = Integer.valueOf(Integer.valueOf(textField.getText()));
+				if(loading) {
+					continue;
 				}
 				// If the erode dilate iterations is a number
 				if (isInt(textField_1.getText())) {
@@ -680,6 +671,10 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 					// Update the size
 					visionParams.sz = new Size(visionParams.width, visionParams.height);
 				}
+				
+				visionParams.type = textField.getText();
+				visionParams.identifier = textField_12.getText();
+				
 				visionParams.outputPath = textField_5.getText();
 				// Update the minimum hue
 				visionParams.minHue = sMinHue.getValue();
@@ -716,8 +711,8 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				
 				thread.updateParams(visionParams);
 				
-				// Sleep for 1ms
-				Thread.sleep(5);
+				// Sleep for 100ms
+				Thread.sleep(100);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

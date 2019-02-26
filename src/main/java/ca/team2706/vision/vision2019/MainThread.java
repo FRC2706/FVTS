@@ -34,13 +34,14 @@ public class MainThread extends Thread {
 		frame = new Mat();
 
 		// Whether to use a camera, or load an image file from disk.
-		if (visionParams.cameraSelect == -1) {
+		if (visionParams.type.equals("usb") && Integer.valueOf(visionParams.identifier) == -1) {
 			useCamera = false;
 		}
 
 		if (useCamera) {
 			try {
-				CameraServer.initCamera(visionParams.cameraSelect);
+				VisionCameraServer.initCamera(visionParams.type,visionParams.identifier);
+				VisionCameraServer.update();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -60,14 +61,15 @@ public class MainThread extends Thread {
 		DisplayGui guiProcessedImg = null;
 		// Wether to open the guis
 		boolean use_GUI = true;
+
 		// If on Linux don't use guis
-		if (System.getProperty("os.name").toLowerCase().indexOf("raspbian") != -1) {
+		if (System.getProperty("os.arch").toLowerCase().indexOf("arm") != -1) {
 			use_GUI = false;
 		}
 
 		if (useCamera) {
 
-			frame = CameraServer.getFrame(visionParams.cameraSelect);
+			frame = VisionCameraServer.getFrame(visionParams.type,visionParams.identifier);
 
 		} else {
 			try {
@@ -80,29 +82,34 @@ public class MainThread extends Thread {
 
 		// Set up the GUI display windows
 		if (use_GUI) {
-			try {
-				// Initilizes the window to display the raw image
-				guiRawImg = new DisplayGui(Main.matToBufferedImage(frame), "Raw-" + visionParams.name, true);
-				// Initilizes the window to display the processed image
-				guiProcessedImg = new DisplayGui(Main.matToBufferedImage(frame), "Processed-" + visionParams.name,
-						true);
-			} catch (IOException e) {
-				// means mat2BufferedImage broke
-				// non-fatal error, let the program continue
-			}
+			// Initilizes the window to display the raw image
+			guiRawImg = new DisplayGui(1, 1, "Raw-" + visionParams.name, true);
+			// Initilizes the window to display the processed image
+			guiProcessedImg = new DisplayGui(1, 1, "Processed-" + visionParams.name, true);
 		}
 
 		// Main video processing loop
 		while (true) {
 			try {
+				
+				if(!visionParams.enabled) {
+					
+					guiRawImg.b = false;
+					guiProcessedImg.b = false;
+					
+					guiRawImg.dispose();
+					guiProcessedImg.dispose();
+					
+					break;
+					
+				}
+				
 				if (useCamera) {
 					// Read the frame from the camera, if it fails try again
-					frame = CameraServer.getFrame(visionParams.cameraSelect);
+					frame = VisionCameraServer.getFrame(visionParams.type,visionParams.identifier);
 				} // else use the image from disk that we loaded above
-				if (use_GUI) {
-					// Resize the frame
-					Imgproc.resize(frame, frame, visionParams.sz);
-				}
+				// Resize the frame
+				Imgproc.resize(frame, frame, visionParams.sz);
 				// Process the frame!
 				// Log when the pipeline starts
 				long pipelineStart = System.nanoTime();
@@ -164,13 +171,16 @@ public class MainThread extends Thread {
 					double elapsedTime = ((double) System.currentTimeMillis() / 1000) - current_time_seconds;
 					// If the elapsed time is more that the seconds between image
 					// dumps
+					
 					// then dump images asynchronously
 					if (elapsedTime >= visionParams.secondsBetweenImageDumps && visionParams.secondsBetweenImageDumps != -1) {
 						// Sets the current number of seconds
 						current_time_seconds = (((double) System.currentTimeMillis()) / 1000);
 						try {
+							Mat draw = frame.clone();
+							Pipeline.drawPreferredTarget(draw, visionData);
 							Bundle b = new Bundle(Main.matToBufferedImage(frame),
-									Main.matToBufferedImage(visionData.binMask), Main.matToBufferedImage(rawOutputImg),
+									Main.matToBufferedImage(visionData.binMask), Main.matToBufferedImage(draw),
 									timestamp, visionParams);
 							ImageDumpScheduler.schedule(b);
 							timestamp++;
@@ -197,32 +207,6 @@ public class MainThread extends Thread {
 	}
 
 	public void updateParams(VisionParams params) {
-
-		if (visionParams.cameraSelect != params.cameraSelect) {
-			useCamera = true;
-			if (visionParams.cameraSelect == -1) {
-				useCamera = false;
-			}
-
-			if (useCamera) {
-				// Initilizes the camera
-				try {
-					CameraServer.initCamera(visionParams.cameraSelect);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-			} else {
-				// load the image from file.
-				try {
-					frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
-				} catch (IOException e) {
-					e.printStackTrace();
-					frame = new Mat();
-				}
-			}
-		}
-
 		this.visionParams = params;
 	}
 
