@@ -129,6 +129,7 @@ public class MainThread extends Thread {
 					}else {
 						rawOutputImg = frame.clone();
 					}
+					rawOutputImg = frame;
 					// Draws the preffered target
 					Pipeline.drawPreferredTarget(rawOutputImg, visionData);
 				} else {
