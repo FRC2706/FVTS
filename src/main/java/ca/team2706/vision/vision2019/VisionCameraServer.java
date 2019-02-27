@@ -22,13 +22,9 @@ public class VisionCameraServer extends Thread {
 
 	public static void initCamera(String type, String identifier) throws Exception {
 
-		if (type.trim().equalsIgnoreCase("usb")) {
+		if (type.equals("usb")) {
 
 			int id = Integer.valueOf(identifier);
-			
-			if(cameras.containsKey(id)) {
-				return;
-			}
 
 			VideoCapture capture = new VideoCapture(id);
 
@@ -48,11 +44,7 @@ public class VisionCameraServer extends Thread {
 
 			frames.put(id, frame1);
 
-		}else if(type.trim().equalsIgnoreCase("mjpegserver")) {
-			
-			if(servers.containsKey(identifier)) {
-				return;
-			}
+		}else if(type.equals("mjpegserver")) {
 			
 			String[] data = identifier.split(":");
 			
@@ -85,9 +77,9 @@ public class VisionCameraServer extends Thread {
 	
 	public static Mat getFrame(String type, String identifier) {
 		
-		if(type.trim().equalsIgnoreCase("usb")) {
+		if(type.equals("usb")) {
 			return frames.get(Integer.valueOf(identifier));
-		}else if(type.trim().equalsIgnoreCase("mjpegserver")) {
+		}else if(type.equals("mjpegserver")) {
 			return framess.get(identifier);
 		}
 		
