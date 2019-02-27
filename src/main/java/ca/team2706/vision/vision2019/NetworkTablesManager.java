@@ -26,7 +26,7 @@ public class NetworkTablesManager extends Thread{
 				
 				boolean enabled = params.table.getBoolean("enabled", true);
 				
-				if(params.enabled == false && enabled) {
+				if(params.enabled == false && enabled && params.table.isConnected()) {
 				
 					params.enabled = true;
 					
@@ -52,7 +52,7 @@ public class NetworkTablesManager extends Thread{
 						Main.threads.add(thread);
 					}
 					
-				}else if(params.enabled && !enabled) {
+				}else if(params.enabled && !enabled && params.table.isConnected()) {
 				
 					params.enabled = false;
 

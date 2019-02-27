@@ -124,6 +124,11 @@ public class MainThread extends Thread {
 				if (use_GUI) {
 					// If use gui then draw the prefered target
 					// Sets the raw image to the frame
+					if(useCamera) {
+						rawOutputImg = frame;
+					}else {
+						rawOutputImg = frame.clone();
+					}
 					rawOutputImg = frame;
 					// Draws the preffered target
 					Pipeline.drawPreferredTarget(rawOutputImg, visionData);
