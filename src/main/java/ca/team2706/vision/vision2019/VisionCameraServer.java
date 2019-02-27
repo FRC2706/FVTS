@@ -23,10 +23,22 @@ public class VisionCameraServer extends Thread {
 	public static void initCamera(String type, String identifier) throws Exception {
 
 		if (type.equals("usb")) {
-
+			
 			int id = Integer.valueOf(identifier);
 
+			if(cameras.containsKey(id) || id == -1) {
+				return;
+			}
+			
 			VideoCapture capture = new VideoCapture(id);
+			
+			System.out.println("Waiting for camera to respond!");
+			
+			while(!capture.isOpened()) {
+				Thread.sleep(10);
+			}
+			
+			System.out.println("Camera successfully connected");
 
 			if (frame1 == null) {
 				frame1 = new Mat();
