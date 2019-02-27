@@ -32,8 +32,12 @@ public class VisionCameraServer extends Thread {
 				frame1 = new Mat();
 			}
 
-			while (!capture.read(frame1)) {
-				Thread.sleep(40);
+			if(!capture.read(frame1)) {
+				
+				System.err.println("Failed to connect to camera #"+identifier);
+				
+				System.exit(1);
+				
 			}
 
 			cameras.put(id, capture);
