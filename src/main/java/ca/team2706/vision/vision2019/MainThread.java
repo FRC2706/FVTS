@@ -92,7 +92,7 @@ public class MainThread extends Thread {
 		while (true) {
 			try {
 				
-				if(!visionParams.enabled) {
+				if(!visionParams.enabled && use_GUI) {
 					
 					guiRawImg.b = false;
 					guiProcessedImg.b = false;
@@ -102,6 +102,8 @@ public class MainThread extends Thread {
 					
 					break;
 					
+				}else if(!visionParams.enabled) {
+					break;
 				}
 				
 				if (useCamera) {
