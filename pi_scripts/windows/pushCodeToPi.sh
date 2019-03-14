@@ -23,7 +23,7 @@ fi
 echo "Make sure you've done a \"git pull\" so that you're deploying the latest code!"
 echo
 
-gradlew build -PbuildType=arm-raspbian -PtestType=windows
+./gradlew build -PbuildType=arm-raspbian -PtestType=windows
 
 # ERROR HANDLING: check that the build succeeded
 if [ $? -ne 0 ]; then

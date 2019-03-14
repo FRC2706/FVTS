@@ -22,7 +22,6 @@ fi
 echo "Copying visionParams.properties to ${PI_USER}@${PI_ADDR}"
 ssh ${PI_USER}@${PI_ADDR} "mkdir -p ${PI_DIR}"
 scp visionParams.properties ${PI_USER}@${PI_ADDR}:${PI_DIR}
-scp master.cf ${PI_USER}@${PI_ADDR}:${PI_DIR}
 
 # ERROR HANDLING: if the copy failed, abort
 if [ $? -ne 0 ]; then

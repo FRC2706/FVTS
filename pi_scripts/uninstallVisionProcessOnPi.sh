@@ -13,4 +13,6 @@ if [[ $1 != "" ]]; then
   PI_ADDR=$1
 fi
 
-ssh ${PI_USER}@${PI_ADDR} "sudo systemctl stop vision.service && sudo systemctl disable vision.service && sudo rm /etc/systemd/system/vision.service && sudo systemctl daemon-reload"
+ssh ${PI_USER}@${PI_ADDR} "sudo systemctl stop vision.service"
+ssh ${PI_USER}@${PI_ADDR} "sudo systemctl disable vision.service"
+ssh ${PI_USER}@${PI_ADDR} "sudo rm /etc/systemd/system/vision.service"

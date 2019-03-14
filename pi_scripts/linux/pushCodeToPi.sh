@@ -45,7 +45,7 @@ if [ $? -ne ]; then
 fi
 
 # Push the vision params file too
-source pi_scripts/pushVisionParamsToPi.sh
+source pi_scripts/pushvisionParamsToPi.sh
 
 # Restart the vision process on the pi
 source pi_scripts/restartVisionProcessOnPi.sh ${PI_ADDR}
