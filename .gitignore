@@ -20,4 +20,4 @@ out/
 *.log
 imagedump/
 field images/
-/Vision2019/null00001_raw.png
+null*
