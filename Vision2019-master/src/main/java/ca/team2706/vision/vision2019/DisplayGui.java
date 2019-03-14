@@ -101,6 +101,10 @@ public class DisplayGui extends JFrame implements Runnable {
 			return;
 		}
 		this.image = image;
+		Graphics g = this.image.createGraphics();
+		g.setColor(Color.WHITE);
+		g.drawString(Main.filename, 50, 50);
+		g.dispose();
 
 		// If the image width or height is more or less than the last image change the
 		// size

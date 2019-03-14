@@ -29,6 +29,31 @@ ext.tntcoreDep = { ->
     return "edu.wpi.first.wpilib.networktables.java:NetworkTables:+:$classifier"
 }
 
+ext.cscoreDep = { ->
+	def classifier
+	
+	if(buildType == "linux-x86_64" || buildType == "linux-x86"){
+		classifier = "linux";
+	}else if(buildType == "windows"){
+		classifier = "windows2015";
+	}else{
+		classifier = buildType;
+	}
+    return "edu.wpi.cscore.java:cscore:+:"+classifier;
+}
+
+ext.tcscoreDep = { ->
+	def classifier
+	
+	if(testType == "linux-x86_64" || testType == "linux-x86"){
+		classifier = "linux";
+	}else if(testType == "windows"){
+		classifier = "windows2015";
+	}else{
+		classifier = testType;
+	}
+    return "edu.wpi.cscore.java:cscore:+:"+classifier;
+}
 ext.getOpenCvPlatformPackage = { ->
   if (buildType == "windows") {
     if (System.getProperty("os.arch") == "amd64") {
