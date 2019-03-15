@@ -8,7 +8,6 @@ import org.opencv.videoio.VideoCapture;
 
 import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.MjpegServer;
-import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
 
 public class VisionCameraServer extends Thread {
@@ -33,10 +32,26 @@ public class VisionCameraServer extends Thread {
 			
 			VideoCapture capture = new VideoCapture(id);
 			
+			System.out.println("Waiting for camera to respond!");
+			
+			while(!capture.isOpened()) {
+				Thread.sleep(10);
+			}
+			
+			System.out.println("Camera successfully connected");
+
 			if (frame1 == null) {
 				frame1 = new Mat();
 			}
-			
+
+			if(!capture.read(frame1)) {
+				
+				System.err.println("Failed to connect to camera #"+identifier);
+				
+				System.exit(1);
+				
+			}
+
 			cameras.put(id, capture);
 
 			frames.put(id, frame1);

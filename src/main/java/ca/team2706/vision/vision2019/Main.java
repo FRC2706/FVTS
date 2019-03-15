@@ -214,7 +214,7 @@ public class Main {
 	public static void loadVisionParams() {
 		try {
 
-			File configFile = new File("/boot/visionParams.properties");
+			File configFile = new File("visionParams.properties");
 
 			List<String> lists = ConfigParser.listLists(configFile);
 
@@ -461,7 +461,7 @@ public class Main {
 
 		// Must be included!
 		// Loads OpenCV
-		System.loadLibrary("opencv_java344");
+		System.loadLibrary("opencv_java310");
 
 		String ip = "";
 		
@@ -475,9 +475,9 @@ public class Main {
 		// read the vision calibration values from file.
 		loadVisionParams();
 		
-		Map<String,String> masterConfig = ConfigParser.getProperties(new File("/boot/master.cf"), "config");
+		Map<String,String> masterConfig = ConfigParser.getProperties(new File("master.cf"), "config");
 		
-		Map<String,String> masterEnabled = ConfigParser.getProperties(new File("/boot/master.cf"), "enabled");
+		Map<String,String> masterEnabled = ConfigParser.getProperties(new File("master.cf"), "enabled");
 		
 		String allowOverride = masterConfig.get("allowOverride");
 		
