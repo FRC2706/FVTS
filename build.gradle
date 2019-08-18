@@ -1,6 +1,7 @@
 // Do not mess with the following 6 lines
 plugins {
   id 'com.github.johnrengelman.shadow' version '1.2.4'
+  id 'com.github.gmazzo.buildconfig' version '1.5.0'
 }
 
 
@@ -14,6 +15,7 @@ mainClassName = 'ca.team2706.vision.vision2019.Main'
 
 // Change the line below to change the name of the output jar
 def projectName = 'CameraVision'
+def version = '1.0'
 
 task setbuildType{
   doFirst{
@@ -43,11 +45,13 @@ task settestType{
   }
   }
 }
+buildConfig{
+    buildConfigField "boolean", "DEBUG", "false"
+    buildConfigField "String", "VERSION", version+"-release-"+ext.buildType
+}
 
 // Shouldn't need to change anything below this point
 apply from: 'dependencies.gradle'
-
-
 
 sourceSets {
     main {
@@ -57,7 +61,7 @@ sourceSets {
     }
     test {
         java{
-	    srcDir 'src/test/java/'
+	        srcDir 'src/test/java/'
         }
     }
 }
@@ -75,6 +79,8 @@ dependencies {
   compile 'edu.wpi.first.cameraserver:cameraserver-java:+:'
   compile 'junit:junit:4.12'
   compile cscoreDep()
+  compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+  
   testCompile 'junit:junit:4.12'
   testCompile tntcoreDep()
   testCompile 'org.opencv:opencv-java:3.1.0'
