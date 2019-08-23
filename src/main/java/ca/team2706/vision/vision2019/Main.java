@@ -413,6 +413,7 @@ public class Main {
 		byte ba[] = mob.toArray();
 
 		BufferedImage bi = ImageIO.read(new ByteArrayInputStream(ba));
+		matrix.release();
 		return bi;
 	}
 
