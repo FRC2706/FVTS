@@ -60,4 +60,4 @@ After the program is installed and running on the raspberry pi it can be restart
 
 ## Accessing the CLI
 
-Vision2019 has an integrated logging server which can be remotely accessed. This is done through running `telnet [ip address] 6677` (note that this requires installing/enabling `telnet`)
+Vision2019 has an integrated logging server which can be remotely accessed. This is done through running `telnet [ip address] 5810` (note that this requires installing/enabling `telnet`)
