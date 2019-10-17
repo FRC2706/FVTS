@@ -40,7 +40,7 @@ any device, along with performing OpenCV operations.
 
 ## Choosing which system to build for
 
-Run `buildScripts/linux.sh` for linux x86_64, `buildScripts/windows.bat` for windows, `buildScripts/raspbian-linuxtest.sh` to build for raspbian with linux tests and `buildScripts/raspbian-windowstest.bat`
+Run `buildScripts/linux.sh` for linux x86_64, `buildScripts/windows.bat` for windows, `buildScripts/raspbian-linuxtest.sh` to build for raspbian with linux tests, or `buildScripts/raspbian-windowstest.bat` to build for raspbian with windows tests
 
 ## Choosing the camera
 
@@ -48,4 +48,16 @@ Change `cameraSelect` in `visionParams.properties` to change the USB camera numb
 
 ## Running
 
-Run `gradlew run` after running the build script for your platform.
+### Running for non robot purposes
+
+To run vision either execute Main.java (inside Eclipse) or run `cd output/`, then `./runCameraVision` (Linux) or `runCameraVision.bat` (Windows), note that the `visionParams.properties` and `master.cf` must be in the directory that you run vision from.
+
+### Running on a pi
+
+To run vision on a pi is is super easy. First run `./pi_scripts/installVisionProcessOnPi.sh [ip address]` to install the `vision` service to a pi, then run `./pi_scripts/linux/pushCodeToPi.sh [ip address]` (Linux) or `./pi_scripts/windows/pushCodeToPi.sh [ip address]`
+
+After the program is installed and running on the raspberry pi it can be restarted using `./pi_scripts/restartVisionProcessOnPi.sh [ip address]`, you can push configuration changes using `./pi_scripts/pushVisionParamsToPi.sh [ip address]`, and if you want to uninstall vision you can run `./pi_scripts/uninstallVisionProcessOnPi.sh` (note that it does not remove the vision code/config from the pi, it only removed the service)
+
+## Accessing the CLI
+
+Vision2019 has an integrated logging server which can be remotely accessed. This is done through running `telnet [ip address] 6677` (note that this requires installing/enabling `telnet`)
