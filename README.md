@@ -50,7 +50,7 @@ Change `cameraSelect` in `visionParams.properties` to change the USB camera numb
 
 ### Running for non robot purposes
 
-To run vision either execute Main.java (inside Eclipse) or run `cd output/`, then `./runCameraVision` (Linux) or `runCameraVision.bat` (Windows), note that the `visionParams.properties` and `master.cf` must be in the directory that you run vision from.
+To run vision either execute `Main.java` (inside Eclipse) or run `cd output/`, then `./runCameraVision` (Linux) or `runCameraVision.bat` (Windows), note that the `visionParams.properties` and `master.cf` must be in the directory that you run vision from.
 
 ### Running on a pi
 
