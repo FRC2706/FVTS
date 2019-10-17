@@ -1,13 +1,11 @@
 // Do not mess with the following 6 lines
 plugins {
   id 'com.github.johnrengelman.shadow' version '1.2.4'
-  id 'com.github.gmazzo.buildconfig' version '1.5.0'
 }
 
 
 apply plugin: 'java'
 apply plugin: 'application'
-apply plugin: "jacoco"
 
 // Change the line below if you change the name of your main Java class
 // Comment this line and uncomment the line after it to build/run the Server, and vice versa to run the main vision program
@@ -44,10 +42,6 @@ task settestType{
     }
   }
   }
-}
-buildConfig{
-    buildConfigField "boolean", "DEBUG", "false"
-    buildConfigField "String", "VERSION", version+"-release-"+ext.buildType
 }
 
 // Shouldn't need to change anything below this point
@@ -165,15 +159,6 @@ tasks.withType(Test) {
     scanForTestClasses = false
     include "**/*Test.class"
 }
-
-
-
-jacoco {
-    toolVersion = "0.8.1"
-    reportsDir = file("$buildDir/JacocoReportDir")
-}
-
-
 
 build.dependsOn setbuildType
 test.dependsOn settestType
