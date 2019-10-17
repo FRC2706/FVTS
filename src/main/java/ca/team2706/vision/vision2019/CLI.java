@@ -80,7 +80,7 @@ public class CLI implements Runnable, ActionListener {
 			@Override
 			public void run() {
 				try {
-					ServerSocket ss = new ServerSocket(6677);
+					ServerSocket ss = new ServerSocket(5810);
 					while (!ss.isClosed()) {
 						try {
 							Socket s = ss.accept();
@@ -188,7 +188,7 @@ public class CLI implements Runnable, ActionListener {
 			if (!textField.getText().equals("")) {
 				try {
 					btnConnect.setEnabled(false);
-					s = new Socket(textField.getText(), 6677);
+					s = new Socket(textField.getText(), 5810);
 					in = new Scanner(s.getInputStream());
 					out = new PrintWriter(s.getOutputStream(), true);
 					btnSend.setEnabled(true);
