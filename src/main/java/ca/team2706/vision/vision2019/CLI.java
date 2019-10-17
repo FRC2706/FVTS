@@ -180,8 +180,12 @@ public class CLI implements Runnable, ActionListener {
 			return;
 		}
 		if(message.equalsIgnoreCase("?reload")){
+			String ip = null;
+			if(message.split(" ").length > 1) {
+				ip = message.split(" ")[1];
+			}
 			Main.loadVisionParams();
-			Main.initNetworkTables();
+			Main.initNetworkTables(ip);
 			out.println("Success");
 			return;
 		}
