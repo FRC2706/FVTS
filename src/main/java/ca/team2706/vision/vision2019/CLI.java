@@ -2,6 +2,8 @@ package ca.team2706.vision.vision2019;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
@@ -29,55 +31,88 @@ public class CLI implements Runnable, ActionListener {
 	private JButton btnSend;
 	private JTextArea textArea;
 	private static List<String> logs = new ArrayList<String>();
+
 	/**
 	 * Create the application.
 	 */
 	public CLI() {
 		initialize();
 	}
-	public static void log(String message){
+
+	public static void log(String message) {
 		logs.add(message);
-		while(logs.size() > 200){
+		while (logs.size() > 200) {
 			logs.remove(0);
 		}
-	}
-
-	public static void startServer(){
-		new Thread(new Runnable(){
+		new Thread() {
 			@Override
 			public void run() {
-				try{
+
+				try {
+					File dir = new File("logs/");
+					if (!dir.exists()) {
+						dir.mkdirs();
+					}
+					File logFile = new File(dir, "log.log");
+
+					if (!logFile.exists()) {
+
+						logFile.getParentFile().mkdirs();
+						logFile.createNewFile();
+
+					}
+
+					PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
+
+					out.println(message);
+
+					out.close();
+
+				} catch (Exception e) {
+					Log.e(e.getMessage(),true);
+				}
+			}
+		}.start();
+	}
+
+	public static void startServer() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
 					ServerSocket ss = new ServerSocket(6677);
-					while(!ss.isClosed()){
-						try{
+					while (!ss.isClosed()) {
+						try {
 							Socket s = ss.accept();
-							new Thread(new Runnable(){
+							new Thread(new Runnable() {
 								@Override
 								public void run() {
 									try {
-										PrintWriter out = new PrintWriter(s.getOutputStream(),true);
+										PrintWriter out = new PrintWriter(s.getOutputStream(), true);
 										Scanner in = new Scanner(s.getInputStream());
-										while(!s.isClosed()){
+										while (!s.isClosed()) {
 											String next = in.nextLine();
-											process(out,in,next);
+											process(out, in, next);
 										}
 									} catch (Exception e) {
-										e.printStackTrace();
+										Log.e(e.getMessage(),true);
 									}
-									
+
 								}
 							}).start();
-						}catch(Exception e){}
+						} catch (Exception e) {
+						}
 						Thread.sleep(1);
 					}
 					ss.close();
-				}catch(Exception e){
-					e.printStackTrace();
+				} catch (Exception e) {
+					Log.e(e.getMessage(),true);
 					System.exit(-1);
 				}
 			}
 		}).start();
 	}
+
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -87,74 +122,75 @@ public class CLI implements Runnable, ActionListener {
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
-		
+
 		JLabel lblIp = new JLabel("IP:");
 		lblIp.setBounds(10, 14, 14, 14);
 		frame.getContentPane().add(lblIp);
-		
+
 		textField = new JTextField();
 		textField.setBounds(25, 10, 309, 21);
 		frame.getContentPane().add(textField);
 		textField.setColumns(10);
-		
+
 		btnConnect = new JButton("Connect");
 		btnConnect.setBounds(335, 10, 89, 23);
 		btnConnect.addActionListener(this);
 		frame.getRootPane().setDefaultButton(btnConnect);
 		frame.getContentPane().add(btnConnect);
-		
+
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(10, 94, 414, 156);
 		frame.getContentPane().add(scrollPane);
-		
+
 		textArea = new JTextArea();
 		textArea.setEditable(false);
 		scrollPane.setViewportView(textArea);
-		
+
 		textField_1 = new JTextField();
 		textField_1.setBounds(10, 75, 324, 20);
 		frame.getContentPane().add(textField_1);
 		textField_1.setColumns(10);
-		
+
 		btnSend = new JButton("Send");
 		btnSend.setBounds(335, 74, 89, 23);
 		btnSend.addActionListener(this);
 		frame.getContentPane().add(btnSend);
-		
+
 		frame.setVisible(true);
 	}
 
 	@Override
 	public void run() {
-		while(true){
-			try{
-				if(s != null && in != null && out != null){
+		while (true) {
+			try {
+				if (s != null && in != null && out != null) {
 					String next = in.nextLine();
-					append("remote: "+next);
+					append("remote: " + next);
 				}
-			}catch(Exception e){
-				
+			} catch (Exception e) {
+
 			}
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Log.e(e.getMessage(),true);
 			}
 		}
 	}
-	private void append(String message){
-		textArea.append(message+System.lineSeparator());
+
+	private void append(String message) {
+		textArea.append(message + System.lineSeparator());
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == btnConnect){
-			if(!textField.getText().equals("")){
+		if (e.getSource() == btnConnect) {
+			if (!textField.getText().equals("")) {
 				try {
 					btnConnect.setEnabled(false);
-					s = new Socket(textField.getText(),6677);
+					s = new Socket(textField.getText(), 6677);
 					in = new Scanner(s.getInputStream());
-					out = new PrintWriter(s.getOutputStream(),true);
+					out = new PrintWriter(s.getOutputStream(), true);
 					btnSend.setEnabled(true);
 					frame.getRootPane().setDefaultButton(btnSend);
 				} catch (Exception e1) {
@@ -163,25 +199,26 @@ public class CLI implements Runnable, ActionListener {
 				}
 			}
 		}
-		if(e.getSource() == btnSend){
+		if (e.getSource() == btnSend) {
 			out.println(textField_1.getText());
 			out.flush();
-			append("me: "+textField_1.getText());
+			append("me: " + textField_1.getText());
 			textField_1.setText("");
 		}
 	}
-	public static void process(PrintWriter out, Scanner in, String message){
-		if(!message.startsWith("?")){
+
+	public static void process(PrintWriter out, Scanner in, String message) {
+		if (!message.startsWith("?")) {
 			help(out);
 			return;
 		}
-		if(message.equalsIgnoreCase("?help")){
+		if (message.equalsIgnoreCase("?help")) {
 			help(out);
 			return;
 		}
-		if(message.equalsIgnoreCase("?reload")){
+		if (message.equalsIgnoreCase("?reload")) {
 			String ip = null;
-			if(message.split(" ").length > 1) {
+			if (message.split(" ").length > 1) {
 				ip = message.split(" ")[1];
 			}
 			Main.loadVisionParams();
@@ -189,44 +226,45 @@ public class CLI implements Runnable, ActionListener {
 			out.println("Success");
 			return;
 		}
-		if(message.equalsIgnoreCase("?shutdown")){
+		if (message.equalsIgnoreCase("?shutdown")) {
 			out.println("Shutting down!");
 			out.flush();
 			String os = System.getProperty("os.name");
-			if(os.contains("Windows")){
-				String[] args = new String[] {"cmd", "/c", "taskkill","/f","/t","/im", "javaw.exe"}; 
+			if (os.contains("Windows")) {
+				String[] args = new String[] { "cmd", "/c", "taskkill", "/f", "/t", "/im", "javaw.exe" };
 				try {
 					new ProcessBuilder(args).start();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.e(e.getMessage(),true);
 				}
-			}else{
-				String[] args = new String[] {"/bin/bash", "-c", "sudo", "systemctl", "stop", "java"};
+			} else {
+				String[] args = new String[] { "/bin/bash", "-c", "sudo", "systemctl", "stop", "java" };
 				try {
 					new ProcessBuilder(args).start();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.e(e.getMessage(),true);
 				}
 			}
 		}
-		if(message.equalsIgnoreCase("?logs")){
-			for(String s : logs){
+		if (message.equalsIgnoreCase("?logs")) {
+			for (String s : logs) {
 				out.println(s);
 			}
 			return;
 		}
-		if(message.equalsIgnoreCase("?restart")){
-			String[] args = new String[] {"/bin/bash", "-c", "sudo", "systemctl", "restart","vision.service"};
+		if (message.equalsIgnoreCase("?restart")) {
+			String[] args = new String[] { "/bin/bash", "-c", "sudo", "systemctl", "restart", "vision.service" };
 			try {
 				new ProcessBuilder(args).start();
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.e(e.getMessage(),true);
 			}
 		}
 		help(out);
 		return;
 	}
-	private static void help(PrintWriter out){
+
+	private static void help(PrintWriter out) {
 		out.println("Help menu:");
 		out.println("?help - shows this menu");
 		out.println("?reload - reloads the vision parameters and also networktables");

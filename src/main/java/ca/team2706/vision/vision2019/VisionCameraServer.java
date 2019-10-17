@@ -32,13 +32,13 @@ public class VisionCameraServer extends Thread {
 			
 			VideoCapture capture = new VideoCapture(id);
 			
-			System.out.println("Waiting for camera to respond!");
+			Log.i("Waiting for camera to respond!",true);
 			
 			while(!capture.isOpened()) {
 				Thread.sleep(10);
 			}
 			
-			System.out.println("Camera successfully connected");
+			Log.i("Camera successfully connected",true);
 
 			if (frame1 == null) {
 				frame1 = new Mat();
@@ -46,7 +46,7 @@ public class VisionCameraServer extends Thread {
 
 			if(!capture.read(frame1)) {
 				
-				System.err.println("Failed to connect to camera #"+identifier);
+				Log.e("Failed to connect to camera #"+identifier,true);
 				
 				System.exit(1);
 				
@@ -119,14 +119,14 @@ public class VisionCameraServer extends Thread {
 					frames.put(i, frame);
 
 				} else {
-					System.err.println("Failed to read from camera " + i);
+					Log.e("Failed to read from camera " + i,true);
 				}
 			}
 
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Log.e(e.getMessage(), true);
 			}
 		}
 
@@ -149,7 +149,7 @@ public class VisionCameraServer extends Thread {
 				frames.put(i, frame);
 
 			} else {
-				System.err.println("Failed to read from camera " + i);
+				Log.e("Failed to read from camera " + i,true);
 			}
 
 		}
@@ -171,7 +171,7 @@ public class VisionCameraServer extends Thread {
 		try {
 			Thread.sleep(1);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			Log.e(e.getMessage(), true);
 		}
 	}
 

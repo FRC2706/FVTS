@@ -136,7 +136,7 @@ public class DisplayGui extends JFrame implements Runnable {
 				// Sleep for 1ms
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Log.e(e.getMessage(), true);
 			}
 		}
 	}

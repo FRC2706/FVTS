@@ -35,7 +35,7 @@ public class ImageDumpScheduler implements Runnable{
 			}
 		}
 		}catch(Exception e) {
-			e.printStackTrace();
+			Log.e(e.getMessage(),true);
 		}
 	}
 	public static void schedule(Bundle b){

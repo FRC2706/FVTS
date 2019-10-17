@@ -39,7 +39,7 @@ public class PipelineTest {
 			VisionData data2 = Pipeline.process(new Mat(240, 320, CvType.CV_8U), params, true);
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.e(e.getMessage(),true);
 			fail(e.getMessage());
 		}
 	}
@@ -64,7 +64,7 @@ public class PipelineTest {
 			data1.targetsFound.clear();
 			Pipeline.selectPreferredTarget(data1, params,false);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.e(e.getMessage(),true);
 			fail(e.getMessage());
 		}
 	}
@@ -87,7 +87,7 @@ public class PipelineTest {
 			Pipeline.selectPreferredTarget(data1, params,false);
 			Pipeline.drawPreferredTarget(new Mat(240, 320, CvType.CV_8U), data1);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.e(e.getMessage(),true);
 			fail(e.getMessage());
 		}
 	}
