@@ -1,4 +1,4 @@
-# Vision2019
+# TrackerboxReloaded
 
 # Attribution and license
 
@@ -14,17 +14,6 @@ Team contact: frc2706@owcrobots.ca Supervising mentor: John Gray
 
 
 The base code for this was from the WPILib samples: https://github.com/wpilibsuite/VisionBuildSamples/tree/master/Java
-
-# Development
-In order to make changes to this source code there are a few things that must be done to setup your IDE for vision development.
-
-Step #1: Build Vision2019 according to the instructions in this document
-
-Step #2: Add `output/CameraVision-all.jar` to the build path of your IDE and set its native library location to `output/`
-
-Step #3: Add `src/main/java` and `src/test/java` as source folders in your IDE
-
-Step #4: Configure the run profile for `Main.java` to pass `--development` as an argument to enable development mode
 
 # Java sample vision system
 

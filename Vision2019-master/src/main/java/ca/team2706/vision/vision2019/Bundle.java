@@ -2,19 +2,15 @@ package ca.team2706.vision.vision2019;
 
 import java.awt.image.BufferedImage;
 
-import ca.team2706.vision.vision2019.Main.VisionParams;
-
 public class Bundle {
 	private BufferedImage raw,binMask,output;
 	private int timestamp;
-	private VisionParams params;
 
-	public Bundle(BufferedImage raw, BufferedImage binMask, BufferedImage output, int timestamp, VisionParams params) {
+	public Bundle(BufferedImage raw, BufferedImage binMask, BufferedImage output, int timestamp) {
 		this.raw = raw;
 		this.binMask = binMask;
 		this.output = output;
 		this.timestamp = timestamp;
-		this.params = params;
 	}
 
 	public BufferedImage getBinMask() {
@@ -31,9 +27,5 @@ public class Bundle {
 
 	public int getTimeStamp(){
 		return timestamp;
-	}
-
-	public VisionParams getParams() {
-		return params;
 	}
 }
