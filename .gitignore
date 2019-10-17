@@ -20,5 +20,9 @@ out/
 *.log
 imagedump/
 field images/
+<<<<<<< HEAD
 *.prefs
 
+=======
+null*
+>>>>>>> master
