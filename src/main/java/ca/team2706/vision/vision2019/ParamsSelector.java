@@ -714,7 +714,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				// Sleep for 100ms
 				Thread.sleep(100);
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.e(e.getMessage(), true);
 			}
 		}
 	}
@@ -733,7 +733,7 @@ public class ParamsSelector extends JFrame implements Runnable, ActionListener {
 				Main.saveVisionParams(visionParams);
 				btnSave.setEnabled(true);
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.e(e.getMessage(), true);
 			}
 		}
 		if (arg0.getSource() == btnDistance) {

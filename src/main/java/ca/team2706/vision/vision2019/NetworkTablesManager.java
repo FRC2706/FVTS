@@ -63,7 +63,7 @@ public class NetworkTablesManager extends Thread{
 							try {
 								thread.join();
 							} catch (InterruptedException e) {
-								e.printStackTrace();
+								Log.e(e.getMessage(), true);
 							}
 						}
 						
@@ -77,7 +77,7 @@ public class NetworkTablesManager extends Thread{
 			try {
 				Thread.sleep(5000);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Log.e(e.getMessage(), true);
 			}
 			
 		}

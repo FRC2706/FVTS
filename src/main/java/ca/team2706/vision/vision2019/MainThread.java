@@ -43,7 +43,7 @@ public class MainThread extends Thread {
 				VisionCameraServer.initCamera(visionParams.type,visionParams.identifier);
 				VisionCameraServer.update();
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.e(e.getMessage(), true);
 			}
 
 		} else {
@@ -51,7 +51,7 @@ public class MainThread extends Thread {
 			try {
 				frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.e(e.getMessage(), true);
 				frame = new Mat();
 			}
 		}
@@ -75,7 +75,7 @@ public class MainThread extends Thread {
 			try {
 				frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.e(e.getMessage(), true);
 				System.exit(1);
 			}
 		}
@@ -153,15 +153,15 @@ public class MainThread extends Thread {
 					} catch (IOException e) {
 						// means mat2BufferedImage broke
 						// non-fatal error, let the program continue
-						e.printStackTrace();
+						Log.e(e.getMessage(), true);
 						continue;
 					} catch (NullPointerException e) {
-						e.printStackTrace();
-						System.out.println("Window closed");
+						Log.e(e.getMessage(), true);
+						Log.i("Window closed",true);
 						Runtime.getRuntime().halt(0);
 					} catch (Exception e) {
 						// just in case
-						e.printStackTrace();
+						Log.e(e.getMessage(), true);
 						continue;
 					}
 				}
@@ -184,7 +184,7 @@ public class MainThread extends Thread {
 							ImageDumpScheduler.schedule(b);
 							timestamp++;
 						} catch (IOException e) {
-							e.printStackTrace();
+							Log.e(e.getMessage(), true);
 							return;
 						}
 					}
@@ -192,13 +192,13 @@ public class MainThread extends Thread {
 				// Display the frame rate onto the console
 				double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND)
 						* 1000;
-				System.out.printf("Vision FPS: %3.2f, pipeline took: %3.2f ms\n", visionData.fps, pipelineTime);
+				Log.i("Vision FPS: "+visionData.fps+", pipeline took: "+pipelineTime+" ms\n",false);
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.e(e.getMessage(), true);
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e1) {
-					e1.printStackTrace();
+					Log.e(e1.getMessage(), true);
 				}
 			}
 		}

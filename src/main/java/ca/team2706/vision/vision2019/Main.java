@@ -288,8 +288,8 @@ public class Main {
 			sendVisionParams();
 
 		} catch (Exception e1) {
-			e1.printStackTrace();
-			System.err.println("\n\nError reading the params file, check if the file is corrupt?");
+			Log.e(e1.getMessage(),true);
+			Log.e("\n\nError reading the params file, check if the file is corrupt?",true);
 			System.exit(1);
 		}
 	}
@@ -335,7 +335,7 @@ public class Main {
 			}
 
 		} catch (Exception e1) {
-			e1.printStackTrace();
+			Log.e(e1.getMessage(),true);
 		}
 	}
 
@@ -492,7 +492,7 @@ public class Main {
 		try {
 			cmd = parser.parse(options, args);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.e(e.getMessage(),true);
 			formatter.printHelp("Vision2019", options);
 			System.exit(1);
 		}
@@ -515,7 +515,6 @@ public class Main {
 		if (allowOverride == null || allowOverride.equals("")) {
 
 			allowOverride = "true";
-
 		}
 		// Should network tables be started so that the settings can be overridden?
 		boolean allowOverrideB = Boolean.valueOf(allowOverride);
@@ -547,7 +546,7 @@ public class Main {
 					threads.add(thread);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.e(e.getMessage(),true);
 			}
 
 		} // end main video processing loop
