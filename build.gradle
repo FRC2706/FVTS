@@ -5,13 +5,6 @@ plugins {
   id 'application'
 }
 
-<<<<<<< HEAD
-=======
-
-apply plugin: 'java'
-apply plugin: 'application'
-
->>>>>>> 12479d4ab4dfcc568f421bad931bee61e83be420
 // Change the line below if you change the name of your main Java class
 // Comment this line and uncomment the line after it to build/run the Server, and vice versa to run the main vision program
 mainClassName = 'ca.team2706.vision.vision2019.Main'
