@@ -126,17 +126,13 @@ public class MainThread extends Thread {
 				if (use_GUI) {
 					// If use gui then draw the prefered target
 					// Sets the raw image to the frame
-					if(useCamera) {
-						rawOutputImg = frame;
-					}else {
-						rawOutputImg = frame.clone();
-					}
-					rawOutputImg = frame;
+					rawOutputImg = frame.clone();
+					
 					// Draws the preffered target
 					Pipeline.drawPreferredTarget(rawOutputImg, visionData);
 				} else {
 					// Sets the raw image to the frame
-					rawOutputImg = frame;
+					rawOutputImg = frame.clone();
 				}
 
 				if (visionData.preferredTarget != null)
@@ -153,7 +149,7 @@ public class MainThread extends Thread {
 						BufferedImage raw = Main.matToBufferedImage(rawOutputImg);
 
 						guiRawImg.updateImage(raw);
-						guiProcessedImg.updateImage(Main.matToBufferedImage(visionData.binMask));
+						guiProcessedImg.updateImage(Main.matToBufferedImage(visionData.binMask.clone()));
 					} catch (IOException e) {
 						// means mat2BufferedImage broke
 						// non-fatal error, let the program continue
@@ -182,7 +178,7 @@ public class MainThread extends Thread {
 						try {
 							Mat draw = frame.clone();
 							Pipeline.drawPreferredTarget(draw, visionData);
-							Bundle b = new Bundle(Main.matToBufferedImage(frame),
+							Bundle b = new Bundle(Main.matToBufferedImage(frame.clone()),
 									Main.matToBufferedImage(visionData.binMask), Main.matToBufferedImage(draw),
 									timestamp, visionParams);
 							ImageDumpScheduler.schedule(b);

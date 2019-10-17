@@ -7,12 +7,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
@@ -27,6 +33,8 @@ public class Main {
 
 	public static ParamsSelector selector;
 	public static File timestampfile;
+	private static File visionParamsFile;
+	public static boolean developmentMode = false;
 
 	public static List<MainThread> threads = new ArrayList<MainThread>();
 
@@ -213,16 +221,13 @@ public class Main {
 
 	public static void loadVisionParams() {
 		try {
-
-			File configFile = new File("visionParams.properties");
-
-			List<String> lists = ConfigParser.listLists(configFile);
+			List<String> lists = ConfigParser.listLists(visionParamsFile);
 
 			for (String s : lists) {
 
 				VisionParams visionParams = new VisionParams();
 
-				Map<String, String> data = ConfigParser.getProperties(configFile, s);
+				Map<String, String> data = ConfigParser.getProperties(visionParamsFile, s);
 
 				visionParams.name = s;
 
@@ -364,7 +369,7 @@ public class Main {
 
 		data.put("group", String.valueOf(params.group));
 
-		ConfigParser.saveList(new File("visionParams.properties"), params.name, data);
+		ConfigParser.saveList(visionParamsFile, params.name, data);
 	}
 
 	/**
@@ -408,6 +413,7 @@ public class Main {
 		byte ba[] = mob.toArray();
 
 		BufferedImage bi = ImageIO.read(new ByteArrayInputStream(ba));
+		matrix.release();
 		return bi;
 	}
 
@@ -462,16 +468,33 @@ public class Main {
 		// Must be included!
 		// Loads OpenCV
 		System.loadLibrary("opencv_java310");
-
-		String ip = "";
 		
-		if(args.length > 0) {
-			ip = args[0];
+		Options options = new Options();
+		
+		Option ip = new Option("ip",true,"The IP address of the NetworkTables server");
+		options.addOption(ip);
+		Option developmentMode = new Option("dev","development",false,"Puts Vision2019 in development mode");
+		options.addOption(developmentMode);
+		Option configFile = new Option("conf","config",true,"Specifies an alternative config file");
+		options.addOption(configFile);
+		
+		CommandLineParser parser = new DefaultParser();
+		HelpFormatter formatter = new HelpFormatter();
+		CommandLine cmd = null;
+		try {
+			cmd = parser.parse(options, args);
+		}catch(Exception e) {
+			e.printStackTrace();
+			formatter.printHelp("Vision2019", options);
+			System.exit(1);
 		}
+		Main.developmentMode = cmd.hasOption("development");
 		
 		// Connect NetworkTables, and get access to the publishing table
-		initNetworkTables(ip);
+		initNetworkTables(cmd.getOptionValue("ip",""));
 
+		visionParamsFile = new File(cmd.getOptionValue("config","visionParams.properties"));
+		
 		// read the vision calibration values from file.
 		loadVisionParams();
 		
