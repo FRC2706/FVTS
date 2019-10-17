@@ -2,12 +2,10 @@ package ca.team2706.vision.vision2019;
 
 import java.awt.Color;
 import java.awt.Graphics;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,16 +17,11 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Scanner;
 
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.imageio.ImageIO;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
-
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -37,12 +30,10 @@ import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.VideoWriter;
 import org.opencv.videoio.Videoio;
 
-import org.opencv.core.MatOfPoint;
-
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
-
+	
 	public static String filename = "";
 	public static ParamsSelector selector;
 	public static int timestamp = 0;
@@ -60,39 +51,33 @@ public class Main {
 		frame = f;
 	}
 
-	public static List<MainThread> threads = new ArrayList<MainThread>();
-
-	public static void reloadConfig() {
-		visionParamsList.clear();
-		loadVisionParams();
-		for (MainThread thread : threads) {
-			String name = thread.visionParams.name;
-			boolean found = false;
-			for (VisionParams params : visionParamsList) {
-				if (!found) {
-					if (params.name.equals(name)) {
-						thread.updateParams(params);
-						found = true;
-					}
-				}
-
-			}
-
-		}
-	}
-
 	// Camera Type (set in visionParams.properties)
 	// Set to 1 for USB camera, set to 0 for webcam, I think 0 is USB if
 	// there is no webcam :/
 	/** The vision parameters, this is used by the vision pipeline **/
-	public static List<VisionParams> visionParamsList = new ArrayList<VisionParams>();
-
+	public static VisionParams visionParams = new VisionParams();
+	/**
+	 * The vision NetworkTable, this is used to publish vision data to the
+	 * RoboRIO
+	 **/
+	public static NetworkTable visionTable;
+	/**
+	 * This is the number of seconds between dumping images to a usb stick, this
+	 * is taken from the vision parameters
+	 **/
+	public static double seconds_between_img_dumps;
+	/**
+	 * This is the current number of seconds, this resets every time it is over
+	 * the seconds_between_img_dumps
+	 **/
+	public static double current_time_seconds;
+	/** The directory that images are dumped to **/
+	public static String outputPath;
+	public static CLI cli;
 	/**
 	 * A class to hold calibration parameters for the image processing algorithm
 	 */
 	public static class VisionParams {
-		int group;
-
 		/** This is the minimum hue that the pipeline will recognize **/
 		int minHue;
 		/** This is the maximum hue that the pipeline will recognize **/
@@ -105,27 +90,23 @@ public class Main {
 		int minValue;
 		/** This is the maximum value that the pipeline will recognize **/
 		int maxValue;
+		/**
+		 * This is how many times the pipeline will erode dilate the camera
+		 * image
+		 **/
+		int erodeDilateIterations;
 		/** This is the id of the camera that will be used to get images **/
 		int cameraSelect;
 		/**
-		 * The threshold to detect one large cube as 2 cubes, this is a value between 0
-		 * and 1 This is how many times the pipeline will erode dilate the camera image
-		 **/
-		int erodeDilateIterations;
-
-		double slope, yIntercept;
-
-		/**
-		 * The threshold to detect one large cube as 2 cubes, this is a value between 0
-		 * and 1
+		 * The threshold to detect one large cube as 2 cubes, this is a value
+		 * between 0 and 1
 		 **/
 		double aspectRatioThresh;
 		/** The minimum area that a target can have and still be recognized **/
 		double minArea;
 		/**
-		 * How important it is for a target to be close to the center of the image, this
-		 * will change depending on how well we can turn
-		 * 
+		 * How important it is for a target to be close to the center of the
+		 * image, this will change depending on how well we can turn
 		 **/
 		double distToCentreImportance;
 		/** The width to resize the image from the camera to **/
@@ -133,24 +114,12 @@ public class Main {
 		/** The height to resize the image from the camera to **/
 		int height;
 		/**
-		 * The size to resize the image from the camera to, this is just the width and
-		 * the height values
+		 * The size to resize the image from the camera to, this is just the
+		 * width and the height values
 		 **/
 		Size sz;
 		/** This is the image to be processed if the selected camera is -1 **/
 		String imageFile;
-
-		public NetworkTable table;
-
-		public String name;
-
-		public String outputPath;
-
-		public double secondsBetweenImageDumps;
-
-		public boolean enabled;
-
-		public String type, identifier;
 	}
 
 	/**
@@ -160,10 +129,6 @@ public class Main {
 	public static class VisionData {
 
 		public static class Target {
-			double distance;
-
-			MatOfPoint contour;
-
 			/** The x center of the target in the image **/
 			int xCentre;
 			/**
@@ -177,8 +142,8 @@ public class Main {
 			 **/
 			double yCentreNorm;
 			/**
-			 * A value between 0 and 1 representing the percentage of the image the target
-			 * takes up
+			 * A value between 0 and 1 representing the percentage of the image
+			 * the target takes up
 			 **/
 			double areaNorm; // [0,1] representing how much of the screen it
 								// occupies
@@ -187,11 +152,10 @@ public class Main {
 		}
 
 		/** The List of all the targets in the image **/
-
 		ArrayList<Target> targetsFound = new ArrayList<Target>();
 		/**
-		 * The target that is the most appealing, how it is chosen depends on the
-		 * distToCenterImportance value in the vision parameters
+		 * The target that is the most appealing, how it is chosen depends on
+		 * the distToCenterImportance value in the vision parameters
 		 **/
 		Target preferredTarget;
 		/** The image that contains the targets **/
@@ -199,49 +163,28 @@ public class Main {
 		/** The frames per second **/
 		public Mat binMask = new Mat();
 		public double fps;
-		public VisionParams params;
 	}
 
 	/**
 	 * Initilizes the Network Tables WARNING! Change 127.0.0.1 to the robot ip
 	 * before it is on master or it will not be fun :)
 	 */
-	public static void initNetworkTables(String ip) {
-
+	public static void initNetworkTables() {
 		// Tells the NetworkTable class that this is a client
 		NetworkTable.setClientMode();
 		// Sets the interval for updating NetworkTables
 		NetworkTable.setUpdateRate(0.02);
-		// Sets the vision table to the "vision" table that is in NetworkTables
-		loggingTable = NetworkTable.getTable("logging-level");
-
-		boolean use_GUI = true;
-		
-		// If on Linux don't use guis
-		if (System.getProperty("os.arch").toLowerCase().indexOf("arm") != -1) {
-			use_GUI = false;
-		}
-		
-		if (!use_GUI && ip.equals("")) {
-
-			// Sets the team number
-			NetworkTable.setTeam(2706); // Use this for the robit
-			// Enables DSClient
-			NetworkTable.setDSClientEnabled(true); // and this for the robit
-
-		} else {
-
-			if(ip.equals("")) {
-				ip = "localhost";
-			}
-			
-			// Sets the IP adress to connect to
-			NetworkTable.setIPAddress(ip); // Use this for testing
-
-		}
-
+		// Sets the team number
+		//NetworkTable.setTeam(2706); // Use this for the robit
+		// Enables DSClient
+		NetworkTable.setDSClientEnabled(true); // and this for the robit
+		// Sets the IP adress to connect to
+		NetworkTable.setIPAddress("localhost"); //Use this for testing
 		// Initilizes NetworkTables
 		NetworkTable.initialize();
+		// Sets the vision table to the "vision" table that is in NetworkTables
+		visionTable = NetworkTable.getTable("vision");
+		loggingTable = NetworkTable.getTable("logging-level");
 	}
 
 	/**
@@ -249,113 +192,105 @@ public class Main {
 	 **/
 
 	public static void loadVisionParams() {
-		try
-	{
+		// Initilizes the properties
+		Properties properties = new Properties();
+		try {
+			// The file input stream that contains the vision parameters data
+			// from visionParams.properties
+			FileInputStream in = new FileInputStream("visionParams.properties");
+			// Tells the properties to use the file input stream
+			properties.load(in);
+			// Sets the selected camera to the selected camera in the properties
+			// file
+			visionParams.cameraSelect = Integer.valueOf(properties.getProperty("CameraSelect"));
+			// Sets the minimum hue to the minimum hue in the properties file
+			visionParams.minHue = Integer.valueOf(properties.getProperty("minHue"));
+			// Sets the maximum hue to the maximum hue in the properties file
+			visionParams.maxHue = Integer.valueOf(properties.getProperty("maxHue"));
+			// Sets the minimum saturation to the minimum saturation in the
+			// properties file
+			visionParams.minSaturation = Integer.valueOf(properties.getProperty("minSaturation"));
+			// Sets the maximum saturation to the maximum saturation in the
+			// properties file
+			visionParams.maxSaturation = Integer.valueOf(properties.getProperty("maxSaturation"));
+			// Sets the minimum value to the minimum value in the properties
+			// file
+			visionParams.minValue = Integer.valueOf(properties.getProperty("minValue"));
+			// Sets the maximum value to the maximum value in the properties
+			// file
+			visionParams.maxValue = Integer.valueOf(properties.getProperty("maxValue"));
+			// Sets the minimum area to the minimum area in the properties file
+			visionParams.minArea = Double.valueOf(properties.getProperty("minArea"));
+			// Sets the erode dilate iterations to the erode dilation iterations
+			// in the properties file
+			visionParams.erodeDilateIterations = Integer.valueOf(properties.getProperty("erodeDilateIterations"));
 
-		File configFile = new File("visionParams.properties");
+			// Sets the aspect ratio threshold to the aspect ratio threshold in
+			// the properties file
+			visionParams.aspectRatioThresh = Double.valueOf(properties.getProperty("aspectRatioThresh"));
+			// Sets the distance to center importance to the distance to center
+			// importance in the properties file
+			visionParams.distToCentreImportance = Double.valueOf(properties.getProperty("distToCentreImportance"));
+			// Sets the output path for dumping images to the image dump path in
+			// the properties file
+			outputPath = properties.getProperty("imgDumpPath");
+			// Sets the seconds between image dumps to the seconds between image
+			// dumps in the properties file
+			seconds_between_img_dumps = Double.valueOf(properties.getProperty("imgDumpWait"));
+			// Sets the image file path to the image file path in the properties
+			// file, this is only used if the selected camera is -1
+			visionParams.imageFile = properties.getProperty("imageFile");
+			if (outputPath.endsWith("/") || outputPath.endsWith("\\")) {
+				timestampfile = new File(outputPath + "time.stamp");
+			} else {
+				timestampfile = new File(outputPath + "/" + "time.stamp");
+			}
+			// if the file, take the timestamp from there
+			if (timestampfile.exists()) {
+				Scanner s = new Scanner(timestampfile);
+				try{
+					timestamp = Integer.valueOf(s.nextLine()).intValue();
+				}catch(Exception e){
+					Log.e(e.getMessage(), true);
+				}
+				timestamp++;
+				s.close();
+			}
 
-		List<String> lists = ConfigParser.listLists(configFile);
-
-		for (String s : lists) {
-
-			VisionParams visionParams = new VisionParams();
-
-			Map<String, String> data = ConfigParser.getProperties(configFile, s);
-
-			visionParams.name = s;
-
-			visionParams.minHue = Integer.valueOf(data.get("minHue"));
-			visionParams.maxHue = Integer.valueOf(data.get("maxHue"));
-			visionParams.minSaturation = Integer.valueOf(data.get("minSaturation"));
-			visionParams.maxSaturation = Integer.valueOf(data.get("maxSaturation"));
-			visionParams.minValue = Integer.valueOf(data.get("minValue"));
-			visionParams.maxValue = Integer.valueOf(data.get("maxValue"));
-
-			visionParams.aspectRatioThresh = Double.valueOf(data.get("aspectRatioThresh"));
-
-			visionParams.distToCentreImportance = Double.valueOf(data.get("distToCenterImportance"));
-
-			visionParams.imageFile = data.get("imageFile");
-
-			visionParams.minArea = Double.valueOf(data.get("minArea"));
-
-			visionParams.erodeDilateIterations = Integer.valueOf(data.get("erodeDilateIterations"));
-
-			String resolution = data.get("resolution");
-
-			visionParams.width = Integer.valueOf(resolution.split("x")[0]);
-			visionParams.height = Integer.valueOf(resolution.split("x")[1]);
-
-			// Set the vision parameters size
-			visionParams.sz = new Size(visionParams.width, visionParams.height);
-
-			visionParams.table = NetworkTable.getTable("vision-" + s);
-
-			visionParams.outputPath = data.get("imgDumpPath");
-
-			visionParams.secondsBetweenImageDumps = Double.valueOf(data.get("imgDumpTime"));
-
-			visionParams.slope = Double.valueOf(data.get("slope"));
-
-			visionParams.yIntercept = Double.valueOf(data.get("yIntercept"));
-
-			visionParams.group = Integer.valueOf(data.get("group"));
-
-			visionParams.type = data.get("type");
-
-			visionParams.identifier = data.get("identifier");
-
-			visionParamsList.add(visionParams);
-
+			// Gets the resolution from the properties file
+			String resolution = properties.getProperty("resolution");
+			if (resolution.equals("320x240")) {
+				// Sets the resolution to 320 by 240
+				visionParams.width = 320;
+				visionParams.height = 240;
+			} else if (resolution.equals("640x480")) {
+				// Sets the resolution to 640 by 480
+				visionParams.width = 640;
+				visionParams.height = 480;
+			} else if (resolution.equals("160x120")) {
+				// Sets the resolution to 160 by 120
+				visionParams.width = 160;
+				visionParams.height = 120;
+			} else if (resolution.equals("80x60")) {
+				// Sets the resolution to 80 by 60
+				visionParams.width = 80;
+				visionParams.height = 60;
+			} else {
+				// Throws a error that the the resolution is invalid
+				throw new IllegalArgumentException("Error: " + properties.getProperty("resolution")
+						+ " is not a supported resolution.\n" + "Allowed: 80x60, 160x120, 320x240, 640x480.");
+			}
+		} catch (Exception e1) {
+			Log.e("Error reading the params file, check if the file is corrupt?",true);
+			System.exit(1);
 		}
-
-		sendVisionParams();
-
-	}catch(
-	Exception e1)
-	{
-		e1.printStackTrace();
-		System.err.println("\n\nError reading the params file, check if the file is corrupt?");
-		System.exit(1);
 	}
-	}
-
-	private static void sendVisionParams() {
-		
-		for(VisionParams params : visionParamsList) {
-			
-			NetworkTable visionTable = NetworkTable.getTable("vision-" + params.name+"/params");
-			
-			visionTable.putNumber("group", params.group);
-			visionTable.putNumber("yIntercept", params.yIntercept);
-			visionTable.putNumber("slope", params.slope);
-			visionTable.putNumber("secondsBetweenImageDumps", params.secondsBetweenImageDumps);
-			visionTable.putNumber("height", params.height);
-			visionTable.putNumber("width", params.width);
-			visionTable.putNumber("erodeDilateIterations", params.erodeDilateIterations);
-			visionTable.putNumber("minArea", params.minArea);
-			visionTable.putString("imageFile", params.imageFile);
-			visionTable.putNumber("distToCenterImportance", params.distToCentreImportance);
-			visionTable.putNumber("aspectRatioThresh", params.aspectRatioThresh);
-			visionTable.putString("type", params.type);
-			visionTable.putString("identifier", params.identifier);
-			visionTable.putNumber("minHue", params.minHue);
-			visionTable.putNumber("maxHue", params.maxHue);
-			visionTable.putNumber("minSaturation", params.minSaturation);
-			visionTable.putNumber("maxSaturation", params.maxSaturation);
-			visionTable.putNumber("minValue", params.minValue);
-			visionTable.putNumber("maxValue", params.maxValue);
-			
-		}
-		
-	}>>>>>>>master
 
 	/**
 	 * Saves the vision parameters to a file
 	 * 
 	 **/
 	public static void saveVisionParams() {
-<<<<<<< HEAD
 		// Initilizes the properties object
 		Properties properties = new Properties();
 		try {
@@ -409,80 +344,18 @@ public class Main {
 		} catch (Exception e1) {
 			Log.e(e1.getMessage(), true);
 			Log.e("Error saving properties file", true);
-=======
-
-		try {
-
-			for (VisionParams params : visionParamsList) {
-
-				saveVisionParams(params);
-
-			}
-
-		} catch (Exception e1) {
-			e1.printStackTrace();
->>>>>>> master
 			System.exit(1);
 		}
 	}
 
-<<<<<<< HEAD
-
 	/**
 	 * Turns all the vision data into packets that kno da wae to get to the robo
 	 * rio :]
-=======
-	public static void saveVisionParams(VisionParams params) throws Exception {
-		Map<String, String> data = new HashMap<String, String>();
-
-		data.put("type", params.type);
-		data.put("identifier", params.identifier);
-		data.put("minHue", String.valueOf(params.minHue));
-		data.put("maxHue", String.valueOf(params.maxHue));
-		data.put("minSaturation", String.valueOf(params.minSaturation));
-		data.put("maxSaturation", String.valueOf(params.maxSaturation));
-		data.put("minValue", String.valueOf(params.minValue));
-		data.put("maxValue", String.valueOf(params.maxValue));
-
-		data.put("aspectRatioThresh", String.valueOf(params.aspectRatioThresh));
-
-		data.put("distToCenterImportance", String.valueOf(params.distToCentreImportance));
-
-		data.put("imageFile", params.imageFile);
-
-		data.put("minArea", String.valueOf(params.minArea));
-
-		data.put("erodeDilateIterations", String.valueOf(params.erodeDilateIterations));
-
-		data.put("resolution", params.width + "x" + params.height);
-
-		data.put("imgDumpPath", params.outputPath);
-
-		data.put("imgDumpTime", String.valueOf(params.secondsBetweenImageDumps));
-
-		data.put("slope", String.valueOf(params.slope));
-
-		data.put("yIntercept", String.valueOf(params.yIntercept));
-
-		data.put("group", String.valueOf(params.group));
-
-		ConfigParser.saveList(new File("visionParams.properties"), params.name, data);
-	}
-
-	/**
-	 * Turns all the vision data into packets that kno da wae to get to the robo rio
-	 * :]
->>>>>>> master
 	 *
 	 * @param visionData
 	 */
 	public static void sendVisionDataOverNetworkTables(VisionData visionData) {
 
-<<<<<<< HEAD
-=======
-		NetworkTable visionTable = visionData.params.table;
-
->>>>>>> master
 		// Sends the data
 		// Puts the fps into the vision table
 		visionTable.putNumber("fps", visionData.fps);
@@ -495,21 +368,14 @@ public class Main {
 			visionTable.putNumber("ctrX", visionData.preferredTarget.xCentreNorm);
 			// Puts the normalized area into the vision table
 			visionTable.putNumber("area", visionData.preferredTarget.areaNorm);
-<<<<<<< HEAD
-=======
-			
-			visionTable.putNumber("angle", visionData.preferredTarget.xCentreNorm*45);
->>>>>>> master
 		}
 	}
 
 	/**
 	 * Converts a OpenCV Matrix to a BufferedImage :)
 	 *
-	 * <<<<<<< HEAD
-	 * 
-	 * @param matrix Matrix to be converted =======
-	 * @param matrix Matrix to be converted >>>>>>> master
+	 * @param matrix
+	 *            Matrix to be converted
 	 * @return Generated from the matrix
 	 * @throws IOException
 	 * @throws Exception
@@ -526,10 +392,8 @@ public class Main {
 	/**
 	 * Converts a Buffered Image to a OpenCV Matrix
 	 * 
-	 * <<<<<<< HEAD
-	 * 
-	 * @param Buffered Image to convert to matrix =======
-	 * @param Buffered Image to convert to matrix >>>>>>> master
+	 * @param Buffered
+	 *            Image to convert to matrix
 	 * @return The matrix from the buffered image
 	 */
 
@@ -542,7 +406,6 @@ public class Main {
 
 	/**
 	 * 
-<<<<<<< HEAD
 	 * @param The
 	 *            image to dump to a file
 	 * @param image
@@ -562,19 +425,6 @@ public class Main {
 		}
 		
 		File output = new File(outputPath +match+"-"+String.format("%05d", timestamp) + "_" + suffix + ".png");
-=======
-	 * @param The    image to dump to a file
-	 * @param image  the image to be dumped
-	 * @param suffix the suffix to put on the file name
-	 * @throws IOException
-	 */
-
-	public static void imgDump(BufferedImage image, String suffix, int timestamp, VisionParams params)
-			throws IOException {
-		// prepend the file name with the tamestamp integer, left-padded with
-		// zeros so it sorts properly
-		File output = new File(params.outputPath + String.format("%05d", timestamp) + "_" + suffix + ".png");
->>>>>>> master
 		try {
 			ImageIO.write(image, "PNG", output);
 		} catch (IOException e) {
@@ -585,39 +435,23 @@ public class Main {
 		PrintWriter out = new PrintWriter(timestampfile);
 		out.println(timestamp);
 		out.close();
-<<<<<<< HEAD
 		
 	}
 
 	public static boolean b = true;
-
-	=======
-
-	}
-
-	>>>>>>>master
-
+	
 	/**
 	 * The main method! Very important Do not delete! :] :]
 	 *
 	 * 
-<<<<<<< HEAD
 	 * @param The
 	 *            command line arguments
 	 */
 	public static void main(String[] args) {
-=======
-	 * @param The command line arguments
-	 */
-
-	public static void main(String[] args) throws Exception{
-
->>>>>>> master
 		// Must be included!
 		// Loads OpenCV
 		System.loadLibrary("opencv_java310");
 
-<<<<<<< HEAD
 		// Connect NetworkTables, and get access to the publishing table
 		initNetworkTables();
 
@@ -855,64 +689,5 @@ public class Main {
 		Mat frame = new Mat();
 		camera.read(frame);
 		return frame;
-	}=======
-
-	String ip = "";
-
-	if(args.length>0){ip=args[0];}
-
-	// Connect NetworkTables, and get access to the publishing table
-	initNetworkTables(ip);
-
-	// read the vision calibration values from file.
-	loadVisionParams();
-
-	Map<String, String> masterConfig = ConfigParser.getProperties(new File("master.cf"), "config");
-
-	Map<String, String> masterEnabled = ConfigParser.getProperties(new File("master.cf"), "enabled");
-
-	String allowOverride = masterConfig.get("allowOverride");
-
-	if(allowOverride==null||allowOverride.equals("")){
-
-	allowOverride="true";
-
-	}
-
-	boolean allowOverrideB = Boolean.valueOf(allowOverride);
-
-	if(allowOverrideB)NetworkTablesManager.init();
-
-	ImageDumpScheduler.start();
-
-	VisionCameraServer.startServer();
-
-	for(
-	VisionParams params:visionParamsList){try
-	{
-
-		String s = masterEnabled.get(params.name);
-
-		if (s == null || s.equals("")) {
-			s = "true";
-		}
-
-		boolean enabled = Boolean.valueOf(s);
-
-		params.enabled = enabled;
-
-		VisionCameraServer.initCamera(params.type, params.identifier);
-		MainThread thread = new MainThread(params);
-		if (enabled) {
-			thread.start();
-		}
-		threads.add(thread);
-	}catch(
-	Exception e)
-	{
-		e.printStackTrace();
 	}
 }
-
-} // end main video processing loop
->>>>>>>master}
