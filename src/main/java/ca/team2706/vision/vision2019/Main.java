@@ -7,13 +7,18 @@ import java.io.File;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
@@ -21,7 +26,6 @@ import org.opencv.core.MatOfByte;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.videoio.VideoCapture;
 import org.opencv.core.MatOfPoint;
 
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
@@ -32,18 +36,9 @@ public class Main {
 	public static ParamsSelector selector;
 	public static int timestamp = 0;
 	public static File timestampfile;
-	public static BufferedImage currentImage;
-	public static VideoCapture camera;
-	public static VisionData lastData;
-	public static boolean process = true;
-	public static boolean showMiddle = false;
-	public static boolean useCamera = true;
 	public static NetworkTable loggingTable;
-	public static Mat frame;
-
-	public static void setFrame(Mat f) {
-		frame = f;
-	}
+	private static File visionParamsFile;
+	public static boolean developmentMode = false;
 
 	public static List<MainThread> threads = new ArrayList<MainThread>();
 
@@ -235,16 +230,13 @@ public class Main {
 
 	public static void loadVisionParams() {
 		try {
-
-			File configFile = new File("visionParams.properties");
-
-			List<String> lists = ConfigParser.listLists(configFile);
+			List<String> lists = ConfigParser.listLists(visionParamsFile);
 
 			for (String s : lists) {
 
 				VisionParams visionParams = new VisionParams();
 
-				Map<String, String> data = ConfigParser.getProperties(configFile, s);
+				Map<String, String> data = ConfigParser.getProperties(visionParamsFile, s);
 
 				visionParams.name = s;
 
@@ -381,7 +373,7 @@ public class Main {
 
 		data.put("group", String.valueOf(params.group));
 
-		ConfigParser.saveList(new File("visionParams.properties"), params.name, data);
+		ConfigParser.saveList(visionParamsFile, params.name, data);
 	}
 
 	/**
@@ -426,6 +418,7 @@ public class Main {
 		byte ba[] = mob.toArray();
 
 		BufferedImage bi = ImageIO.read(new ByteArrayInputStream(ba));
+		matrix.release();
 		return bi;
 	}
 
@@ -454,7 +447,8 @@ public class Main {
 	 * @throws IOException
 	 */
 
-	public static void imgDump(BufferedImage image, String suffix, int timestamp, String outputPath) throws IOException {
+	public static void imgDump(BufferedImage image, String suffix, int timestamp, String outputPath)
+			throws IOException {
 		// prepend the file name with the tamestamp integer, left-padded with
 		// zeros so it sorts properly
 		@SuppressWarnings("deprecation")
@@ -474,72 +468,88 @@ public class Main {
 	 *
 	 * 
 	 * @param The command line arguments
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 
-	public static void main(String[] args) throws Exception{
+	public static void main(String[] args) throws Exception {
 
 		// Must be included!
 		// Loads OpenCV
 		System.loadLibrary("opencv_java310");
 
+		Options options = new Options();
 
-	String ip = "";
+		Option ip = new Option("ip", true, "The IP address of the NetworkTables server");
+		options.addOption(ip);
+		Option developmentMode = new Option("dev", "development", false, "Puts Vision2019 in development mode");
+		options.addOption(developmentMode);
+		Option configFile = new Option("conf", "config", true, "Specifies an alternative config file");
+		options.addOption(configFile);
 
-	if(args.length>0){ip=args[0];}
-
-	// Connect NetworkTables, and get access to the publishing table
-	initNetworkTables(ip);
-
-	// read the vision calibration values from file.
-	loadVisionParams();
-
-	Map<String, String> masterConfig = ConfigParser.getProperties(new File("master.cf"), "config");
-
-	Map<String, String> masterEnabled = ConfigParser.getProperties(new File("master.cf"), "enabled");
-
-	String allowOverride = masterConfig.get("allowOverride");
-
-	if(allowOverride==null||allowOverride.equals("")){
-
-	allowOverride="true";
-
-	}
-
-	boolean allowOverrideB = Boolean.valueOf(allowOverride);
-
-	if(allowOverrideB)NetworkTablesManager.init();
-
-	ImageDumpScheduler.start();
-
-	VisionCameraServer.startServer();
-
-	for(
-	VisionParams params:visionParamsList){try
-	{
-
-		String s = masterEnabled.get(params.name);
-
-		if (s == null || s.equals("")) {
-			s = "true";
+		CommandLineParser parser = new DefaultParser();
+		HelpFormatter formatter = new HelpFormatter();
+		CommandLine cmd = null;
+		try {
+			cmd = parser.parse(options, args);
+		} catch (Exception e) {
+			e.printStackTrace();
+			formatter.printHelp("Vision2019", options);
+			System.exit(1);
 		}
+		Main.developmentMode = cmd.hasOption("development");
 
-		boolean enabled = Boolean.valueOf(s);
+		// Connect NetworkTables, and get access to the publishing table
+		initNetworkTables(cmd.getOptionValue("ip", ""));
 
-		params.enabled = enabled;
+		visionParamsFile = new File(cmd.getOptionValue("config", "visionParams.properties"));
 
-		VisionCameraServer.initCamera(params.type, params.identifier);
-		MainThread thread = new MainThread(params);
-		if (enabled) {
-			thread.start();
+		// read the vision calibration values from file.
+		loadVisionParams();
+
+		Map<String, String> masterConfig = ConfigParser.getProperties(new File("master.cf"), "config");
+
+		Map<String, String> masterEnabled = ConfigParser.getProperties(new File("master.cf"), "enabled");
+
+		String allowOverride = masterConfig.get("allowOverride");
+
+		if (allowOverride == null || allowOverride.equals("")) {
+
+			allowOverride = "true";
+
 		}
-		threads.add(thread);
-	}catch(
-	Exception e)
-	{
-		e.printStackTrace();
-	}
-}
+		// Should network tables be started so that the settings can be overridden?
+		boolean allowOverrideB = Boolean.valueOf(allowOverride);
 
-} // end main video processing loop
+		if (allowOverrideB)
+			NetworkTablesManager.init();
+
+		ImageDumpScheduler.start();
+
+		VisionCameraServer.startServer();
+
+		for (VisionParams params : visionParamsList) {
+			try {
+
+				String s = masterEnabled.get(params.name);
+
+				if (s == null || s.equals("")) {
+					s = "true";
+
+					boolean enabled = Boolean.valueOf(s);
+
+					params.enabled = enabled;
+
+					VisionCameraServer.initCamera(params.type, params.identifier);
+					MainThread thread = new MainThread(params);
+					if (enabled) {
+						thread.start();
+					}
+					threads.add(thread);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} // end main video processing loop
+	}
 }
