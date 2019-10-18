@@ -208,8 +208,8 @@ public class Main {
 		for (VisionParams params : visionParamsList) {
 
 			for(Attribute a : params.getAttribs()) {
-				if(!a.getName().equals("name")) {
-					NetworkTable visionTable = NetworkTablesManager.tables.get(params.getByName("name").getName());
+				if(a.getName().equals("name")) {
+					NetworkTable visionTable = NetworkTablesManager.tables.get(params.getByName("name").getValue());
 					visionTable.putString(a.getName(), a.getValue());
 				}
 			}
@@ -271,11 +271,7 @@ public class Main {
 
 	/**
 	 * Converts a OpenCV Matrix to a BufferedImage :)
-	 *
-	 * <<<<<<< HEAD
-	 * 
-	 * @param matrix Matrix to be converted =======
-	 * @param matrix Matrix to be converted >>>>>>> master
+	 * @param matrix Matrix to be converted
 	 * @return Generated from the matrix
 	 * @throws IOException
 	 * @throws Exception
@@ -293,10 +289,7 @@ public class Main {
 	/**
 	 * Converts a Buffered Image to a OpenCV Matrix
 	 * 
-	 * <<<<<<< HEAD
-	 * 
-	 * @param Buffered Image to convert to matrix =======
-	 * @param Buffered Image to convert to matrix >>>>>>> master
+	 * @param Buffered Image to convert to matrix
 	 * @return The matrix from the buffered image
 	 */
 

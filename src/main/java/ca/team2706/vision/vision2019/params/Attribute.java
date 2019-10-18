@@ -3,7 +3,7 @@ package ca.team2706.vision.vision2019.params;
 public class Attribute {
 	private String value;
 	private String name;
-	public Attribute(String value, String name) {
+	public Attribute(String name, String value) {
 		this.value = value;
 		this.name = name;
 	}

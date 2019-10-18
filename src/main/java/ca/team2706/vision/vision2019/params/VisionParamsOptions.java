@@ -3,6 +3,8 @@ package ca.team2706.vision.vision2019.params;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.team2706.vision.vision2019.Log;
+
 public class VisionParamsOptions {
 	private List<AttributeOptions> options = new ArrayList<AttributeOptions>();
 	private List<Attribute> attribs = new ArrayList<Attribute>();
@@ -20,8 +22,10 @@ public class VisionParamsOptions {
 		for(AttributeOptions o : options) {
 			if(o.isRequired()) {
 				Attribute a = getByName(o.getName());
-				if(a == null)
+				if(a == null) {
+					Log.e("Missing parameter "+o.getName(), true);
 					return false;
+				}
 			}
 		}
 		return true;
