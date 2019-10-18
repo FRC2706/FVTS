@@ -9,9 +9,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
 import ca.team2706.vision.vision2019.Pipeline;
-import ca.team2706.vision.vision2019.Main.VisionData;
-import ca.team2706.vision.vision2019.Main.VisionParams;
-import ca.team2706.vision.vision2019.Main.VisionData.Target;
+import ca.team2706.vision.vision2019.params.VisionParams;
 
 public class PipelineTest {
 

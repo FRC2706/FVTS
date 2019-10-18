@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,12 +21,11 @@ import org.apache.commons.cli.Options;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
-
-import org.opencv.core.Rect;
-import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.core.MatOfPoint;
 
+import ca.team2706.vision.vision2019.params.Attribute;
+import ca.team2706.vision.vision2019.params.AttributeOptions;
+import ca.team2706.vision.vision2019.params.VisionParams;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
@@ -39,18 +37,19 @@ public class Main {
 	public static NetworkTable loggingTable;
 	private static File visionParamsFile;
 	public static boolean developmentMode = false;
-
+	public static List<AttributeOptions> options;
+	
 	public static List<MainThread> threads = new ArrayList<MainThread>();
 
 	public static void reloadConfig() {
 		visionParamsList.clear();
 		loadVisionParams();
 		for (MainThread thread : threads) {
-			String name = thread.visionParams.name;
+			String name = thread.visionParams.getByName("name").getValue();
 			boolean found = false;
 			for (VisionParams params : visionParamsList) {
 				if (!found) {
-					if (params.name.equals(name)) {
+					if (params.getByName("name").getValue().equals(name)) {
 						thread.updateParams(params);
 						found = true;
 					}
@@ -66,121 +65,6 @@ public class Main {
 	// there is no webcam :/
 	/** The vision parameters, this is used by the vision pipeline **/
 	public static List<VisionParams> visionParamsList = new ArrayList<VisionParams>();
-
-	/**
-	 * A class to hold calibration parameters for the image processing algorithm
-	 */
-	public static class VisionParams {
-		int group;
-
-		/** This is the minimum hue that the pipeline will recognize **/
-		int minHue;
-		/** This is the maximum hue that the pipeline will recognize **/
-		int maxHue;
-		/** This is the minimum saturation that the pipeline will recognize **/
-		int minSaturation;
-		/** This is the maximum saturation that the pipeline will recognize **/
-		int maxSaturation;
-		/** This is the minimum value that the pipeline will recognize **/
-		int minValue;
-		/** This is the maximum value that the pipeline will recognize **/
-		int maxValue;
-		/** This is the id of the camera that will be used to get images **/
-		int cameraSelect;
-		/**
-		 * The threshold to detect one large cube as 2 cubes, this is a value between 0
-		 * and 1 This is how many times the pipeline will erode dilate the camera image
-		 **/
-		int erodeDilateIterations;
-
-		double slope, yIntercept;
-
-		/**
-		 * The threshold to detect one large cube as 2 cubes, this is a value between 0
-		 * and 1
-		 **/
-		double aspectRatioThresh;
-		/** The minimum area that a target can have and still be recognized **/
-		double minArea;
-		/**
-		 * How important it is for a target to be close to the center of the image, this
-		 * will change depending on how well we can turn
-		 * 
-		 **/
-		double distToCentreImportance;
-		/** The width to resize the image from the camera to **/
-		int width;
-		/** The height to resize the image from the camera to **/
-		int height;
-		/**
-		 * The size to resize the image from the camera to, this is just the width and
-		 * the height values
-		 **/
-		Size sz;
-		/** This is the image to be processed if the selected camera is -1 **/
-		String imageFile;
-
-		public NetworkTable table;
-
-		public String name;
-
-		public String outputPath;
-
-		public double secondsBetweenImageDumps;
-
-		public boolean enabled;
-
-		public String type, identifier;
-	}
-
-	/**
-	 * A class to hold any visionTable data returned by process() :) :) :} :] :]
-	 */
-
-	public static class VisionData {
-
-		public static class Target {
-			double distance;
-
-			MatOfPoint contour;
-
-			/** The x center of the target in the image **/
-			int xCentre;
-			/**
-			 * The normalized x center of the target that is between 0 and 1
-			 **/
-			double xCentreNorm;
-			/** The y center of the target in the image **/
-			int yCentre;
-			/**
-			 * The normalized y center of the target that is between 0 and 1
-			 **/
-			double yCentreNorm;
-			/**
-			 * A value between 0 and 1 representing the percentage of the image the target
-			 * takes up
-			 **/
-			double areaNorm; // [0,1] representing how much of the screen it
-								// occupies
-			/** The rectangle made from x and y centers **/
-			Rect boundingBox;
-		}
-
-		/** The List of all the targets in the image **/
-
-		ArrayList<Target> targetsFound = new ArrayList<Target>();
-		/**
-		 * The target that is the most appealing, how it is chosen depends on the
-		 * distToCenterImportance value in the vision parameters
-		 **/
-		Target preferredTarget;
-		/** The image that contains the targets **/
-		public Mat outputImg = new Mat();
-		/** The frames per second **/
-		public Mat binMask = new Mat();
-		public double fps;
-		public VisionParams params;
-	}
 
 	/**
 	 * Initilizes the Network Tables WARNING! Change 127.0.0.1 to the robot ip
@@ -230,59 +114,84 @@ public class Main {
 
 	public static void loadVisionParams() {
 		try {
-			List<String> lists = ConfigParser.listLists(visionParamsFile);
+			AttributeOptions name = new AttributeOptions("name",true);
 
+			AttributeOptions minHue = new AttributeOptions("minHue",true);
+			AttributeOptions maxHue = new AttributeOptions("maxHue",true);
+			AttributeOptions minSat = new AttributeOptions("minSaturation",true);
+			AttributeOptions maxSat = new AttributeOptions("maxSaturation",true);
+			AttributeOptions minVal = new AttributeOptions("minValue",true);
+			AttributeOptions maxVal = new AttributeOptions("maxValue",true);
+
+			AttributeOptions aspectRatioThresh = new AttributeOptions("aspectRatioThresh",true);
+
+			AttributeOptions distToCenterImportance = new AttributeOptions("distToCenterImportance",true);
+
+			AttributeOptions imageFile = new AttributeOptions("imageFile",true);
+
+			AttributeOptions minArea = new AttributeOptions("minArea",true);
+
+			AttributeOptions erodeDilateIterations = new AttributeOptions("erodeDilateIterations",true);
+
+			AttributeOptions resolution = new AttributeOptions("resolution",true);
+
+			AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath",true);
+
+			AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime",true);
+
+			AttributeOptions slope = new AttributeOptions("slope",true);
+
+			AttributeOptions yIntercept = new AttributeOptions("yIntercept",true);
+
+			AttributeOptions group = new AttributeOptions("group",true);
+
+			AttributeOptions type = new AttributeOptions("type",true);
+
+			AttributeOptions identifier = new AttributeOptions("identifier",true);
+			
+			
+			options = new ArrayList<AttributeOptions>();
+			options.add(name);
+			options.add(minHue);
+			options.add(maxHue);
+			options.add(minSat);
+			options.add(maxSat);
+			options.add(minVal);
+			options.add(maxVal);
+			options.add(aspectRatioThresh);
+			options.add(distToCenterImportance);
+			options.add(imageFile);
+			options.add(minArea);
+			options.add(erodeDilateIterations);
+			options.add(resolution);
+			options.add(imgDumpPath);
+			options.add(imgDumpTime);
+			options.add(slope);
+			options.add(yIntercept);
+			options.add(group);
+			options.add(type);
+			options.add(identifier);
+			List<String> lists = ConfigParser.listLists(visionParamsFile);
+			
 			for (String s : lists) {
 
-				VisionParams visionParams = new VisionParams();
-
 				Map<String, String> data = ConfigParser.getProperties(visionParamsFile, s);
-
-				visionParams.name = s;
-
-				visionParams.minHue = Integer.valueOf(data.get("minHue"));
-				visionParams.maxHue = Integer.valueOf(data.get("maxHue"));
-				visionParams.minSaturation = Integer.valueOf(data.get("minSaturation"));
-				visionParams.maxSaturation = Integer.valueOf(data.get("maxSaturation"));
-				visionParams.minValue = Integer.valueOf(data.get("minValue"));
-				visionParams.maxValue = Integer.valueOf(data.get("maxValue"));
-
-				visionParams.aspectRatioThresh = Double.valueOf(data.get("aspectRatioThresh"));
-
-				visionParams.distToCentreImportance = Double.valueOf(data.get("distToCenterImportance"));
-
-				visionParams.imageFile = data.get("imageFile");
-
-				visionParams.minArea = Double.valueOf(data.get("minArea"));
-
-				visionParams.erodeDilateIterations = Integer.valueOf(data.get("erodeDilateIterations"));
-
-				String resolution = data.get("resolution");
-
-				visionParams.width = Integer.valueOf(resolution.split("x")[0]);
-				visionParams.height = Integer.valueOf(resolution.split("x")[1]);
-
-				// Set the vision parameters size
-				visionParams.sz = new Size(visionParams.width, visionParams.height);
-
-				visionParams.table = NetworkTable.getTable("vision-" + s);
-
-				visionParams.outputPath = data.get("imgDumpPath");
-
-				visionParams.secondsBetweenImageDumps = Double.valueOf(data.get("imgDumpTime"));
-
-				visionParams.slope = Double.valueOf(data.get("slope"));
-
-				visionParams.yIntercept = Double.valueOf(data.get("yIntercept"));
-
-				visionParams.group = Integer.valueOf(data.get("group"));
-
-				visionParams.type = data.get("type");
-
-				visionParams.identifier = data.get("identifier");
-
-				visionParamsList.add(visionParams);
-
+				
+				List<Attribute> attribs = new ArrayList<Attribute>();
+				attribs.add(new Attribute("name",s));
+				for(String s1 : data.keySet()) {
+					attribs.add(new Attribute(s1,data.get(s1)));
+				}
+				VisionParams params = new VisionParams(attribs, options);
+				String resolution1 = params.getByName("resolution").getValue();
+				int width = Integer.valueOf(resolution1.split("x")[0]);
+				int height = Integer.valueOf(resolution1.split("x")[1]);
+				params.getAttribs().add(new Attribute("width",width+""));
+				params.getAttribs().add(new Attribute("height",height+""));
+				NetworkTable visionTable = NetworkTable.getTable("vision-" + params.getByName("name").getValue() + "/params");
+				NetworkTablesManager.tables.put(s, visionTable);
+				// The parameters are now valid, because it didnt throw an error
+				visionParamsList.add(params);
 			}
 
 			sendVisionParams();
@@ -298,28 +207,12 @@ public class Main {
 
 		for (VisionParams params : visionParamsList) {
 
-			NetworkTable visionTable = NetworkTable.getTable("vision-" + params.name + "/params");
-
-			visionTable.putNumber("group", params.group);
-			visionTable.putNumber("yIntercept", params.yIntercept);
-			visionTable.putNumber("slope", params.slope);
-			visionTable.putNumber("secondsBetweenImageDumps", params.secondsBetweenImageDumps);
-			visionTable.putNumber("height", params.height);
-			visionTable.putNumber("width", params.width);
-			visionTable.putNumber("erodeDilateIterations", params.erodeDilateIterations);
-			visionTable.putNumber("minArea", params.minArea);
-			visionTable.putString("imageFile", params.imageFile);
-			visionTable.putNumber("distToCenterImportance", params.distToCentreImportance);
-			visionTable.putNumber("aspectRatioThresh", params.aspectRatioThresh);
-			visionTable.putString("type", params.type);
-			visionTable.putString("identifier", params.identifier);
-			visionTable.putNumber("minHue", params.minHue);
-			visionTable.putNumber("maxHue", params.maxHue);
-			visionTable.putNumber("minSaturation", params.minSaturation);
-			visionTable.putNumber("maxSaturation", params.maxSaturation);
-			visionTable.putNumber("minValue", params.minValue);
-			visionTable.putNumber("maxValue", params.maxValue);
-
+			for(Attribute a : params.getAttribs()) {
+				if(!a.getName().equals("name")) {
+					NetworkTable visionTable = NetworkTablesManager.tables.get(params.getByName("name").getName());
+					visionTable.putString(a.getName(), a.getValue());
+				}
+			}
 		}
 	}
 
@@ -342,38 +235,13 @@ public class Main {
 	public static void saveVisionParams(VisionParams params) throws Exception {
 		Map<String, String> data = new HashMap<String, String>();
 
-		data.put("type", params.type);
-		data.put("identifier", params.identifier);
-		data.put("minHue", String.valueOf(params.minHue));
-		data.put("maxHue", String.valueOf(params.maxHue));
-		data.put("minSaturation", String.valueOf(params.minSaturation));
-		data.put("maxSaturation", String.valueOf(params.maxSaturation));
-		data.put("minValue", String.valueOf(params.minValue));
-		data.put("maxValue", String.valueOf(params.maxValue));
+		for(Attribute a : params.getAttribs()) {
+			if(!a.getName().equals("name")) {
+				data.put(a.getName(), a.getValue());
+			}
+		}
 
-		data.put("aspectRatioThresh", String.valueOf(params.aspectRatioThresh));
-
-		data.put("distToCenterImportance", String.valueOf(params.distToCentreImportance));
-
-		data.put("imageFile", params.imageFile);
-
-		data.put("minArea", String.valueOf(params.minArea));
-
-		data.put("erodeDilateIterations", String.valueOf(params.erodeDilateIterations));
-
-		data.put("resolution", params.width + "x" + params.height);
-
-		data.put("imgDumpPath", params.outputPath);
-
-		data.put("imgDumpTime", String.valueOf(params.secondsBetweenImageDumps));
-
-		data.put("slope", String.valueOf(params.slope));
-
-		data.put("yIntercept", String.valueOf(params.yIntercept));
-
-		data.put("group", String.valueOf(params.group));
-
-		ConfigParser.saveList(visionParamsFile, params.name, data);
+		ConfigParser.saveList(visionParamsFile, params.getByName("name").getValue(), data);
 	}
 
 	/**
@@ -383,7 +251,7 @@ public class Main {
 	 * @param visionData
 	 */
 	public static void sendVisionDataOverNetworkTables(VisionData visionData) {
-		NetworkTable visionTable = visionData.params.table;
+		NetworkTable visionTable = NetworkTablesManager.tables.get(visionData.params.getByName("name").getValue());
 		// Sends the data
 		// Puts the fps into the vision table
 		visionTable.putNumber("fps", visionData.fps);
@@ -529,16 +397,16 @@ public class Main {
 		for (VisionParams params : visionParamsList) {
 			try {
 
-				String s = masterEnabled.get(params.name);
+				String s = masterEnabled.get(params.getByName("name").getValue());
 
 				if (s == null || s.equals("")) {
 					s = "true";
 
 					boolean enabled = Boolean.valueOf(s);
 
-					params.enabled = enabled;
+					params.getAttribs().add(new Attribute("enabled",String.valueOf(enabled)));
 
-					VisionCameraServer.initCamera(params.type, params.identifier);
+					VisionCameraServer.initCamera(params.getByName("type").getValue(), params.getByName("identifier").getValue());
 					MainThread thread = new MainThread(params);
 					if (enabled) {
 						thread.start();
