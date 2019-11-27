@@ -62,7 +62,8 @@ public class ParamsSelector extends JFrame implements ActionListener {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		// Sets the layout to a abstract layout
 		contentPane.setLayout(null);
-
+		contentPane.setBounds(0, 0, getWidth(), getHeight()*10);
+		
 		int x = 100, y = 100;
 		
 		for (Attribute a : visionParams.getAttribs()) {
@@ -71,10 +72,10 @@ public class ParamsSelector extends JFrame implements ActionListener {
 			field.setToolTipText(a.getName());
 			field.setBounds(x, y, 100, 40);
 			contentPane.add(field);
-			x += 220;
-			if(x > 1920/2) {
+			x += 120;
+			if(x > getWidth()-50) {
 				x = 100;
-				y += 100;
+				y += 60;
 			}
 		}
 		btnUpdate = new JButton("Apply");
@@ -82,9 +83,9 @@ public class ParamsSelector extends JFrame implements ActionListener {
 		btnUpdate.addActionListener(this);
 		contentPane.add(btnUpdate);
 		x += 120;
-		if(x > 1920/2) {
+		if(x > getWidth()-50) {
 			x = 100;
-			y += 100;
+			y += 120;
 		}
 		
 		btnSave = new JButton("Save");
