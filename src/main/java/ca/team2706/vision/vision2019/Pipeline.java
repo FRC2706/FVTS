@@ -13,9 +13,8 @@ import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-import ca.team2706.vision.vision2019.Main.VisionData;
-import ca.team2706.vision.vision2019.Main.VisionData.Target;
-import ca.team2706.vision.vision2019.Main.VisionParams;
+import ca.team2706.vision.vision2019.VisionData.Target;
+import ca.team2706.vision.vision2019.params.VisionParams;
 
 public class Pipeline {
 
@@ -54,15 +53,15 @@ public class Pipeline {
 		// Colour threshold
 		Mat hsvThreshold = new Mat();
 
-		Core.inRange(src, new Scalar(visionParams.minHue, visionParams.minSaturation, visionParams.minValue),
-				new Scalar(visionParams.maxHue, visionParams.maxSaturation, visionParams.maxValue), hsvThreshold);
+		Core.inRange(src, new Scalar(visionParams.getByName("minHue").getValueI(), visionParams.getByName("minSaturation").getValueI(), visionParams.getByName("minValue").getValueI()),
+				new Scalar(visionParams.getByName("maxHue").getValueI(), visionParams.getByName("maxSaturation").getValueI(), visionParams.getByName("maxValue").getValueI()), hsvThreshold);
 
 		// Erode - Dilate*2 - Erode
-		Imgproc.erode(hsvThreshold, erodeOne, new Mat(), new Point(), visionParams.erodeDilateIterations,
+		Imgproc.erode(hsvThreshold, erodeOne, new Mat(), new Point(), visionParams.getByName("erodeDilateIterations").getValueI(),
 				Core.BORDER_CONSTANT, new Scalar(0));
-		Imgproc.dilate(erodeOne, dilated, new Mat(), new Point(), 2 * visionParams.erodeDilateIterations,
+		Imgproc.dilate(erodeOne, dilated, new Mat(), new Point(), 2 * visionParams.getByName("erodeDilateIterations").getValueI(),
 				Core.BORDER_CONSTANT, new Scalar(0));
-		Imgproc.erode(dilated, erodeTwo, new Mat(), new Point(), visionParams.erodeDilateIterations,
+		Imgproc.erode(dilated, erodeTwo, new Mat(), new Point(), visionParams.getByName("erodeDilateIterations").getValueI(),
 				Core.BORDER_CONSTANT, new Scalar(0));
 
 		visionData.binMask = erodeTwo.clone();
@@ -79,7 +78,7 @@ public class Pipeline {
 			// height * width for area (easier and less CPU cycles than contour.area)
 			double areaNorm = ((double) boundingRect.width * boundingRect.height) / imgArea;
 
-			if (areaNorm >= visionParams.minArea) {
+			if (areaNorm >= visionParams.getByName("minArea").getValueD()) {
 
 				VisionData.Target target = new VisionData.Target();
 				target.boundingBox = boundingRect;
@@ -251,8 +250,8 @@ public class Pipeline {
 			double areaScore = target.areaNorm / largestAreaNorm;
 			double distFromCentrePenalty = Math.abs(target.xCentreNorm);
 
-			double score = (1 - visionParams.distToCentreImportance) * areaScore
-					- visionParams.distToCentreImportance * distFromCentrePenalty;
+			double score = (1 - visionParams.getByName("distToCentreImportance").getValueD()) * areaScore
+					- visionParams.getByName("distToCentreImportance").getValueD() * distFromCentrePenalty;
 
 			if (bestScore < score) {
 				visionData.preferredTarget = target;
@@ -273,7 +272,7 @@ public class Pipeline {
 
 			double y = visionData.preferredTarget.boundingBox.height;
 
-			double x = (y - visionParams.yIntercept) / visionParams.slope;
+			double x = (y - visionParams.getByName("yIntercept").getValueD()) / visionParams.getByName("slope").getValueD();
 
 			// Now we have the distance in cm!!!
 

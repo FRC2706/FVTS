@@ -7,14 +7,15 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import ca.team2706.vision.vision2019.Main.VisionData;
-import ca.team2706.vision.vision2019.Main.VisionParams;
+import ca.team2706.vision.vision2019.params.VisionParams;
 
 public class MainThread extends Thread {
 
 	public VisionParams visionParams;
+	public ParamsSelector selector;
 
 	public MainThread(VisionParams params) {
 		this.visionParams = params;
@@ -28,19 +29,19 @@ public class MainThread extends Thread {
 
 	@Override
 	public void run() {
-
+		
 		// Initializes a Matrix to hold the frame
 
 		frame = new Mat();
 
 		// Whether to use a camera, or load an image file from disk.
-		if (visionParams.type.equals("usb") && Integer.valueOf(visionParams.identifier) == -1) {
+		if (visionParams.getByName("type").getValue().equals("usb") && visionParams.getByName("identifier").getValueI() == -1) {
 			useCamera = false;
 		}
 
 		if (useCamera) {
 			try {
-				VisionCameraServer.initCamera(visionParams.type,visionParams.identifier);
+				VisionCameraServer.initCamera(visionParams.getByName("type").getValue(),visionParams.getByName("identifier").getValue());
 				VisionCameraServer.update();
 			} catch (Exception e) {
 				Log.e(e.getMessage(), true);
@@ -49,7 +50,7 @@ public class MainThread extends Thread {
 		} else {
 			// load the image from file.
 			try {
-				frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
+				frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
 			} catch (IOException e) {
 				Log.e(e.getMessage(), true);
 				frame = new Mat();
@@ -60,20 +61,15 @@ public class MainThread extends Thread {
 		// The window to display the processed image
 		DisplayGui guiProcessedImg = null;
 		// Wether to open the guis
-		boolean use_GUI = true;
-
-		// If on Linux don't use guis
-		if (System.getProperty("os.arch").toLowerCase().indexOf("arm") != -1) {
-			use_GUI = false;
-		}
+		boolean use_GUI = Main.developmentMode;
 
 		if (useCamera) {
 
-			frame = VisionCameraServer.getFrame(visionParams.type,visionParams.identifier);
+			frame = VisionCameraServer.getFrame(visionParams.getByName("type").getValue(),visionParams.getByName("identifier").getValue());
 
 		} else {
 			try {
-				frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.imageFile)));
+				frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
 			} catch (IOException e) {
 				Log.e(e.getMessage(), true);
 				System.exit(1);
@@ -82,17 +78,24 @@ public class MainThread extends Thread {
 
 		// Set up the GUI display windows
 		if (use_GUI) {
-			// Initilizes the window to display the raw image
-			guiRawImg = new DisplayGui(1, 1, "Raw-" + visionParams.name, true);
-			// Initilizes the window to display the processed image
-			guiProcessedImg = new DisplayGui(1, 1, "Processed-" + visionParams.name, true);
+			// Initializes the window to display the raw image
+			guiRawImg = new DisplayGui(1, 1, "Raw-" + visionParams.getByName("name").getValue(), true);
+			// Initializes the window to display the processed image
+			guiProcessedImg = new DisplayGui(1, 1, "Processed-" + visionParams.getByName("name").getValue(), true);
+			// Initializes the parameters selector window
+			try {
+				selector = new ParamsSelector(visionParams);
+			} catch (Exception e) {
+				Log.e(e.getMessage(), true);
+				e.printStackTrace();
+			}
 		}
 
 		// Main video processing loop
 		while (true) {
 			try {
 				
-				if(!visionParams.enabled && use_GUI) {
+				if(!visionParams.getByName("enabled").getValueB() && use_GUI) {
 					
 					guiRawImg.b = false;
 					guiProcessedImg.b = false;
@@ -102,16 +105,17 @@ public class MainThread extends Thread {
 					
 					break;
 					
-				}else if(!visionParams.enabled) {
+				}else if(!visionParams.getByName("enabled").getValueB()) {
 					break;
 				}
 				
 				if (useCamera) {
 					// Read the frame from the camera, if it fails try again
-					frame = VisionCameraServer.getFrame(visionParams.type,visionParams.identifier);
+					frame = VisionCameraServer.getFrame(visionParams.getByName("type").getValue(),visionParams.getByName("identifier").getValue());
 				} // else use the image from disk that we loaded above
 				// Resize the frame
-				Imgproc.resize(frame, frame, visionParams.sz);
+				Size sz = new Size(visionParams.getByName("width").getValueI(),visionParams.getByName("height").getValueI());
+				Imgproc.resize(frame, frame, sz);
 				// Process the frame!
 				// Log when the pipeline starts
 				long pipelineStart = System.nanoTime();
@@ -120,7 +124,7 @@ public class MainThread extends Thread {
 				// Log when the pipeline stops
 				long pipelineEnd = System.nanoTime();
 				// Selects the prefered target
-				Pipeline.selectPreferredTarget(visionData, visionParams, visionParams.group == 1 ? true : false);
+				Pipeline.selectPreferredTarget(visionData, visionParams, visionParams.getByName("group").getValueI() == 1 ? true : false);
 				// Creates the raw output image object
 				Mat rawOutputImg;
 				if (use_GUI) {
@@ -172,7 +176,7 @@ public class MainThread extends Thread {
 					// dumps
 					
 					// then dump images asynchronously
-					if (elapsedTime >= visionParams.secondsBetweenImageDumps && visionParams.secondsBetweenImageDumps != -1) {
+					if (elapsedTime >= visionParams.getByName("imgDumpTime").getValueI() && visionParams.getByName("imgDumpTime").getValueI() != -1) {
 						// Sets the current number of seconds
 						current_time_seconds = (((double) System.currentTimeMillis()) / 1000);
 						try {
@@ -194,11 +198,11 @@ public class MainThread extends Thread {
 						* 1000;
 				Log.i("Vision FPS: "+visionData.fps+", pipeline took: "+pipelineTime+" ms\n",false);
 			} catch (Exception e) {
-				Log.e(e.getMessage(), true);
+				Log.e(e.getMessage(), true);e.printStackTrace();
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e1) {
-					Log.e(e1.getMessage(), true);
+					Log.e(e1.getMessage(), true);e.printStackTrace();
 				}
 			}
 		}
@@ -213,7 +217,7 @@ public class MainThread extends Thread {
 
 		VisionData visionData = Pipeline.process(frame, visionParams, false);
 
-		Pipeline.selectPreferredTarget(visionData, visionParams, visionParams.group == 1 ? true : false);
+		Pipeline.selectPreferredTarget(visionData, visionParams, visionParams.getByName("group").getValueI() == 1 ? true : false);
 
 		return visionData;
 

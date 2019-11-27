@@ -2,7 +2,7 @@ package ca.team2706.vision.vision2019;
 
 import java.awt.image.BufferedImage;
 
-import ca.team2706.vision.vision2019.Main.VisionParams;
+import ca.team2706.vision.vision2019.params.VisionParams;
 
 public class Bundle {
 	private BufferedImage raw,binMask,output;

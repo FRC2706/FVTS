@@ -1,11 +1,16 @@
 package ca.team2706.vision.vision2019;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import ca.team2706.vision.vision2019.Main.VisionParams;
+import ca.team2706.vision.vision2019.params.VisionParams;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class NetworkTablesManager extends Thread{
+	
+	public static Map<String,NetworkTable> tables = new HashMap<String,NetworkTable>();
 	
 	public static void init() {
 		new NetworkTablesManager().start();
@@ -16,26 +21,27 @@ public class NetworkTablesManager extends Thread{
 		
 		for(VisionParams params : Main.visionParamsList) {
 			
-			params.table.putBoolean("enabled", params.enabled);
+			tables.get(params.getByName("name").getValue()).putBoolean("enabled", params.getByName("enabled").getValueB());
 			
 		}
 		
 		while(true) {
 			
 			for(VisionParams params : Main.visionParamsList) {
+				NetworkTable table = tables.get(params.getByName("name").getValue());
 				
-				boolean enabled = params.table.getBoolean("enabled", true);
+				boolean enabled = table.getBoolean("enabled", true);
 				
-				if(params.enabled == false && enabled && params.table.isConnected()) {
+				if(params.getByName("enabled").getValueB() == false && enabled && table.isConnected()) {
 				
-					params.enabled = true;
+					params.getByName("enabled").setValue("true");
 					
 					List<MainThread> toRemove = new ArrayList<MainThread>();
 					List<MainThread> toAdd = new ArrayList<MainThread>();
 					
 					for(MainThread thread : Main.threads) {
 						
-						if(thread.visionParams.name.equals(params.name)) {
+						if(thread.visionParams.getByName("name").getValue().equals(params.getByName("name").getValue())) {
 							toRemove.add(thread);
 							MainThread thread1 = new MainThread(params);
 							toAdd.add(thread1);
@@ -52,13 +58,13 @@ public class NetworkTablesManager extends Thread{
 						Main.threads.add(thread);
 					}
 					
-				}else if(params.enabled && !enabled && params.table.isConnected()) {
+				}else if(params.getByName("enabled").getValueB() && !enabled && table.isConnected()) {
 				
-					params.enabled = false;
+					params.getByName("enabled").setValue("false");
 
 					for(MainThread thread : Main.threads) {
 						
-						if(thread.visionParams.name.equals(params.name)) {
+						if(thread.visionParams.getByName("name").getValue().equals(params.getByName("name").getValue())) {
 							thread.updateParams(params);
 							try {
 								thread.join();
