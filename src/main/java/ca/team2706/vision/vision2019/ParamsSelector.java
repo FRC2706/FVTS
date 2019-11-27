@@ -3,6 +3,8 @@ package ca.team2706.vision.vision2019;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +57,16 @@ public class ParamsSelector extends JFrame implements ActionListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		// Sets the size of the window
 		setBounds(100, 100, 600, 300);
+		addComponentListener(new ComponentAdapter() {
+		    public void componentResized(ComponentEvent componentEvent) {
+		    	setupContent();
+		    }
+		});
+		setupContent();
+		// Makes the window visible
+		setVisible(true);
+	}
+	private void setupContent() {
 
 		// Initilizes the content panel
 		contentPane = new JPanel();
@@ -73,7 +85,7 @@ public class ParamsSelector extends JFrame implements ActionListener {
 			field.setBounds(x, y, 100, 40);
 			contentPane.add(field);
 			x += 120;
-			if(x > getWidth()-50) {
+			if(x > getWidth()-150) {
 				x = 100;
 				y += 60;
 			}
@@ -83,7 +95,7 @@ public class ParamsSelector extends JFrame implements ActionListener {
 		btnUpdate.addActionListener(this);
 		contentPane.add(btnUpdate);
 		x += 120;
-		if(x > getWidth()-50) {
+		if(x > getWidth()-150) {
 			x = 100;
 			y += 120;
 		}
@@ -96,8 +108,6 @@ public class ParamsSelector extends JFrame implements ActionListener {
 		// Sets the content pane to the content pane
 		setContentPane(contentPane);
 
-		// Makes the window visible
-		setVisible(true);
 	}
 
 	@Override
