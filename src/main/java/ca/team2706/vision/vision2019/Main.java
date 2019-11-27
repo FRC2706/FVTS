@@ -31,7 +31,6 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
 public class Main {
 
 	public static String filename = "";
-	public static ParamsSelector selector;
 	public static int timestamp = 0;
 	public static File timestampfile;
 	public static NetworkTable loggingTable;

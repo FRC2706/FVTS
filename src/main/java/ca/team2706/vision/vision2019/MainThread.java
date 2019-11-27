@@ -15,6 +15,7 @@ import ca.team2706.vision.vision2019.params.VisionParams;
 public class MainThread extends Thread {
 
 	public VisionParams visionParams;
+	public ParamsSelector selector;
 
 	public MainThread(VisionParams params) {
 		this.visionParams = params;
@@ -60,12 +61,7 @@ public class MainThread extends Thread {
 		// The window to display the processed image
 		DisplayGui guiProcessedImg = null;
 		// Wether to open the guis
-		boolean use_GUI = true;
-
-		// If on Linux don't use guis
-		if (System.getProperty("os.arch").toLowerCase().indexOf("arm") != -1) {
-			use_GUI = false;
-		}
+		boolean use_GUI = Main.developmentMode;
 
 		if (useCamera) {
 
@@ -82,10 +78,17 @@ public class MainThread extends Thread {
 
 		// Set up the GUI display windows
 		if (use_GUI) {
-			// Initilizes the window to display the raw image
+			// Initializes the window to display the raw image
 			guiRawImg = new DisplayGui(1, 1, "Raw-" + visionParams.getByName("name").getValue(), true);
-			// Initilizes the window to display the processed image
+			// Initializes the window to display the processed image
 			guiProcessedImg = new DisplayGui(1, 1, "Processed-" + visionParams.getByName("name").getValue(), true);
+			// Initializes the parameters selector window
+			try {
+				selector = new ParamsSelector(visionParams);
+			} catch (Exception e) {
+				Log.e(e.getMessage(), true);
+				e.printStackTrace();
+			}
 		}
 
 		// Main video processing loop
