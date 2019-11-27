@@ -20,4 +20,7 @@ public class VisionParams {
 	public List<Attribute> getAttribs(){
 		return options.getAttribs();
 	}
+	public void putAttrib(Attribute a) {
+		options.putAttrib(a);
+	}
 }

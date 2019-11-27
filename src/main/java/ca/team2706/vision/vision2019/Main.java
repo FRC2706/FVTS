@@ -38,7 +38,7 @@ public class Main {
 	private static File visionParamsFile;
 	public static boolean developmentMode = false;
 	public static List<AttributeOptions> options;
-	
+
 	public static List<MainThread> threads = new ArrayList<MainThread>();
 
 	public static void reloadConfig() {
@@ -114,42 +114,43 @@ public class Main {
 
 	public static void loadVisionParams() {
 		try {
-			AttributeOptions name = new AttributeOptions("name",true);
+			AttributeOptions name = new AttributeOptions("name", true);
 
-			AttributeOptions minHue = new AttributeOptions("minHue",true);
-			AttributeOptions maxHue = new AttributeOptions("maxHue",true);
-			AttributeOptions minSat = new AttributeOptions("minSaturation",true);
-			AttributeOptions maxSat = new AttributeOptions("maxSaturation",true);
-			AttributeOptions minVal = new AttributeOptions("minValue",true);
-			AttributeOptions maxVal = new AttributeOptions("maxValue",true);
+			AttributeOptions minHue = new AttributeOptions("minHue", true);
+			AttributeOptions maxHue = new AttributeOptions("maxHue", true);
+			AttributeOptions minSat = new AttributeOptions("minSaturation", true);
+			AttributeOptions maxSat = new AttributeOptions("maxSaturation", true);
+			AttributeOptions minVal = new AttributeOptions("minValue", true);
+			AttributeOptions maxVal = new AttributeOptions("maxValue", true);
 
-			AttributeOptions aspectRatioThresh = new AttributeOptions("aspectRatioThresh",true);
+			AttributeOptions aspectRatioThresh = new AttributeOptions("aspectRatioThresh", true);
 
-			AttributeOptions distToCenterImportance = new AttributeOptions("distToCenterImportance",true);
+			AttributeOptions distToCentreImportance = new AttributeOptions("distToCentreImportance", true);
 
-			AttributeOptions imageFile = new AttributeOptions("imageFile",true);
+			AttributeOptions imageFile = new AttributeOptions("imageFile", true);
 
-			AttributeOptions minArea = new AttributeOptions("minArea",true);
+			AttributeOptions minArea = new AttributeOptions("minArea", true);
 
-			AttributeOptions erodeDilateIterations = new AttributeOptions("erodeDilateIterations",true);
+			AttributeOptions erodeDilateIterations = new AttributeOptions("erodeDilateIterations", true);
 
-			AttributeOptions resolution = new AttributeOptions("resolution",true);
+			AttributeOptions resolution = new AttributeOptions("resolution", true);
 
-			AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath",true);
+			AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath", true);
 
-			AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime",true);
+			AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime", true);
 
-			AttributeOptions slope = new AttributeOptions("slope",true);
+			AttributeOptions slope = new AttributeOptions("slope", true);
 
-			AttributeOptions yIntercept = new AttributeOptions("yIntercept",true);
+			AttributeOptions yIntercept = new AttributeOptions("yIntercept", true);
 
-			AttributeOptions group = new AttributeOptions("group",true);
+			AttributeOptions group = new AttributeOptions("group", true);
 
-			AttributeOptions type = new AttributeOptions("type",true);
+			AttributeOptions type = new AttributeOptions("type", true);
 
-			AttributeOptions identifier = new AttributeOptions("identifier",true);
-			
-			
+			AttributeOptions identifier = new AttributeOptions("identifier", true);
+
+			AttributeOptions enabled = new AttributeOptions("enabled", false);
+
 			options = new ArrayList<AttributeOptions>();
 			options.add(name);
 			options.add(minHue);
@@ -159,7 +160,7 @@ public class Main {
 			options.add(minVal);
 			options.add(maxVal);
 			options.add(aspectRatioThresh);
-			options.add(distToCenterImportance);
+			options.add(distToCentreImportance);
 			options.add(imageFile);
 			options.add(minArea);
 			options.add(erodeDilateIterations);
@@ -171,24 +172,26 @@ public class Main {
 			options.add(group);
 			options.add(type);
 			options.add(identifier);
+			options.add(enabled);
 			List<String> lists = ConfigParser.listLists(visionParamsFile);
-			
+
 			for (String s : lists) {
 
 				Map<String, String> data = ConfigParser.getProperties(visionParamsFile, s);
-				
+
 				List<Attribute> attribs = new ArrayList<Attribute>();
-				attribs.add(new Attribute("name",s));
-				for(String s1 : data.keySet()) {
-					attribs.add(new Attribute(s1,data.get(s1)));
+				attribs.add(new Attribute("name", s));
+				for (String s1 : data.keySet()) {
+					attribs.add(new Attribute(s1, data.get(s1)));
 				}
 				VisionParams params = new VisionParams(attribs, options);
 				String resolution1 = params.getByName("resolution").getValue();
 				int width = Integer.valueOf(resolution1.split("x")[0]);
 				int height = Integer.valueOf(resolution1.split("x")[1]);
-				params.getAttribs().add(new Attribute("width",width+""));
-				params.getAttribs().add(new Attribute("height",height+""));
-				NetworkTable visionTable = NetworkTable.getTable("vision-" + params.getByName("name").getValue() + "/params");
+				params.getAttribs().add(new Attribute("width", width + ""));
+				params.getAttribs().add(new Attribute("height", height + ""));
+				NetworkTable visionTable = NetworkTable
+						.getTable("vision-" + params.getByName("name").getValue() + "/params");
 				NetworkTablesManager.tables.put(s, visionTable);
 				// The parameters are now valid, because it didnt throw an error
 				visionParamsList.add(params);
@@ -197,8 +200,8 @@ public class Main {
 			sendVisionParams();
 
 		} catch (Exception e1) {
-			Log.e(e1.getMessage(),true);
-			Log.e("\n\nError reading the params file, check if the file is corrupt?",true);
+			Log.e(e1.getMessage(), true);
+			Log.e("\n\nError reading the params file, check if the file is corrupt?", true);
 			System.exit(1);
 		}
 	}
@@ -207,8 +210,8 @@ public class Main {
 
 		for (VisionParams params : visionParamsList) {
 
-			for(Attribute a : params.getAttribs()) {
-				if(a.getName().equals("name")) {
+			for (Attribute a : params.getAttribs()) {
+				if (a.getName().equals("name")) {
 					NetworkTable visionTable = NetworkTablesManager.tables.get(params.getByName("name").getValue());
 					visionTable.putString(a.getName(), a.getValue());
 				}
@@ -228,15 +231,15 @@ public class Main {
 			}
 
 		} catch (Exception e1) {
-			Log.e(e1.getMessage(),true);
+			Log.e(e1.getMessage(), true);
 		}
 	}
 
 	public static void saveVisionParams(VisionParams params) throws Exception {
 		Map<String, String> data = new HashMap<String, String>();
 
-		for(Attribute a : params.getAttribs()) {
-			if(!a.getName().equals("name")) {
+		for (Attribute a : params.getAttribs()) {
+			if (!a.getName().equals("name")) {
 				data.put(a.getName(), a.getValue());
 			}
 		}
@@ -271,6 +274,7 @@ public class Main {
 
 	/**
 	 * Converts a OpenCV Matrix to a BufferedImage :)
+	 * 
 	 * @param matrix Matrix to be converted
 	 * @return Generated from the matrix
 	 * @throws IOException
@@ -353,7 +357,7 @@ public class Main {
 		try {
 			cmd = parser.parse(options, args);
 		} catch (Exception e) {
-			Log.e(e.getMessage(),true);
+			Log.e(e.getMessage(), true);
 			formatter.printHelp("Vision2019", options);
 			System.exit(1);
 		}
@@ -370,6 +374,15 @@ public class Main {
 		Map<String, String> masterConfig = ConfigParser.getProperties(new File("master.cf"), "config");
 
 		Map<String, String> masterEnabled = ConfigParser.getProperties(new File("master.cf"), "enabled");
+
+		// Go through and enable the configs
+		for (String s : masterEnabled.keySet()) {
+			for (VisionParams params : visionParamsList) {
+				if (params.getByName("name").getValue().equals(s)) {
+					params.putAttrib(new Attribute("enabled", masterEnabled.get(s)));
+				}
+			}
+		}
 
 		String allowOverride = masterConfig.get("allowOverride");
 
@@ -390,24 +403,24 @@ public class Main {
 		for (VisionParams params : visionParamsList) {
 			try {
 
-				String s = masterEnabled.get(params.getByName("name").getValue());
+				String s = params.getByName("enabled").getValue();
 
 				if (s == null || s.equals("")) {
 					s = "true";
-
-					boolean enabled = Boolean.valueOf(s);
-
-					params.getAttribs().add(new Attribute("enabled",String.valueOf(enabled)));
-
-					VisionCameraServer.initCamera(params.getByName("type").getValue(), params.getByName("identifier").getValue());
-					MainThread thread = new MainThread(params);
-					if (enabled) {
-						thread.start();
-					}
-					threads.add(thread);
 				}
+				boolean enabled = Boolean.valueOf(s);
+				
+				Log.i(params.getByName("name").getValue()+" enabled: "+enabled,true);
+				
+				VisionCameraServer.initCamera(params.getByName("type").getValue(),
+						params.getByName("identifier").getValue());
+				MainThread thread = new MainThread(params);
+				if (enabled) {
+					thread.start();
+				}
+				threads.add(thread);
 			} catch (Exception e) {
-				Log.e(e.getMessage(),true);
+				Log.e(e.getMessage(), true);
 			}
 
 		} // end main video processing loop

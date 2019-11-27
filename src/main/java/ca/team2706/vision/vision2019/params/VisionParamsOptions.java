@@ -37,4 +37,11 @@ public class VisionParamsOptions {
 		}
 		return null;
 	}
+	public void putAttrib(Attribute a) {
+		for(int i = 0; i < attribs.size(); i++) {
+			if(attribs.get(i).getName().equals(a.getName()))
+				attribs.remove(i);
+		}
+		attribs.add(a);
+	}
 }

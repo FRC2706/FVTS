@@ -195,11 +195,11 @@ public class MainThread extends Thread {
 						* 1000;
 				Log.i("Vision FPS: "+visionData.fps+", pipeline took: "+pipelineTime+" ms\n",false);
 			} catch (Exception e) {
-				Log.e(e.getMessage(), true);
+				Log.e(e.getMessage(), true);e.printStackTrace();
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e1) {
-					Log.e(e1.getMessage(), true);
+					Log.e(e1.getMessage(), true);e.printStackTrace();
 				}
 			}
 		}
