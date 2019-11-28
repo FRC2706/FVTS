@@ -1,7 +1,9 @@
-package ca.team2706.vision.vision2019;
+package ca.team2706.vision.core;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import ca.team2706.vision.vision2019.Main;
 
 
 public class ImageDumpScheduler implements Runnable{

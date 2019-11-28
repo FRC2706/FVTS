@@ -23,9 +23,16 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 
-import ca.team2706.vision.vision2019.params.Attribute;
-import ca.team2706.vision.vision2019.params.AttributeOptions;
-import ca.team2706.vision.vision2019.params.VisionParams;
+import ca.team2706.vision.core.ConfigParser;
+import ca.team2706.vision.core.ImageDumpScheduler;
+import ca.team2706.vision.core.Log;
+import ca.team2706.vision.core.MainThread;
+import ca.team2706.vision.core.NetworkTablesManager;
+import ca.team2706.vision.core.VisionCameraServer;
+import ca.team2706.vision.core.VisionData;
+import ca.team2706.vision.core.params.Attribute;
+import ca.team2706.vision.core.params.AttributeOptions;
+import ca.team2706.vision.core.params.VisionParams;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {

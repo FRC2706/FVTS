@@ -1,4 +1,4 @@
-package ca.team2706.vision.vision2019;
+package ca.team2706.vision.core;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -8,6 +8,8 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import ca.team2706.vision.vision2019.Main;
 
 public class NewWindow extends JFrame implements ActionListener {
 

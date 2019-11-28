@@ -1,4 +1,4 @@
-package ca.team2706.vision.vision2019;
+package ca.team2706.vision.core;
 
 /**
  * A class to hold a x and y position

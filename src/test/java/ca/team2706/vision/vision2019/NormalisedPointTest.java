@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import ca.team2706.vision.vision2019.NormalisedPoint;
+import ca.team2706.vision.core.NormalisedPoint;
 
 public class NormalisedPointTest {
 

@@ -1,4 +1,4 @@
-package ca.team2706.vision.vision2019.params;
+package ca.team2706.vision.core.params;
 
 public class AttributeOptions {
 	private String name;

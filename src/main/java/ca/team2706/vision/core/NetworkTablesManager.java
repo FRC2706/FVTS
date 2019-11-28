@@ -1,11 +1,12 @@
-package ca.team2706.vision.vision2019;
+package ca.team2706.vision.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ca.team2706.vision.vision2019.params.VisionParams;
+import ca.team2706.vision.core.params.VisionParams;
+import ca.team2706.vision.vision2019.Main;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class NetworkTablesManager extends Thread{
