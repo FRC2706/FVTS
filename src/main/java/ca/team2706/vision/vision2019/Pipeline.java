@@ -13,8 +13,9 @@ import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-import ca.team2706.vision.vision2019.VisionData.Target;
-import ca.team2706.vision.vision2019.params.VisionParams;
+import ca.team2706.vision.core.VisionData;
+import ca.team2706.vision.core.VisionData.Target;
+import ca.team2706.vision.core.params.VisionParams;
 
 public class Pipeline {
 

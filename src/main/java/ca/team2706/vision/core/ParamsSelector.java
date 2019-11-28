@@ -1,4 +1,4 @@
-package ca.team2706.vision.vision2019;
+package ca.team2706.vision.core;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -14,9 +14,10 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import ca.team2706.vision.vision2019.params.Attribute;
-import ca.team2706.vision.vision2019.params.AttributeOptions;
-import ca.team2706.vision.vision2019.params.VisionParams;
+import ca.team2706.vision.core.params.Attribute;
+import ca.team2706.vision.core.params.AttributeOptions;
+import ca.team2706.vision.core.params.VisionParams;
+import ca.team2706.vision.vision2019.Main;
 
 public class ParamsSelector extends JFrame implements ActionListener {
 

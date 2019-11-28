@@ -1,9 +1,9 @@
-package ca.team2706.vision.vision2019.params;
+package ca.team2706.vision.core.params;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.team2706.vision.vision2019.Log;
+import ca.team2706.vision.core.Log;
 
 public class VisionParamsOptions {
 	private List<AttributeOptions> options = new ArrayList<AttributeOptions>();

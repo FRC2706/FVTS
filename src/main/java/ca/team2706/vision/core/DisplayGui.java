@@ -1,6 +1,8 @@
-package ca.team2706.vision.vision2019;
+package ca.team2706.vision.core;
 
 import javax.swing.*;
+
+import ca.team2706.vision.vision2019.Main;
 
 import java.awt.*;
 import java.awt.image.BufferStrategy;

@@ -1,4 +1,4 @@
-package ca.team2706.vision.vision2019;
+package ca.team2706.vision.core;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -10,7 +10,9 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import ca.team2706.vision.vision2019.params.VisionParams;
+import ca.team2706.vision.core.params.VisionParams;
+import ca.team2706.vision.vision2019.Main;
+import ca.team2706.vision.vision2019.Pipeline;
 
 public class MainThread extends Thread {
 

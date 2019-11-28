@@ -1,4 +1,4 @@
-package ca.team2706.vision.vision2019;
+package ca.team2706.vision.core;
 
 import org.opencv.core.Point;
 

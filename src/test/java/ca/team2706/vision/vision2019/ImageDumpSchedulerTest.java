@@ -6,8 +6,8 @@ import java.awt.image.BufferedImage;
 
 import org.junit.Test;
 
-import ca.team2706.vision.vision2019.Bundle;
-import ca.team2706.vision.vision2019.ImageDumpScheduler;
+import ca.team2706.vision.core.Bundle;
+import ca.team2706.vision.core.ImageDumpScheduler;
 
 public class ImageDumpSchedulerTest {
 

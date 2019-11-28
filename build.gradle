@@ -1,4 +1,5 @@
 // Do not mess with the following 6 lines
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
   id 'com.github.johnrengelman.shadow' version '5.1.0'
   id 'java'
@@ -87,6 +88,12 @@ jar {
 shadowJar {
   baseName = projectName
 }
+task libraryJar(type: ShadowJar){
+	classifier = projectName+"-lib"
+	configurations = [ project.configurations.runtime ]
+        manifest.inheritFrom project.tasks.jar.manifest
+        exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'ca/team2706/vision/**/*')
+}
 
 distributions {
   main {
@@ -170,6 +177,7 @@ test.dependsOn tunzipOpenCv
 
 build.dependsOn copyToOutput
 build.dependsOn zipOutput
+build.dependsOn libraryJar
 run.dependsOn unzipOpenCv
 
 clean {
