@@ -30,6 +30,15 @@ public class MainThread extends Thread {
 	@Override
 	public void run() {
 		
+		// Setup the camera server for this camera
+		try {
+			VisionCameraServer.initCamera(this.visionParams.getByName("type").getValue(),
+					this.visionParams.getByName("identifier").getValue());
+		} catch (Exception e2) {
+			Log.e(e2.getMessage(), true);
+			e2.printStackTrace();
+		}
+		
 		// Initializes a Matrix to hold the frame
 
 		frame = new Mat();
