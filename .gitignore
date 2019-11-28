@@ -18,11 +18,8 @@ out/
 
 # Java Gui Stuff
 *.log
+logs/
 imagedump/
 field images/
-<<<<<<< HEAD
 *.prefs
-
-=======
 null*
->>>>>>> master
