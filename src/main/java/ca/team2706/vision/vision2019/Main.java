@@ -197,7 +197,7 @@ public class Main {
 				params.getAttribs().add(new Attribute("width", width + ""));
 				params.getAttribs().add(new Attribute("height", height + ""));
 				NetworkTable visionTable = NetworkTable
-						.getTable("vision-" + params.getByName("name").getValue() + "/params");
+						.getTable("vision-" + params.getByName("name").getValue() + "/");
 				NetworkTablesManager.tables.put(s, visionTable);
 				// The parameters are now valid, because it didnt throw an error
 				visionParamsList.add(params);
@@ -275,6 +275,8 @@ public class Main {
 			visionTable.putNumber("area", visionData.preferredTarget.areaNorm);
 
 			visionTable.putNumber("angle", visionData.preferredTarget.xCentreNorm * 45);
+			
+			visionTable.putNumber("distance", visionData.preferredTarget.distance);
 		}
 	}
 
