@@ -20,7 +20,7 @@ In order to make changes to this source code there are a few things that must be
 
 Step #1: Build Vision2019 according to the instructions in this document
 
-Step #2: Add `output/CameraVision-all.jar` to the build path of your IDE and set its native library location to `output/`
+Step #2: Add `build/libs/Vision2019-CameraVision-lib.jar` to the build path of your IDE and set its native library location to `output/`
 
 Step #3: Add `src/main/java` and `src/test/java` as source folders in your IDE
 
