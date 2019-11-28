@@ -26,9 +26,11 @@ Step #3: Add `src/main/java` and `src/test/java` as source folders in your IDE
 
 Step #4: Configure the run profile for `Main.java` to pass `--development` as an argument to enable development mode
 
+Note: Do not pass `--development` to the program when attempting to benchmark it, the UI updating is on the main thread and makes the FPS 10x worse
+
 # Java sample vision system
 
-This is the WPILib sample build system for building Java based vision targeting for running on systems other than the roboRIO. This currently supports the following platforms
+This currently supports the following platforms
 
 * Windows
 * Raspberry Pi running Raspbian
