@@ -411,8 +411,6 @@ public class Main {
 				
 				Log.i(params.getByName("name").getValue()+" enabled: "+enabled,true);
 				
-				VisionCameraServer.initCamera(params.getByName("type").getValue(),
-						params.getByName("identifier").getValue());
 				MainThread thread = new MainThread(params);
 				if (enabled) {
 					thread.start();
