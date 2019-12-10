@@ -1,4 +1,5 @@
 # Vision2019
+![](https://github.com/FRC2706/Vision2019/workflows/Build%20%26%20Test/badge.svg)
 
 # Attribution and license
 
