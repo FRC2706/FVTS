@@ -3,8 +3,6 @@ package ca.team2706.vision.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.team2706.vision.vision2019.Main;
-
 
 public class ImageDumpScheduler implements Runnable{
 	public static final int QUEUE_LIMIT = 10;
@@ -25,9 +23,9 @@ public class ImageDumpScheduler implements Runnable{
 				}
 				
 				try {
-					Main.imgDump(b.getRaw(), "raw",b.getTimeStamp(),b.getParams().getByName("outputPath").getValue());
-					Main.imgDump(b.getBinMask(), "binMask", b.getTimeStamp(),b.getParams().getByName("outputPath").getValue());
-					Main.imgDump(b.getOutput(), "output", b.getTimeStamp(),b.getParams().getByName("outputPath").getValue());
+					Utils.imgDump(b.getRaw(), "raw",b.getTimeStamp(),b.getParams().getByName("outputPath").getValue());
+					Utils.imgDump(b.getBinMask(), "binMask", b.getTimeStamp(),b.getParams().getByName("outputPath").getValue());
+					Utils.imgDump(b.getOutput(), "output", b.getTimeStamp(),b.getParams().getByName("outputPath").getValue());
 				} catch (Exception e) {
 					//Non fatal error
 				}

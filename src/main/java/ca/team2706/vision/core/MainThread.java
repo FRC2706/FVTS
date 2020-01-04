@@ -61,7 +61,7 @@ public class MainThread extends Thread {
 		} else {
 			// load the image from file.
 			try {
-				frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
+				frame = Utils.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
 			} catch (IOException e) {
 				Log.e(e.getMessage(), true);
 				frame = new Mat();
@@ -80,7 +80,7 @@ public class MainThread extends Thread {
 
 		} else {
 			try {
-				frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
+				frame = Utils.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
 			} catch (IOException e) {
 				Log.e(e.getMessage(), true);
 				System.exit(1);
@@ -161,10 +161,10 @@ public class MainThread extends Thread {
 					try {
 						// May throw a NullPointerException if initializing
 						// the window failed
-						BufferedImage raw = Main.matToBufferedImage(rawOutputImg);
+						BufferedImage raw = Utils.matToBufferedImage(rawOutputImg);
 
 						guiRawImg.updateImage(raw);
-						guiProcessedImg.updateImage(Main.matToBufferedImage(visionData.binMask.clone()));
+						guiProcessedImg.updateImage(Utils.matToBufferedImage(visionData.binMask.clone()));
 					} catch (IOException e) {
 						// means mat2BufferedImage broke
 						// non-fatal error, let the program continue
@@ -193,8 +193,8 @@ public class MainThread extends Thread {
 						try {
 							Mat draw = frame.clone();
 							Pipeline.drawPreferredTarget(draw, visionData);
-							Bundle b = new Bundle(Main.matToBufferedImage(frame.clone()),
-									Main.matToBufferedImage(visionData.binMask), Main.matToBufferedImage(draw),
+							Bundle b = new Bundle(Utils.matToBufferedImage(frame.clone()),
+									Utils.matToBufferedImage(visionData.binMask), Utils.matToBufferedImage(draw),
 									timestamp, visionParams);
 							ImageDumpScheduler.schedule(b);
 							timestamp++;
