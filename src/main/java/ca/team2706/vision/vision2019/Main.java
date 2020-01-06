@@ -2,9 +2,9 @@ package ca.team2706.vision.vision2019;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -19,6 +19,7 @@ import ca.team2706.vision.core.ImageDumpScheduler;
 import ca.team2706.vision.core.Log;
 import ca.team2706.vision.core.MainThread;
 import ca.team2706.vision.core.NetworkTablesManager;
+import ca.team2706.vision.core.Utils;
 import ca.team2706.vision.core.VisionCameraServer;
 import ca.team2706.vision.core.VisionData;
 import ca.team2706.vision.core.params.Attribute;
@@ -32,15 +33,17 @@ public class Main {
 	public static int timestamp = 0;
 	public static File timestampfile;
 	public static NetworkTable loggingTable;
-	private static File visionParamsFile;
+	public static File visionParamsFile;
 	public static boolean developmentMode = false;
 	public static List<AttributeOptions> options;
+	public static List<VisionData> data;
+	public static Lock lock;
 
 	public static List<MainThread> threads = new ArrayList<MainThread>();
 
 	public static void reloadConfig() {
 		visionParamsList.clear();
-		loadVisionParams();
+		Utils.loadVisionParams();
 		for (MainThread thread : threads) {
 			String name = thread.visionParams.getByName("name").getValue();
 			boolean found = false;
@@ -105,105 +108,7 @@ public class Main {
 		NetworkTable.initialize();
 	}
 
-	/**
-	 * Loads the visionTable params! :]
-	 **/
-
-	public static void loadVisionParams() {
-		try {
-			AttributeOptions name = new AttributeOptions("name", true);
-
-			AttributeOptions minHue = new AttributeOptions("minHue", true);
-			AttributeOptions maxHue = new AttributeOptions("maxHue", true);
-			AttributeOptions minSat = new AttributeOptions("minSaturation", true);
-			AttributeOptions maxSat = new AttributeOptions("maxSaturation", true);
-			AttributeOptions minVal = new AttributeOptions("minValue", true);
-			AttributeOptions maxVal = new AttributeOptions("maxValue", true);
-
-			AttributeOptions aspectRatioThresh = new AttributeOptions("aspectRatioThresh", true);
-
-			AttributeOptions distToCentreImportance = new AttributeOptions("distToCentreImportance", true);
-
-			AttributeOptions imageFile = new AttributeOptions("imageFile", true);
-
-			AttributeOptions minArea = new AttributeOptions("minArea", true);
-
-			AttributeOptions erodeDilateIterations = new AttributeOptions("erodeDilateIterations", true);
-
-			AttributeOptions resolution = new AttributeOptions("resolution", true);
-
-			AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath", true);
-
-			AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime", true);
-
-			AttributeOptions slope = new AttributeOptions("slope", true);
-
-			AttributeOptions yIntercept = new AttributeOptions("yIntercept", true);
-
-			AttributeOptions group = new AttributeOptions("group", true);
-
-			AttributeOptions type = new AttributeOptions("type", true);
-
-			AttributeOptions identifier = new AttributeOptions("identifier", true);
-
-			AttributeOptions enabled = new AttributeOptions("enabled", false);
-
-			options = new ArrayList<AttributeOptions>();
-			options.add(name);
-			options.add(minHue);
-			options.add(maxHue);
-			options.add(minSat);
-			options.add(maxSat);
-			options.add(minVal);
-			options.add(maxVal);
-			options.add(aspectRatioThresh);
-			options.add(distToCentreImportance);
-			options.add(imageFile);
-			options.add(minArea);
-			options.add(erodeDilateIterations);
-			options.add(resolution);
-			options.add(imgDumpPath);
-			options.add(imgDumpTime);
-			options.add(slope);
-			options.add(yIntercept);
-			options.add(group);
-			options.add(type);
-			options.add(identifier);
-			options.add(enabled);
-			List<String> lists = ConfigParser.listLists(visionParamsFile);
-
-			for (String s : lists) {
-
-				Map<String, String> data = ConfigParser.getProperties(visionParamsFile, s);
-
-				List<Attribute> attribs = new ArrayList<Attribute>();
-				attribs.add(new Attribute("name", s));
-				for (String s1 : data.keySet()) {
-					attribs.add(new Attribute(s1, data.get(s1)));
-				}
-				VisionParams params = new VisionParams(attribs, options);
-				String resolution1 = params.getByName("resolution").getValue();
-				int width = Integer.valueOf(resolution1.split("x")[0]);
-				int height = Integer.valueOf(resolution1.split("x")[1]);
-				params.getAttribs().add(new Attribute("width", width + ""));
-				params.getAttribs().add(new Attribute("height", height + ""));
-				NetworkTable visionTable = NetworkTable
-						.getTable("vision-" + params.getByName("name").getValue() + "/");
-				NetworkTablesManager.tables.put(s, visionTable);
-				// The parameters are now valid, because it didnt throw an error
-				visionParamsList.add(params);
-			}
-
-			sendVisionParams();
-
-		} catch (Exception e1) {
-			Log.e(e1.getMessage(), true);
-			Log.e("\n\nError reading the params file, check if the file is corrupt?", true);
-			System.exit(1);
-		}
-	}
-
-	private static void sendVisionParams() {
+	public static void sendVisionParams() {
 
 		for (VisionParams params : visionParamsList) {
 
@@ -214,34 +119,6 @@ public class Main {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Saves the vision parameters to a file
-	 * 
-	 **/
-	public static void saveVisionParams() {
-		try {
-
-			for (VisionParams params : visionParamsList) {
-				saveVisionParams(params);
-			}
-
-		} catch (Exception e1) {
-			Log.e(e1.getMessage(), true);
-		}
-	}
-
-	public static void saveVisionParams(VisionParams params) throws Exception {
-		Map<String, String> data = new HashMap<String, String>();
-
-		for (Attribute a : params.getAttribs()) {
-			if (!a.getName().equals("name")) {
-				data.put(a.getName(), a.getValue());
-			}
-		}
-
-		ConfigParser.saveList(visionParamsFile, params.getByName("name").getValue(), data);
 	}
 
 	/**
@@ -315,7 +192,7 @@ public class Main {
 		visionParamsFile = new File(cmd.getOptionValue("config", "visionParams.properties"));
 
 		// read the vision calibration values from file.
-		loadVisionParams();
+		Utils.loadVisionParams();
 
 		Map<String, String> masterConfig = ConfigParser.getProperties(new File("master.cf"), "config");
 
@@ -358,7 +235,7 @@ public class Main {
 				
 				Log.i(params.getByName("name").getValue()+" enabled: "+enabled,true);
 				
-				MainThread thread = new MainThread(params);
+				MainThread thread = new MainThread(params,true);
 				if (enabled) {
 					thread.start();
 				}
@@ -367,6 +244,6 @@ public class Main {
 				Log.e(e.getMessage(), true);
 			}
 
-		} // end main video processing loop
+		} // end main vision startup loop
 	}
 }

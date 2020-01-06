@@ -223,7 +223,7 @@ public class CLI implements Runnable, ActionListener {
 			if (message.split(" ").length > 1) {
 				ip = message.split(" ")[1];
 			}
-			Main.loadVisionParams();
+			Utils.loadVisionParams();
 			Main.initNetworkTables(ip);
 			out.println("Success");
 			return;

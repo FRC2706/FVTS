@@ -37,7 +37,7 @@ public class ParamsSelector extends JFrame implements ActionListener {
 
 		this.visionParams = new VisionParams(attribs, Main.options);
 
-		new MainThread(visionParams);
+		new MainThread(visionParams,true);
 	}
 	
 	private JButton btnUpdate,btnSave;
@@ -124,7 +124,7 @@ public class ParamsSelector extends JFrame implements ActionListener {
 			}
 		}else if(e.getSource() == btnSave) {
 			try {
-				Main.saveVisionParams(visionParams);
+				Utils.saveVisionParams(visionParams);
 			} catch (Exception e1) {
 				Log.e(e1.getMessage(), true);
 				e1.printStackTrace();

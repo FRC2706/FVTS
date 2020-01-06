@@ -18,9 +18,11 @@ public class MainThread extends Thread {
 
 	public VisionParams visionParams;
 	public ParamsSelector selector;
+	private boolean networkTables;
 
-	public MainThread(VisionParams params) {
+	public MainThread(VisionParams params, boolean doNetworkTables) {
 		this.visionParams = params;
+		this.networkTables = doNetworkTables;
 	}
 
 	public Mat frame;
@@ -152,10 +154,14 @@ public class MainThread extends Thread {
 
 				if (visionData.preferredTarget != null)
 					lastDist = visionData.preferredTarget.distance;
-
-				// Sends the data to the vision table
-				Main.sendVisionDataOverNetworkTables(visionData);
-
+				if(networkTables) {
+					// Sends the data to the vision table
+					Main.sendVisionDataOverNetworkTables(visionData);
+				}else {
+					Main.lock.lock();
+					Main.data.add(visionData);
+					Main.lock.unlock();
+				}
 				// display the processed frame in the GUI
 				if (use_GUI) {
 					try {

@@ -44,7 +44,7 @@ public class NetworkTablesManager extends Thread{
 						
 						if(thread.visionParams.getByName("name").getValue().equals(params.getByName("name").getValue())) {
 							toRemove.add(thread);
-							MainThread thread1 = new MainThread(params);
+							MainThread thread1 = new MainThread(params,true);
 							toAdd.add(thread1);
 							thread1.start();
 						}

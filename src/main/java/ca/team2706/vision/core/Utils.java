@@ -5,6 +5,10 @@ import java.awt.image.DataBufferByte;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -13,7 +17,11 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 
+import ca.team2706.vision.core.params.Attribute;
+import ca.team2706.vision.core.params.AttributeOptions;
+import ca.team2706.vision.core.params.VisionParams;
 import ca.team2706.vision.vision2019.Main;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Utils {
 
@@ -69,6 +77,132 @@ public class Utils {
 		BufferedImage bi = ImageIO.read(new ByteArrayInputStream(ba));
 		matrix.release();
 		return bi;
+	}
+
+	/**
+	 * Loads the visionTable params! :]
+	 **/
+	
+	public static void loadVisionParams() {
+		try {
+			AttributeOptions name = new AttributeOptions("name", true);
+	
+			AttributeOptions minHue = new AttributeOptions("minHue", true);
+			AttributeOptions maxHue = new AttributeOptions("maxHue", true);
+			AttributeOptions minSat = new AttributeOptions("minSaturation", true);
+			AttributeOptions maxSat = new AttributeOptions("maxSaturation", true);
+			AttributeOptions minVal = new AttributeOptions("minValue", true);
+			AttributeOptions maxVal = new AttributeOptions("maxValue", true);
+	
+			AttributeOptions aspectRatioThresh = new AttributeOptions("aspectRatioThresh", true);
+	
+			AttributeOptions distToCentreImportance = new AttributeOptions("distToCentreImportance", true);
+	
+			AttributeOptions imageFile = new AttributeOptions("imageFile", true);
+	
+			AttributeOptions minArea = new AttributeOptions("minArea", true);
+	
+			AttributeOptions erodeDilateIterations = new AttributeOptions("erodeDilateIterations", true);
+	
+			AttributeOptions resolution = new AttributeOptions("resolution", true);
+	
+			AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath", true);
+	
+			AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime", true);
+	
+			AttributeOptions slope = new AttributeOptions("slope", true);
+	
+			AttributeOptions yIntercept = new AttributeOptions("yIntercept", true);
+	
+			AttributeOptions group = new AttributeOptions("group", true);
+	
+			AttributeOptions type = new AttributeOptions("type", true);
+	
+			AttributeOptions identifier = new AttributeOptions("identifier", true);
+	
+			AttributeOptions enabled = new AttributeOptions("enabled", false);
+	
+			Main.options = new ArrayList<AttributeOptions>();
+			Main.options.add(name);
+			Main.options.add(minHue);
+			Main.options.add(maxHue);
+			Main.options.add(minSat);
+			Main.options.add(maxSat);
+			Main.options.add(minVal);
+			Main.options.add(maxVal);
+			Main.options.add(aspectRatioThresh);
+			Main.options.add(distToCentreImportance);
+			Main.options.add(imageFile);
+			Main.options.add(minArea);
+			Main.options.add(erodeDilateIterations);
+			Main.options.add(resolution);
+			Main.options.add(imgDumpPath);
+			Main.options.add(imgDumpTime);
+			Main.options.add(slope);
+			Main.options.add(yIntercept);
+			Main.options.add(group);
+			Main.options.add(type);
+			Main.options.add(identifier);
+			Main.options.add(enabled);
+			List<String> lists = ConfigParser.listLists(Main.visionParamsFile);
+	
+			for (String s : lists) {
+	
+				Map<String, String> data = ConfigParser.getProperties(Main.visionParamsFile, s);
+	
+				List<Attribute> attribs = new ArrayList<Attribute>();
+				attribs.add(new Attribute("name", s));
+				for (String s1 : data.keySet()) {
+					attribs.add(new Attribute(s1, data.get(s1)));
+				}
+				VisionParams params = new VisionParams(attribs, Main.options);
+				String resolution1 = params.getByName("resolution").getValue();
+				int width = Integer.valueOf(resolution1.split("x")[0]);
+				int height = Integer.valueOf(resolution1.split("x")[1]);
+				params.getAttribs().add(new Attribute("width", width + ""));
+				params.getAttribs().add(new Attribute("height", height + ""));
+				NetworkTable visionTable = NetworkTable
+						.getTable("vision-" + params.getByName("name").getValue() + "/");
+				NetworkTablesManager.tables.put(s, visionTable);
+				// The parameters are now valid, because it didnt throw an error
+				Main.visionParamsList.add(params);
+			}
+	
+			Main.sendVisionParams();
+	
+		} catch (Exception e1) {
+			Log.e(e1.getMessage(), true);
+			Log.e("\n\nError reading the params file, check if the file is corrupt?", true);
+			System.exit(1);
+		}
+	}
+
+	/**
+	 * Saves the vision parameters to a file
+	 * 
+	 **/
+	public static void saveVisionParams() {
+		try {
+	
+			for (VisionParams params : Main.visionParamsList) {
+				Utils.saveVisionParams(params);
+			}
+	
+		} catch (Exception e1) {
+			Log.e(e1.getMessage(), true);
+		}
+	}
+
+	public static void saveVisionParams(VisionParams params) throws Exception {
+		Map<String, String> data = new HashMap<String, String>();
+	
+		for (Attribute a : params.getAttribs()) {
+			if (!a.getName().equals("name")) {
+				data.put(a.getName(), a.getValue());
+			}
+		}
+	
+		ConfigParser.saveList(Main.visionParamsFile, params.getByName("name").getValue(), data);
 	}
 
 }
