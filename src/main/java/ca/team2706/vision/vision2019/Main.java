@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -36,8 +35,6 @@ public class Main {
 	public static File visionParamsFile;
 	public static boolean developmentMode = false;
 	public static List<AttributeOptions> options;
-	public static List<VisionData> data;
-	public static Lock lock;
 
 	public static List<MainThread> threads = new ArrayList<MainThread>();
 

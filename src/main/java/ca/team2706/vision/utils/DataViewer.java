@@ -1,9 +1,8 @@
 package ca.team2706.vision.utils;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Scanner;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -27,12 +26,15 @@ import ca.team2706.vision.core.params.VisionParams;
 import ca.team2706.vision.vision2019.Main;
 
 public class DataViewer {
-	public static void main(String[] args) throws Exception{
-		System.out.println("Vision2019 DataViewer "+Constants.VERSION_STRING+" developed by "+Constants.AUTHOR);
-		
+	@SuppressWarnings("resource")
+	public static void main(String[] args) throws Exception {
+		System.out.println("Vision2019 DataViewer " + Constants.VERSION_STRING + " developed by " + Constants.AUTHOR);
+
 		// Must be included!
 		// Loads OpenCV
 		System.loadLibrary(Constants.OPENCV_LIBRARY);
+		
+		Log.silence();
 
 		Options options = new Options();
 
@@ -53,10 +55,7 @@ public class DataViewer {
 			formatter.printHelp("Vision2019", options);
 			System.exit(1);
 		}
-		
-		Main.data = new ArrayList<VisionData>();
-		Main.lock = new ReentrantLock();
-		
+
 		Main.developmentMode = cmd.hasOption("development");
 
 		Main.visionParamsFile = new File(cmd.getOptionValue("config", "visionParams.properties"));
@@ -102,10 +101,10 @@ public class DataViewer {
 					s = "true";
 				}
 				boolean enabled = Boolean.valueOf(s);
-				
-				Log.i(params.getByName("name").getValue()+" enabled: "+enabled,true);
-				
-				MainThread thread = new MainThread(params,false);
+
+				Log.i(params.getByName("name").getValue() + " enabled: " + enabled, true);
+
+				MainThread thread = new MainThread(params, false);
 				if (enabled) {
 					thread.start();
 				}
@@ -114,34 +113,75 @@ public class DataViewer {
 				Log.e(e.getMessage(), true);
 			}
 		} // end main vision startup loop
-		while(true) {
-			if(Main.data.size() > 0) {
-				Main.lock.lock();
-				VisionData data = Main.data.get(0);
-				Main.data.remove(0);
-				Main.lock.unlock();
-				System.out.println("Data ("+data.params.getByName("name")+"):");
-				System.out.println("FPS: "+data.fps);
-				System.out.println("Number of targets found: "+data.targetsFound.size());
-				System.out.println("Preffered target found: "+(data.preferredTarget != null));
-				if(data.preferredTarget != null) {
-					System.out.println("Preffered target: ");
-					System.out.println("Distance: "+data.preferredTarget.distance);
-					System.out.println("X-Centre: "+data.preferredTarget.xCentreNorm);
-					System.out.println("Y-Centre: "+data.preferredTarget.yCentreNorm);
-					System.out.println("Area: "+data.preferredTarget.areaNorm);
+		Scanner in = new Scanner(System.in);
+		System.out.print("Constant or triggered? C/T: ");
+		boolean constant = in.nextLine().equalsIgnoreCase("C");
+		if (constant) {
+			while (true) {
+				for(MainThread thread : Main.threads) {
+					if(thread.lock == null)
+						continue;
+					thread.lock.lock();
+					VisionData data = thread.lastFrame;
+					thread.lastFrame = null;
+					thread.lock.unlock();
+					System.out.println("Data (" + data.params.getByName("name").getValue() + "):");
+					System.out.println("FPS: " + data.fps);
+					System.out.println("Number of targets found: " + data.targetsFound.size());
+					System.out.println("Preffered target found: " + (data.preferredTarget != null));
+					if (data.preferredTarget != null) {
+						System.out.println("Preffered target: ");
+						System.out.println("Distance: " + data.preferredTarget.distance);
+						System.out.println("X-Centre: " + data.preferredTarget.xCentreNorm);
+						System.out.println("Y-Centre: " + data.preferredTarget.yCentreNorm);
+						System.out.println("Area: " + data.preferredTarget.areaNorm);
+					}
+					for (int i = 0; i < data.targetsFound.size(); i++) {
+						Target t = data.targetsFound.get(i);
+						System.out.println("Target #" + (i + 1) + ": ");
+						System.out.println("Distance: " + t.distance);
+						System.out.println("X-Centre: " + t.xCentreNorm);
+						System.out.println("Y-Centre: " + t.yCentreNorm);
+						System.out.println("Area: " + t.areaNorm);
+					}
+					data = null;
 				}
-				for(int i = 0; i < data.targetsFound.size(); i++) {
-					Target t = data.targetsFound.get(i);
-					System.out.println("Target #"+(i+1)+": ");
-					System.out.println("Distance: "+t.distance);
-					System.out.println("X-Centre: "+t.xCentreNorm);
-					System.out.println("Y-Centre: "+t.yCentreNorm);
-					System.out.println("Area: "+t.areaNorm);
+			} // end data collection loop
+		}else {
+			System.out.println("Hit enter to trigger a capture!");
+			while(true) {
+				in.nextLine();
+				for(MainThread thread : Main.threads) {
+					if(thread.lock == null)
+						continue;
+					thread.lock.lock();
+					if(thread.lastFrame == null)
+						continue;
+					VisionData data = thread.lastFrame;
+					thread.lastFrame = null;
+					thread.lock.unlock();
+					System.out.println("Data (" + data.params.getByName("name").getValue() + "):");
+					System.out.println("FPS: " + data.fps);
+					System.out.println("Number of targets found: " + data.targetsFound.size());
+					System.out.println("Preffered target found: " + (data.preferredTarget != null));
+					if (data.preferredTarget != null) {
+						System.out.println("Preffered target: ");
+						System.out.println("Distance: " + data.preferredTarget.distance);
+						System.out.println("X-Centre: " + data.preferredTarget.xCentreNorm);
+						System.out.println("Y-Centre: " + data.preferredTarget.yCentreNorm);
+						System.out.println("Area: " + data.preferredTarget.areaNorm);
+					}
+					for (int i = 0; i < data.targetsFound.size(); i++) {
+						Target t = data.targetsFound.get(i);
+						System.out.println("Target #" + (i + 1) + ": ");
+						System.out.println("Distance: " + t.distance);
+						System.out.println("X-Centre: " + t.xCentreNorm);
+						System.out.println("Y-Centre: " + t.yCentreNorm);
+						System.out.println("Area: " + t.areaNorm);
+					}
+					data = null;
 				}
-				data = null;
 			}
-		} // end data collection loop
-		
+		}
 	}
 }

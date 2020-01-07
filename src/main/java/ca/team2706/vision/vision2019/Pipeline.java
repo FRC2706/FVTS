@@ -280,6 +280,16 @@ public class Pipeline {
 			visionData.preferredTarget.distance = x;
 
 		}
+		for(Target t : visionData.targetsFound) {
+			double y = t.boundingBox.height;
+
+			double x = (y - visionParams.getByName("yIntercept").getValueD()) / visionParams.getByName("slope").getValueD();
+
+			// Now we have the distance in cm!!!
+
+			t.distance = x;
+
+		}
 
 	}
 

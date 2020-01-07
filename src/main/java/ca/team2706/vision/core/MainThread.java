@@ -3,6 +3,8 @@ package ca.team2706.vision.core;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.imageio.ImageIO;
 
@@ -30,9 +32,13 @@ public class MainThread extends Thread {
 	public boolean useCamera = true;
 	public static int timestamp = 0;
 	public double lastDist = 0;
+	public VisionData lastFrame = null;
+	public Lock lock;
 
 	@Override
 	public void run() {
+		if(!networkTables)
+			lock = new ReentrantLock();
 		
 		// Setup the camera server for this camera
 		try {
@@ -158,9 +164,9 @@ public class MainThread extends Thread {
 					// Sends the data to the vision table
 					Main.sendVisionDataOverNetworkTables(visionData);
 				}else {
-					Main.lock.lock();
-					Main.data.add(visionData);
-					Main.lock.unlock();
+					lock.lock();
+					lastFrame = visionData;
+					lock.unlock();
 				}
 				// display the processed frame in the GUI
 				if (use_GUI) {
