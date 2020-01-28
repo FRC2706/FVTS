@@ -271,6 +271,7 @@ public class CLI implements Runnable, ActionListener {
 		out.println("?help - shows this menu");
 		out.println("?reload - reloads the vision parameters and also networktables");
 		out.println("?shutdown - forcively shuts down the vision process");
+		out.println("?restart - forcively restarts the vision process");
 		out.println("?logs - shows the logs");
 		out.flush();
 	}
