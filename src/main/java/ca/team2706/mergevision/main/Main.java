@@ -131,7 +131,7 @@ public class Main {
 
 			AttributeOptions distToCentreImportance = new AttributeOptions("distToCentreImportance", true);
 
-			AttributeOptions imageFile = new AttributeOptions("imageFile", true);
+			AttributeOptions imageFile = new AttributeOptions("imageFile", false);
 
 			AttributeOptions minArea = new AttributeOptions("minArea", true);
 
