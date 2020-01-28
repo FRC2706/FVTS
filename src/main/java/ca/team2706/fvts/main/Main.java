@@ -29,6 +29,8 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
 
+	public static final File MASTER_CONFIG_FILE = new File("master.cf");
+	
 	public static String filename = "";
 	public static int timestamp = 0;
 	public static File timestampfile;
@@ -36,6 +38,7 @@ public class Main {
 	public static File visionParamsFile;
 	public static boolean developmentMode = false;
 	public static List<AttributeOptions> options;
+	public static File loggingFile;
 
 	public static List<MainThread> threads = new ArrayList<MainThread>();
 
@@ -288,9 +291,9 @@ public class Main {
 		// read the vision calibration values from file.
 		Utils.loadVisionParams();
 
-		Map<String, String> masterConfig = ConfigParser.getProperties(new File("master.cf"), "config");
+		Map<String, String> masterConfig = ConfigParser.getProperties(MASTER_CONFIG_FILE, "config");
 
-		Map<String, String> masterEnabled = ConfigParser.getProperties(new File("master.cf"), "enabled");
+		Map<String, String> masterEnabled = ConfigParser.getProperties(MASTER_CONFIG_FILE, "enabled");
 
 		// Go through and enable the configs
 		for (String s : masterEnabled.keySet()) {
@@ -300,6 +303,7 @@ public class Main {
 				}
 			}
 		}
+		CLI.logFile = new File(masterConfig.get("logFile"));
 
 		String allowOverride = masterConfig.get("allowOverride");
 
