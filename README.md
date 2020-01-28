@@ -1,4 +1,4 @@
-# FVTS
+# FVTS - The FRC Vision Tracking System
 ![](https://github.com/FRC2706/FVTS/workflows/Build%20%26%20Test/badge.svg)
 
 # Attribution and license
