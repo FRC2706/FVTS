@@ -109,13 +109,13 @@ public class Pipeline {
 	 *
 	 * @param visionData
 	 */
-	public static void selectPreferredTarget(VisionData visionData, VisionParams visionParams, boolean bool) {
+	public static void selectPreferredTarget(VisionData visionData, VisionParams visionParams, boolean group, int groupAngle) {
 
 		if (visionData.targetsFound.size() == 0) {
 			return;
 		}
 
-		if (bool) {
+		if (group) {
 
 			ArrayList<Target> newTargets = new ArrayList<Target>();
 
@@ -125,7 +125,7 @@ public class Pipeline {
 
 				RotatedRect rect = Imgproc.minAreaRect(contour);
 
-				rect.angle = rect.angle + 40;
+				rect.angle = rect.angle + groupAngle;
 
 				if (rect.angle > 0) {
 					continue;
@@ -145,7 +145,7 @@ public class Pipeline {
 						MatOfPoint2f contour2 = new MatOfPoint2f(target2.contour.toArray());
 
 						RotatedRect rect2 = Imgproc.minAreaRect(contour2);
-						rect2.angle = rect2.angle + 40;
+						rect2.angle = rect2.angle + groupAngle;
 
 						if (rect2.angle < 0) {
 							continue;

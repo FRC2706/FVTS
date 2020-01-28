@@ -135,7 +135,7 @@ public class MainThread extends Thread {
 				// Log when the pipeline stops
 				long pipelineEnd = System.nanoTime();
 				// Selects the prefered target
-				Pipeline.selectPreferredTarget(visionData, visionParams, visionParams.getByName("group").getValueI() == 1 ? true : false);
+				Pipeline.selectPreferredTarget(visionData, visionParams, visionParams.getByName("group").getValueI() == 1 ? true : false,visionParams.getByName("groupAngle").getValueI());
 				// Creates the raw output image object
 				Mat rawOutputImg;
 				if (use_GUI) {
@@ -228,7 +228,7 @@ public class MainThread extends Thread {
 
 		VisionData visionData = Pipeline.process(frame, visionParams, false);
 
-		Pipeline.selectPreferredTarget(visionData, visionParams, visionParams.getByName("group").getValueI() == 1 ? true : false);
+		Pipeline.selectPreferredTarget(visionData, visionParams, visionParams.getByName("group").getValueI() == 1 ? true : false,visionParams.getByName("groupAngle").getValueI());
 
 		return visionData;
 

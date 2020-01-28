@@ -131,7 +131,7 @@ public class Main {
 
 			AttributeOptions distToCentreImportance = new AttributeOptions("distToCentreImportance", true);
 
-			AttributeOptions imageFile = new AttributeOptions("imageFile", false);
+			AttributeOptions imageFile = new AttributeOptions("imageFile", true);
 
 			AttributeOptions minArea = new AttributeOptions("minArea", true);
 
@@ -148,6 +148,7 @@ public class Main {
 			AttributeOptions yIntercept = new AttributeOptions("yIntercept", true);
 
 			AttributeOptions group = new AttributeOptions("group", true);
+			AttributeOptions angle = new AttributeOptions("groupAngle",true);
 
 			AttributeOptions type = new AttributeOptions("type", true);
 
@@ -173,6 +174,7 @@ public class Main {
 			options.add(slope);
 			options.add(yIntercept);
 			options.add(group);
+			options.add(angle);
 			options.add(type);
 			options.add(identifier);
 			options.add(enabled);
