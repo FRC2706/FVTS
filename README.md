@@ -1,5 +1,5 @@
-# Vision2019
-![](https://github.com/FRC2706/Vision2019/workflows/Build%20%26%20Test/badge.svg)
+# MergeVision
+![](https://github.com/FRC2706/MergeVision/workflows/Build%20%26%20Test/badge.svg)
 
 # Attribution and license
 
@@ -19,9 +19,9 @@ The base code for this was from the WPILib samples: https://github.com/wpilibsui
 # Development
 In order to make changes to this source code there are a few things that must be done to setup your IDE for vision development.
 
-Step #1: Build Vision2019 according to the instructions in this document
+Step #1: Build MergeVision according to the instructions in this document
 
-Step #2: Add `build/libs/Vision2019-CameraVision-lib.jar` to the build path of your IDE and set its native library location to `output/`
+Step #2: Add `build/libs/MergeVision-CameraVision-lib.jar` to the build path of your IDE and set its native library location to `output/`
 
 Step #3: Add `src/main/java` and `src/test/java` as source folders in your IDE
 
@@ -63,4 +63,4 @@ After the program is installed and running on the raspberry pi it can be restart
 
 ## Accessing the CLI
 
-Vision2019 has an integrated logging server which can be remotely accessed. This is done through running `telnet [ip address] 5810` (note that this requires installing/enabling `telnet`)
+MergeVision has an integrated logging server which can be remotely accessed. This is done through running `telnet [ip address] 5810` (note that this requires installing/enabling `telnet`)
