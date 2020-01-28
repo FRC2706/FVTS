@@ -16,19 +16,6 @@ Team contact: frc2706@owcrobots.ca Supervising mentor: John Gray
 
 The base code for this was from the WPILib samples: https://github.com/wpilibsuite/VisionBuildSamples/tree/master/Java
 
-# Development
-In order to make changes to this source code there are a few things that must be done to setup your IDE for vision development.
-
-Step #1: Build MergeVision according to the instructions in this document
-
-Step #2: Add `build/libs/MergeVision-lib.jar` to the build path of your IDE and set its native library location to `output/`
-
-Step #3: Add `src/main/java` and `src/test/java` as source folders in your IDE
-
-Step #4: Configure the run profile for `Main.java` to pass `--development` as an argument to enable development mode
-
-Note: Do not pass `--development` to the program when attempting to benchmark it, the UI updating is on the main thread and makes the FPS 10x worse
-
 # Java sample vision system
 
 This currently supports the following platforms
@@ -42,27 +29,3 @@ NOTE: In order for MergeVision to be able to run it must be built with a Java ve
 
 It has been designed to be easy to setup and use, and only needs a few minor settings to pick which system you want to be ran on. It has samples for interfacing with NetworkTables and CsCore from
 any device, along with performing OpenCV operations.
-
-## Choosing which system to build for
-
-Run `buildScripts/linux.sh` for linux x86_64, `buildScripts/windows.bat` for windows, `buildScripts/raspbian-linuxtest.sh` to build for raspbian with linux tests, or `buildScripts/raspbian-windowstest.bat` to build for raspbian with windows tests
-
-## Choosing the camera
-
-Change `cameraSelect` in `visionParams.properties` to change the USB camera number.
-
-## Running
-
-### Running for non robot purposes
-
-To run vision either execute `Main.java` (inside Eclipse) or run `cd output/`, then `./runMergeVision` (Linux) or `runMergeVision.bat` (Windows), note that the `visionParams.properties` and `master.cf` must be in the directory that you run vision from.
-
-### Running on a pi
-
-To run vision on a pi is is super easy. First run `./pi_scripts/installVisionProcessOnPi.sh [ip address]` to install the `vision` service to a pi, then run `./pi_scripts/pushCodeToPi.sh [ip address]`
-
-After the program is installed and running on the raspberry pi it can be restarted using `./pi_scripts/restartVisionProcessOnPi.sh [ip address]`, you can push configuration changes using `./pi_scripts/pushVisionParamsToPi.sh [ip address]`, and if you want to uninstall vision you can run `./pi_scripts/uninstallVisionProcessOnPi.sh` (note that it does not remove the vision code/config from the pi, it only removed the service)
-
-## Accessing the CLI
-
-MergeVision has an integrated logging server which can be remotely accessed. This is done through running `telnet [ip address] 5810` (note that this requires installing/enabling `telnet`)
