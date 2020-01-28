@@ -12,7 +12,6 @@ import org.opencv.imgproc.Imgproc;
 
 import ca.team2706.mergevision.core.params.VisionParams;
 import ca.team2706.mergevision.main.Main;
-import ca.team2706.mergevision.main.Pipeline;
 
 public class MainThread extends Thread {
 

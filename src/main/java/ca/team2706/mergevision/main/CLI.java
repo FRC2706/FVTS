@@ -34,6 +34,9 @@ public class CLI implements Runnable, ActionListener {
 	private JTextArea textArea;
 	private static List<String> logs = new ArrayList<String>();
 
+	public static void main(String[] args) {
+		new CLI();
+	}
 	/**
 	 * Create the application.
 	 */

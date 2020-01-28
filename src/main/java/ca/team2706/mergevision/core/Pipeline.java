@@ -1,4 +1,4 @@
-package ca.team2706.mergevision.main;
+package ca.team2706.mergevision.core;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,6 @@ import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-import ca.team2706.mergevision.core.VisionData;
 import ca.team2706.mergevision.core.VisionData.Target;
 import ca.team2706.mergevision.core.params.VisionParams;
 
