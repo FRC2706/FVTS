@@ -1,5 +1,7 @@
 package ca.team2706.mergevision.core;
 
+import ca.team2706.mergevision.main.CLI;
+
 public class Log {
 	
 	public static void i(String message,boolean logToCLI){

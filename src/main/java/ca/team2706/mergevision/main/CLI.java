@@ -1,4 +1,4 @@
-package ca.team2706.mergevision.core;
+package ca.team2706.mergevision.main;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,7 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-import ca.team2706.mergevision.main.Main;
+import ca.team2706.mergevision.core.Log;
 
 public class CLI implements Runnable, ActionListener {
 
@@ -270,8 +270,8 @@ public class CLI implements Runnable, ActionListener {
 		out.println("Help menu:");
 		out.println("?help - shows this menu");
 		out.println("?reload - reloads the vision parameters and also networktables");
-		out.println("?shutdown - forcively shuts down the vision process");
-		out.println("?restart - forcively restarts the vision process");
+		out.println("?shutdown - forcibly shuts down the vision process");
+		out.println("?restart - forcibly restarts the vision process");
 		out.println("?logs - shows the logs");
 		out.flush();
 	}
