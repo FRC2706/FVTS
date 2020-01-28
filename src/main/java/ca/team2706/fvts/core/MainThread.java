@@ -3,6 +3,8 @@ package ca.team2706.fvts.core;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.imageio.ImageIO;
 
@@ -17,9 +19,11 @@ public class MainThread extends Thread {
 
 	public VisionParams visionParams;
 	public ParamsSelector selector;
+	private boolean networkTables;
 
-	public MainThread(VisionParams params) {
+	public MainThread(VisionParams params, boolean doNetworkTables) {
 		this.visionParams = params;
+		this.networkTables = doNetworkTables;
 	}
 
 	public Mat frame;
@@ -27,9 +31,13 @@ public class MainThread extends Thread {
 	public boolean useCamera = true;
 	public static int timestamp = 0;
 	public double lastDist = 0;
+	public VisionData lastFrame = null;
+	public Lock lock;
 
 	@Override
 	public void run() {
+		if(!networkTables)
+			lock = new ReentrantLock();
 		
 		// Setup the camera server for this camera
 		try {
@@ -60,7 +68,7 @@ public class MainThread extends Thread {
 		} else {
 			// load the image from file.
 			try {
-				frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
+				frame = Utils.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
 			} catch (IOException e) {
 				Log.e(e.getMessage(), true);
 				frame = new Mat();
@@ -79,7 +87,7 @@ public class MainThread extends Thread {
 
 		} else {
 			try {
-				frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
+				frame = Utils.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
 			} catch (IOException e) {
 				Log.e(e.getMessage(), true);
 				System.exit(1);
@@ -151,19 +159,23 @@ public class MainThread extends Thread {
 
 				if (visionData.preferredTarget != null)
 					lastDist = visionData.preferredTarget.distance;
-
-				// Sends the data to the vision table
-				Main.sendVisionDataOverNetworkTables(visionData);
-
+				if(networkTables) {
+					// Sends the data to the vision table
+					Main.sendVisionDataOverNetworkTables(visionData);
+				}else {
+					lock.lock();
+					lastFrame = visionData;
+					lock.unlock();
+				}
 				// display the processed frame in the GUI
 				if (use_GUI) {
 					try {
 						// May throw a NullPointerException if initializing
 						// the window failed
-						BufferedImage raw = Main.matToBufferedImage(rawOutputImg);
+						BufferedImage raw = Utils.matToBufferedImage(rawOutputImg);
 
 						guiRawImg.updateImage(raw);
-						guiProcessedImg.updateImage(Main.matToBufferedImage(visionData.binMask.clone()));
+						guiProcessedImg.updateImage(Utils.matToBufferedImage(visionData.binMask.clone()));
 					} catch (IOException e) {
 						// means mat2BufferedImage broke
 						// non-fatal error, let the program continue
@@ -192,8 +204,8 @@ public class MainThread extends Thread {
 						try {
 							Mat draw = frame.clone();
 							Pipeline.drawPreferredTarget(draw, visionData);
-							Bundle b = new Bundle(Main.matToBufferedImage(frame.clone()),
-									Main.matToBufferedImage(visionData.binMask), Main.matToBufferedImage(draw),
+							Bundle b = new Bundle(Utils.matToBufferedImage(frame.clone()),
+									Utils.matToBufferedImage(visionData.binMask), Utils.matToBufferedImage(draw),
 									timestamp, visionParams);
 							ImageDumpScheduler.schedule(b);
 							timestamp++;

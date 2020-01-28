@@ -1,16 +1,9 @@
 package ca.team2706.fvts.main;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.imageio.ImageIO;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -18,21 +11,20 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.imgcodecs.Imgcodecs;
 
 import ca.team2706.fvts.core.ConfigParser;
+import ca.team2706.fvts.core.Constants;
 import ca.team2706.fvts.core.ImageDumpScheduler;
 import ca.team2706.fvts.core.Log;
 import ca.team2706.fvts.core.MainThread;
 import ca.team2706.fvts.core.NetworkTablesManager;
+import ca.team2706.fvts.core.Utils;
 import ca.team2706.fvts.core.VisionCameraServer;
 import ca.team2706.fvts.core.VisionData;
 import ca.team2706.fvts.core.params.Attribute;
 import ca.team2706.fvts.core.params.AttributeOptions;
 import ca.team2706.fvts.core.params.VisionParams;
+
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
@@ -41,7 +33,7 @@ public class Main {
 	public static int timestamp = 0;
 	public static File timestampfile;
 	public static NetworkTable loggingTable;
-	private static File visionParamsFile;
+	public static File visionParamsFile;
 	public static boolean developmentMode = false;
 	public static List<AttributeOptions> options;
 
@@ -49,7 +41,7 @@ public class Main {
 
 	public static void reloadConfig() {
 		visionParamsList.clear();
-		loadVisionParams();
+		Utils.loadVisionParams();
 		for (MainThread thread : threads) {
 			String name = thread.visionParams.getByName("name").getValue();
 			boolean found = false;
@@ -113,7 +105,6 @@ public class Main {
 		// Initilizes NetworkTables
 		NetworkTable.initialize();
 	}
-
 	/**
 	 * Loads the visionTable params! :]
 	 **/
@@ -211,7 +202,7 @@ public class Main {
 		}
 	}
 
-	private static void sendVisionParams() {
+	public static void sendVisionParams() {
 
 		for (VisionParams params : visionParamsList) {
 
@@ -222,34 +213,6 @@ public class Main {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Saves the vision parameters to a file
-	 * 
-	 **/
-	public static void saveVisionParams() {
-		try {
-
-			for (VisionParams params : visionParamsList) {
-				saveVisionParams(params);
-			}
-
-		} catch (Exception e1) {
-			Log.e(e1.getMessage(), true);
-		}
-	}
-
-	public static void saveVisionParams(VisionParams params) throws Exception {
-		Map<String, String> data = new HashMap<String, String>();
-
-		for (Attribute a : params.getAttribs()) {
-			if (!a.getName().equals("name")) {
-				data.put(a.getName(), a.getValue());
-			}
-		}
-
-		ConfigParser.saveList(visionParamsFile, params.getByName("name").getValue(), data);
 	}
 
 	/**
@@ -279,60 +242,6 @@ public class Main {
 		}
 	}
 
-	/**
-	 * Converts a OpenCV Matrix to a BufferedImage :)
-	 * 
-	 * @param matrix Matrix to be converted
-	 * @return Generated from the matrix
-	 * @throws IOException
-	 * @throws Exception
-	 */
-	public static BufferedImage matToBufferedImage(Mat matrix) throws IOException {
-		MatOfByte mob = new MatOfByte();
-		Imgcodecs.imencode(".jpg", matrix, mob);
-		byte ba[] = mob.toArray();
-
-		BufferedImage bi = ImageIO.read(new ByteArrayInputStream(ba));
-		matrix.release();
-		return bi;
-	}
-
-	/**
-	 * Converts a Buffered Image to a OpenCV Matrix
-	 * 
-	 * @param Buffered Image to convert to matrix
-	 * @return The matrix from the buffered image
-	 */
-
-	public static Mat bufferedImageToMat(BufferedImage bi) {
-		Mat mat = new Mat(bi.getHeight(), bi.getWidth(), CvType.CV_8UC3);
-		byte[] data = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
-		mat.put(0, 0, data);
-		return mat;
-	}
-
-	/**
-	 * 
-	 * @param The    image to dump to a file
-	 * @param image  the image to be dumped
-	 * @param suffix the suffix to put on the file name
-	 * @throws IOException
-	 */
-
-	public static void imgDump(BufferedImage image, String suffix, int timestamp, String outputPath)
-			throws IOException {
-		// prepend the file name with the tamestamp integer, left-padded with
-		// zeros so it sorts properly
-		@SuppressWarnings("deprecation")
-		String match = loggingTable.getString("match");
-		if (match.equals("")) {
-			match = "practice";
-		}
-
-		File output = new File(outputPath + match + "-" + String.format("%05d", timestamp) + "_" + suffix + ".png");
-		ImageIO.write(image, "png", output);
-	}
-
 	public static boolean b = true;
 
 	/**
@@ -344,10 +253,11 @@ public class Main {
 	 */
 
 	public static void main(String[] args) throws Exception {
-
+		System.out.println("Vision2019 Main "+Constants.VERSION_STRING+" developed by "+Constants.AUTHOR);
+		
 		// Must be included!
 		// Loads OpenCV
-		System.loadLibrary("opencv_java310");
+		System.loadLibrary(Constants.OPENCV_LIBRARY);
 
 		Options options = new Options();
 
@@ -376,7 +286,7 @@ public class Main {
 		visionParamsFile = new File(cmd.getOptionValue("config", "visionParams.properties"));
 
 		// read the vision calibration values from file.
-		loadVisionParams();
+		Utils.loadVisionParams();
 
 		Map<String, String> masterConfig = ConfigParser.getProperties(new File("master.cf"), "config");
 
@@ -419,7 +329,7 @@ public class Main {
 				
 				Log.i(params.getByName("name").getValue()+" enabled: "+enabled,true);
 				
-				MainThread thread = new MainThread(params);
+				MainThread thread = new MainThread(params,true);
 				if (enabled) {
 					thread.start();
 				}
@@ -428,6 +338,6 @@ public class Main {
 				Log.e(e.getMessage(), true);
 			}
 
-		} // end main video processing loop
+		} // end main vision startup loop
 	}
 }
