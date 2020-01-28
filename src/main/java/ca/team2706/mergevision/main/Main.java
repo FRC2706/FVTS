@@ -129,8 +129,6 @@ public class Main {
 			AttributeOptions minVal = new AttributeOptions("minValue", true);
 			AttributeOptions maxVal = new AttributeOptions("maxValue", true);
 
-			AttributeOptions aspectRatioThresh = new AttributeOptions("aspectRatioThresh", true);
-
 			AttributeOptions distToCentreImportance = new AttributeOptions("distToCentreImportance", true);
 
 			AttributeOptions imageFile = new AttributeOptions("imageFile", true);
@@ -165,7 +163,6 @@ public class Main {
 			options.add(maxSat);
 			options.add(minVal);
 			options.add(maxVal);
-			options.add(aspectRatioThresh);
 			options.add(distToCentreImportance);
 			options.add(imageFile);
 			options.add(minArea);
