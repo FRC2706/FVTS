@@ -4,13 +4,14 @@
 
 PI_USER=pi
 PI_ADDR="10.27.6.61"
-PI_DIR='/home/pi/TrackerboxReloaded'
+PI_DIR='/home/pi/MergeVision'
 PARAMS_FILE="visionParams.properties"
+MASTER_FILE="master.cf"
 
-# Error Handling: check if the current folder is the root of the TrackerboxReloaded git repo.
+# Error Handling: check if the current folder is the root of the MergeVision git repo.
 #   Quit with an error message if not.
 if [ ! -e $PARAMS_FILE ]; then
-    echo "It looks like ${PARAMS_FILE} does not exist! Are you sure you are in the root trackerboxReloaded Dir?"
+    echo "It looks like ${PARAMS_FILE} does not exist! Are you sure you are in the root MergeVision Dir?"
     exit 1
 fi
 
@@ -19,10 +20,10 @@ if [[ $1 != "" ]]; then
   PI_ADDR=$1
 fi
 
-echo "Copying visionParams.properties to ${PI_USER}@${PI_ADDR}"
+echo "Copying config files to ${PI_USER}@${PI_ADDR}"
 ssh ${PI_USER}@${PI_ADDR} "mkdir -p ${PI_DIR}"
-scp visionParams.properties ${PI_USER}@${PI_ADDR}:${PI_DIR}
-scp master.cf ${PI_USER}@${PI_ADDR}:${PI_DIR}
+scp $PARAMS_FILE ${PI_USER}@${PI_ADDR}:${PI_DIR}
+scp $MASTER_FILE ${PI_USER}@${PI_ADDR}:${PI_DIR}
 
 # ERROR HANDLING: if the copy failed, abort
 if [ $? -ne 0 ]; then

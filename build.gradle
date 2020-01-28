@@ -8,11 +8,11 @@ plugins {
 
 // Change the line below if you change the name of your main Java class
 // Comment this line and uncomment the line after it to build/run the Server, and vice versa to run the main vision program
-mainClassName = 'ca.team2706.vision.vision2019.Main'
+mainClassName = 'ca.team2706.mergevision.main.Main'
 
 // Change the line below to change the name of the output jar
-def projectName = 'CameraVision'
-def version = '1.0'
+def projectName = 'MergeVision'
+def version = '2.0'
 
 task setbuildType{
   doFirst{
@@ -89,7 +89,7 @@ shadowJar {
   baseName = projectName
 }
 task libraryJar(type: ShadowJar){
-	classifier = projectName+"-lib"
+	classifier = "-lib"
 	configurations = [ project.configurations.runtime ]
         manifest.inheritFrom project.tasks.jar.manifest
         exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'ca/team2706/vision/**/*')

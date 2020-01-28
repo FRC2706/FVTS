@@ -21,7 +21,7 @@ In order to make changes to this source code there are a few things that must be
 
 Step #1: Build MergeVision according to the instructions in this document
 
-Step #2: Add `build/libs/MergeVision-CameraVision-lib.jar` to the build path of your IDE and set its native library location to `output/`
+Step #2: Add `build/libs/MergeVision-lib.jar` to the build path of your IDE and set its native library location to `output/`
 
 Step #3: Add `src/main/java` and `src/test/java` as source folders in your IDE
 
@@ -38,6 +38,8 @@ This currently supports the following platforms
 * Generic Armhf devices (such as the BeagleBone Black or the Jetson)
 * Linux x86 and x86_64
 
+NOTE: In order for MergeVision to be able to run it must be built with a Java version that is less than or equal to the Java runtime version that it will be run in
+
 It has been designed to be easy to setup and use, and only needs a few minor settings to pick which system you want to be ran on. It has samples for interfacing with NetworkTables and CsCore from
 any device, along with performing OpenCV operations.
 
@@ -53,11 +55,11 @@ Change `cameraSelect` in `visionParams.properties` to change the USB camera numb
 
 ### Running for non robot purposes
 
-To run vision either execute `Main.java` (inside Eclipse) or run `cd output/`, then `./runCameraVision` (Linux) or `runCameraVision.bat` (Windows), note that the `visionParams.properties` and `master.cf` must be in the directory that you run vision from.
+To run vision either execute `Main.java` (inside Eclipse) or run `cd output/`, then `./runMergeVision` (Linux) or `runMergeVision.bat` (Windows), note that the `visionParams.properties` and `master.cf` must be in the directory that you run vision from.
 
 ### Running on a pi
 
-To run vision on a pi is is super easy. First run `./pi_scripts/installVisionProcessOnPi.sh [ip address]` to install the `vision` service to a pi, then run `./pi_scripts/linux/pushCodeToPi.sh [ip address]` (Linux) or `./pi_scripts/windows/pushCodeToPi.sh [ip address]`
+To run vision on a pi is is super easy. First run `./pi_scripts/installVisionProcessOnPi.sh [ip address]` to install the `vision` service to a pi, then run `./pi_scripts/pushCodeToPi.sh [ip address]`
 
 After the program is installed and running on the raspberry pi it can be restarted using `./pi_scripts/restartVisionProcessOnPi.sh [ip address]`, you can push configuration changes using `./pi_scripts/pushVisionParamsToPi.sh [ip address]`, and if you want to uninstall vision you can run `./pi_scripts/uninstallVisionProcessOnPi.sh` (note that it does not remove the vision code/config from the pi, it only removed the service)
 

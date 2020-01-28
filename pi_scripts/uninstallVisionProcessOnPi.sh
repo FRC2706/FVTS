@@ -3,7 +3,7 @@
 # Args: [PI_ADDR]
 
 
-# Configure the target pi to run TrackerboxReloaded on boot as a system service
+# Uninstall the MergeVision system service
 
 PI_USER=pi
 PI_ADDR="10.27.6.61"

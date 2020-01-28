@@ -1,11 +1,11 @@
 [Unit]
-Description=FRC2706 Vision TrackerboxReloaded
+Description=FRC2706 MergeVision
 After=multi-user.target
 
 [Service]
 Type=idle
-ExecStart=/home/pi/TrackerboxReloaded/runCameraVision
-WorkingDirectory=/home/pi/TrackerboxReloaded/
+ExecStart=/home/pi/MergeVision/runMergeVision
+WorkingDirectory=/home/pi/MergeVision/
 
 [Install]
 WantedBy=multi-user.target
