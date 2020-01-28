@@ -1,4 +1,4 @@
-package ca.team2706.mergevision.core;
+package ca.team2706.fvts.core;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -10,8 +10,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import ca.team2706.mergevision.core.params.VisionParams;
-import ca.team2706.mergevision.main.Main;
+import ca.team2706.fvts.core.params.VisionParams;
+import ca.team2706.fvts.main.Main;
 
 public class MainThread extends Thread {
 

@@ -1,4 +1,4 @@
-package ca.team2706.mergevision.core;
+package ca.team2706.fvts.core;
 
 import java.util.ArrayList;
 
@@ -6,7 +6,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 
-import ca.team2706.mergevision.core.params.VisionParams;
+import ca.team2706.fvts.core.params.VisionParams;
 
 /**
  * A class to hold any visionTable data returned by process() :) :) :} :] :]

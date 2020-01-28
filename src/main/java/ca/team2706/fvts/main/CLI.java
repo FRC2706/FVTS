@@ -1,4 +1,4 @@
-package ca.team2706.mergevision.main;
+package ca.team2706.fvts.main;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,7 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-import ca.team2706.mergevision.core.Log;
+import ca.team2706.fvts.core.Log;
 
 public class CLI implements Runnable, ActionListener {
 

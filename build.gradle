@@ -8,10 +8,10 @@ plugins {
 
 // Change the line below if you change the name of your main Java class
 // Comment this line and uncomment the line after it to build/run the Server, and vice versa to run the main vision program
-mainClassName = 'ca.team2706.mergevision.main.Main'
+mainClassName = 'ca.team2706.fvts.main.Main'
 
 // Change the line below to change the name of the output jar
-def projectName = 'MergeVision'
+def projectName = 'FVTS'
 def version = '2.0'
 
 task setbuildType{

@@ -1,4 +1,4 @@
-package ca.team2706.mergevision.core;
+package ca.team2706.fvts.core;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -14,10 +14,10 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import ca.team2706.mergevision.core.params.Attribute;
-import ca.team2706.mergevision.core.params.AttributeOptions;
-import ca.team2706.mergevision.core.params.VisionParams;
-import ca.team2706.mergevision.main.Main;
+import ca.team2706.fvts.core.params.Attribute;
+import ca.team2706.fvts.core.params.AttributeOptions;
+import ca.team2706.fvts.core.params.VisionParams;
+import ca.team2706.fvts.main.Main;
 
 public class ParamsSelector extends JFrame implements ActionListener {
 

@@ -1,5 +1,5 @@
-# MergeVision
-![](https://github.com/FRC2706/MergeVision/workflows/Build%20%26%20Test/badge.svg)
+# FVTS
+![](https://github.com/FRC2706/FVTS/workflows/Build%20%26%20Test/badge.svg)
 
 # Attribution and license
 
@@ -16,8 +16,6 @@ Team contact: frc2706@owcrobots.ca Supervising mentor: John Gray
 
 The base code for this was from the WPILib samples: https://github.com/wpilibsuite/VisionBuildSamples/tree/master/Java
 
-# Java sample vision system
-
 This currently supports the following platforms
 
 * Windows
@@ -25,7 +23,7 @@ This currently supports the following platforms
 * Generic Armhf devices (such as the BeagleBone Black or the Jetson)
 * Linux x86 and x86_64
 
-NOTE: In order for MergeVision to be able to run it must be built with a Java version that is less than or equal to the Java runtime version that it will be run in
+NOTE: In order for FVTS to be able to run it must be built with a Java version that is less than or equal to the Java runtime version that it will be run in
 
 It has been designed to be easy to setup and use, and only needs a few minor settings to pick which system you want to be ran on. It has samples for interfacing with NetworkTables and CsCore from
 any device, along with performing OpenCV operations.

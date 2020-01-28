@@ -1,8 +1,8 @@
-package ca.team2706.mergevision.core;
+package ca.team2706.fvts.core;
 
 import javax.swing.*;
 
-import ca.team2706.mergevision.main.Main;
+import ca.team2706.fvts.main.Main;
 
 import java.awt.*;
 import java.awt.image.BufferStrategy;

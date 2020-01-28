@@ -1,4 +1,4 @@
-package ca.team2706.mergevision.main;
+package ca.team2706.fvts.main;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -23,16 +23,16 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 
-import ca.team2706.mergevision.core.ConfigParser;
-import ca.team2706.mergevision.core.ImageDumpScheduler;
-import ca.team2706.mergevision.core.Log;
-import ca.team2706.mergevision.core.MainThread;
-import ca.team2706.mergevision.core.NetworkTablesManager;
-import ca.team2706.mergevision.core.VisionCameraServer;
-import ca.team2706.mergevision.core.VisionData;
-import ca.team2706.mergevision.core.params.Attribute;
-import ca.team2706.mergevision.core.params.AttributeOptions;
-import ca.team2706.mergevision.core.params.VisionParams;
+import ca.team2706.fvts.core.ConfigParser;
+import ca.team2706.fvts.core.ImageDumpScheduler;
+import ca.team2706.fvts.core.Log;
+import ca.team2706.fvts.core.MainThread;
+import ca.team2706.fvts.core.NetworkTablesManager;
+import ca.team2706.fvts.core.VisionCameraServer;
+import ca.team2706.fvts.core.VisionData;
+import ca.team2706.fvts.core.params.Attribute;
+import ca.team2706.fvts.core.params.AttributeOptions;
+import ca.team2706.fvts.core.params.VisionParams;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Main {
@@ -353,7 +353,7 @@ public class Main {
 
 		Option ip = new Option("ip", true, "The IP address of the NetworkTables server");
 		options.addOption(ip);
-		Option developmentMode = new Option("dev", "development", false, "Puts MergeVision in development mode");
+		Option developmentMode = new Option("dev", "development", false, "Puts FVTS in development mode");
 		options.addOption(developmentMode);
 		Option configFile = new Option("conf", "config", true, "Specifies an alternative config file");
 		options.addOption(configFile);
@@ -365,7 +365,7 @@ public class Main {
 			cmd = parser.parse(options, args);
 		} catch (Exception e) {
 			Log.e(e.getMessage(), true);
-			formatter.printHelp("MergeVision", options);
+			formatter.printHelp("FVTS", options);
 			System.exit(1);
 		}
 		Main.developmentMode = cmd.hasOption("development");

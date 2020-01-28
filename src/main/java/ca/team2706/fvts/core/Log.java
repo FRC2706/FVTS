@@ -1,6 +1,6 @@
-package ca.team2706.mergevision.core;
+package ca.team2706.fvts.core;
 
-import ca.team2706.mergevision.main.CLI;
+import ca.team2706.fvts.main.CLI;
 
 public class Log {
 	

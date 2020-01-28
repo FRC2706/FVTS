@@ -1,4 +1,4 @@
-package ca.team2706.mergevision.main;
+package ca.team2706.fvts.main;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -9,9 +9,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import ca.team2706.mergevision.core.Log;
-import ca.team2706.mergevision.core.ParamsSelector;
-import ca.team2706.mergevision.core.VisionCameraServer;
+import ca.team2706.fvts.core.Log;
+import ca.team2706.fvts.core.ParamsSelector;
+import ca.team2706.fvts.core.VisionCameraServer;
 
 public class NewWindow extends JFrame implements ActionListener {
 

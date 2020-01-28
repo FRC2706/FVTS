@@ -9,10 +9,10 @@ PI_USER=pi
 PI_ADDR="10.27.6.61"
 PARAMS_FILE="visionParams.properties"
 
-# Error Handling: check if the current folder is the root of the MergeVision git repo.
+# Error Handling: check if the current folder is the root of the FVTS git repo.
 #   Quit with an error message if not.
 if [ ! -e $PARAMS_FILE ]; then
-    echo "It looks like ${PARAMS_FILE} does not exist! Are you sure you are in the root MergeVision Dir?"
+    echo "It looks like ${PARAMS_FILE} does not exist! Are you sure you are in the root FVTS Dir?"
     exit 1
 fi
 

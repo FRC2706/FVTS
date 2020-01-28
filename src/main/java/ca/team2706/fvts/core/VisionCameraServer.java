@@ -1,4 +1,4 @@
-package ca.team2706.mergevision.core;
+package ca.team2706.fvts.core;
 
 import java.util.HashMap;
 import java.util.Map;

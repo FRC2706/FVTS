@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 
 import org.junit.Test;
 
-import ca.team2706.mergevision.core.Bundle;
+import ca.team2706.fvts.core.Bundle;
 
 public class BundleTest {
 

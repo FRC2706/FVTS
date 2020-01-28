@@ -1,9 +1,9 @@
-package ca.team2706.mergevision.core.params;
+package ca.team2706.fvts.core.params;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.team2706.mergevision.core.Log;
+import ca.team2706.fvts.core.Log;
 
 public class VisionParamsOptions {
 	private List<AttributeOptions> options = new ArrayList<AttributeOptions>();

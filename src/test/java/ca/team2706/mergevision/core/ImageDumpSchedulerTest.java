@@ -6,8 +6,8 @@ import java.awt.image.BufferedImage;
 
 import org.junit.Test;
 
-import ca.team2706.mergevision.core.Bundle;
-import ca.team2706.mergevision.core.ImageDumpScheduler;
+import ca.team2706.fvts.core.Bundle;
+import ca.team2706.fvts.core.ImageDumpScheduler;
 
 public class ImageDumpSchedulerTest {
 

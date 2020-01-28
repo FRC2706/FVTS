@@ -1,4 +1,4 @@
-package ca.team2706.mergevision.core;
+package ca.team2706.fvts.core;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +13,8 @@ import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-import ca.team2706.mergevision.core.VisionData.Target;
-import ca.team2706.mergevision.core.params.VisionParams;
+import ca.team2706.fvts.core.VisionData.Target;
+import ca.team2706.fvts.core.params.VisionParams;
 
 public class Pipeline {
 

@@ -3,7 +3,7 @@
 # Args: [PI_ADDR]
 
 
-# Uninstall the MergeVision system service
+# Uninstall the FVTS system service
 
 PI_USER=pi
 PI_ADDR="10.27.6.61"

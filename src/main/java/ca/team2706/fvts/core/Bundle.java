@@ -1,8 +1,8 @@
-package ca.team2706.mergevision.core;
+package ca.team2706.fvts.core;
 
 import java.awt.image.BufferedImage;
 
-import ca.team2706.mergevision.core.params.VisionParams;
+import ca.team2706.fvts.core.params.VisionParams;
 
 public class Bundle {
 	private BufferedImage raw,binMask,output;

@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import ca.team2706.mergevision.core.NormalisedPoint;
+import ca.team2706.fvts.core.NormalisedPoint;
 
 public class NormalisedPointTest {
 

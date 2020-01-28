@@ -1,9 +1,9 @@
-package ca.team2706.mergevision.core;
+package ca.team2706.fvts.core;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.team2706.mergevision.main.Main;
+import ca.team2706.fvts.main.Main;
 
 
 public class ImageDumpScheduler implements Runnable{

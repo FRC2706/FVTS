@@ -1,11 +1,11 @@
 [Unit]
-Description=FRC2706 MergeVision
+Description=FRC2706 FVTS
 After=multi-user.target
 
 [Service]
 Type=idle
-ExecStart=/home/pi/MergeVision/runMergeVision
-WorkingDirectory=/home/pi/MergeVision/
+ExecStart=/home/pi/FVTS/runFVTS
+WorkingDirectory=/home/pi/FVTS/
 
 [Install]
 WantedBy=multi-user.target

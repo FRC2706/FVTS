@@ -1,12 +1,12 @@
-package ca.team2706.mergevision.core;
+package ca.team2706.fvts.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ca.team2706.mergevision.core.params.VisionParams;
-import ca.team2706.mergevision.main.Main;
+import ca.team2706.fvts.core.params.VisionParams;
+import ca.team2706.fvts.main.Main;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class NetworkTablesManager extends Thread{

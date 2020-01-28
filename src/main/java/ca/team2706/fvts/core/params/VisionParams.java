@@ -1,4 +1,4 @@
-package ca.team2706.mergevision.core.params;
+package ca.team2706.fvts.core.params;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
 #!/bin/bash
 
-chmod +x output/MergeVision-all.jar
-java -Djava.library.path=output/ -jar output/MergeVision-all.jar $@
+chmod +x output/FVTS-all.jar
+java -Djava.library.path=output/ -jar output/FVTS-all.jar $@
