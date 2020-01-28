@@ -108,6 +108,7 @@ public class MainThread extends Thread {
 				e.printStackTrace();
 			}
 		}
+		Log.i("Initialized profile "+visionParams.getByName("name").getValue(), true);
 
 		// Main video processing loop
 		while (true) {

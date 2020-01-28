@@ -38,7 +38,6 @@ public class Main {
 	public static File visionParamsFile;
 	public static boolean developmentMode = false;
 	public static List<AttributeOptions> options;
-	public static File loggingFile;
 
 	public static List<MainThread> threads = new ArrayList<MainThread>();
 
