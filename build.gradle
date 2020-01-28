@@ -89,7 +89,7 @@ shadowJar {
   baseName = projectName
 }
 task libraryJar(type: ShadowJar){
-	classifier = "-lib"
+	classifier = "lib"
 	configurations = [ project.configurations.runtime ]
         manifest.inheritFrom project.tasks.jar.manifest
         exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'ca/team2706/vision/**/*')
