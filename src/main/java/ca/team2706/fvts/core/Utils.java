@@ -120,6 +120,8 @@ public class Utils {
 			AttributeOptions identifier = new AttributeOptions("identifier", true);
 
 			AttributeOptions enabled = new AttributeOptions("enabled", false);
+			
+			AttributeOptions csvLog = new AttributeOptions("csvLog", true);
 
 			Main.options = new ArrayList<AttributeOptions>();
 			Main.options.add(name);
@@ -143,6 +145,8 @@ public class Utils {
 			Main.options.add(type);
 			Main.options.add(identifier);
 			Main.options.add(enabled);
+			Main.options.add(csvLog);
+			
 			List<String> lists = ConfigParser.listLists(Main.visionParamsFile);
 			List<VisionParams> ret = new ArrayList<VisionParams>();
 
@@ -164,7 +168,7 @@ public class Utils {
 				NetworkTable visionTable = NetworkTable
 						.getTable("vision-" + params.getByName("name").getValue() + "/");
 				NetworkTablesManager.tables.put(s, visionTable);
-				// The parameters are now valid, because it didnt throw an error
+				// The parameters are now valid, because it didn't throw an error
 				ret.add(params);
 			}
 
@@ -218,14 +222,14 @@ public class Utils {
 	
 		ConfigParser.saveList(Main.visionParamsFile, params.getByName("name").getValue(), data);
 	}
-	public static File findFirstAvailable(String pattern) {
+	public static int findFirstAvailable(String pattern) {
 		if(!pattern.contains("$1"))
-			return new File(pattern);
+			return 0;
 		for(int i = 0; i < Integer.MAX_VALUE; i++) {
 			File f = new File(pattern.replaceAll("\\$1", ""+i));
 			if(!f.exists())
-				return f;
+				return i;
 		}
-		return null;
+		return 0;
 	}
 }

@@ -3,6 +3,8 @@ package ca.team2706.fvts.core;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -108,8 +110,11 @@ public class MainThread extends Thread {
 				e.printStackTrace();
 			}
 		}
+		
+		File csvFile = new File(visionParams.getByName("csvLog").getValue().replaceAll("\\$1", ""+Main.runID));
+		
 		Log.i("Initialized profile "+visionParams.getByName("name").getValue(), true);
-
+		
 		// Main video processing loop
 		while (true) {
 			try {
@@ -216,6 +221,25 @@ public class MainThread extends Thread {
 						}
 					}
 				}
+				
+				if(csvFile.getParentFile().exists()) {
+					List<String> data = new ArrayList<String>();
+					data.add(""+visionData.fps);
+					data.add(""+visionData.targetsFound.size());
+					if(visionData.preferredTarget != null) {
+						data.add(visionData.preferredTarget.xCentreNorm+"");
+						data.add(visionData.preferredTarget.yCentreNorm+"");
+						data.add(visionData.preferredTarget.areaNorm+"");
+						data.add(visionData.preferredTarget.distance+"");
+					}
+					try {
+						Log.logData(csvFile, data);
+					}catch(Exception e) {
+						Log.e("Error while logging vision data to csv file!", true);
+						Log.e(e.getMessage(), true);
+					}
+				}
+				
 				// Display the frame rate onto the console
 				double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND)
 						* 1000;

@@ -1,5 +1,12 @@
 package ca.team2706.fvts.core;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.util.List;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+
 import ca.team2706.fvts.main.CLI;
 
 public class Log {
@@ -39,5 +46,12 @@ public class Log {
 			CLI.log("Debug: "+message);
 		}
 		System.out.println("Debug: "+message);
+	}
+	public static void logData(File csvFile, List<String> data) throws Exception {
+		if(!csvFile.exists())
+			csvFile.createNewFile();
+		CSVPrinter printer = new CSVPrinter(new FileWriter(csvFile,true), CSVFormat.DEFAULT);
+		printer.printRecord(data);
+		printer.close(true);
 	}
 }

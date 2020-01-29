@@ -38,6 +38,7 @@ public class Main {
 	public static NetworkTable loggingTable;
 	public static File visionParamsFile;
 	public static boolean developmentMode = false;
+	public static int runID;
 
 	public static List<MainThread> threads = new ArrayList<MainThread>();
 
@@ -193,7 +194,8 @@ public class Main {
 				}
 			}
 		}
-		CLI.logFile = Utils.findFirstAvailable(masterConfig.get("logFile"));
+		runID = Utils.findFirstAvailable(masterConfig.get("logFile"));
+		CLI.logFile = new File(masterConfig.get("logFile").replaceAll("\\$1", ""+runID));
 
 		String allowOverride = masterConfig.get("allowOverride");
 
