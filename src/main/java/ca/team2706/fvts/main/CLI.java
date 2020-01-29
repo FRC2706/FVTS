@@ -58,10 +58,8 @@ public class CLI implements Runnable, ActionListener {
 				if(logFile == null || !logFile.getParentFile().exists())
 					return;
 				try {
-					if (!logFile.exists()) {
-						logFile.createNewFile();
-
-					}
+					logFile.delete();
+					logFile.createNewFile();
 
 					PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
 

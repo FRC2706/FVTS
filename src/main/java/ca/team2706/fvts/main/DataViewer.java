@@ -28,7 +28,7 @@ import ca.team2706.fvts.main.Main;
 public class DataViewer {
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws Exception {
-		System.out.println("Vision2019 DataViewer " + Constants.VERSION_STRING + " developed by " + Constants.AUTHOR);
+		System.out.println("FVTS DataViewer " + Constants.VERSION_STRING + " developed by " + Constants.AUTHOR);
 
 		// Must be included!
 		// Loads OpenCV

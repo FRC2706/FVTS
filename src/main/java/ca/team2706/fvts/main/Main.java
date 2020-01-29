@@ -31,13 +31,13 @@ public class Main {
 
 	public static final File MASTER_CONFIG_FILE = new File("master.cf");
 	
+	public static List<AttributeOptions> options;
 	public static String filename = "";
 	public static int timestamp = 0;
 	public static File timestampfile;
 	public static NetworkTable loggingTable;
 	public static File visionParamsFile;
 	public static boolean developmentMode = false;
-	public static List<AttributeOptions> options;
 
 	public static List<MainThread> threads = new ArrayList<MainThread>();
 
@@ -107,115 +107,6 @@ public class Main {
 		// Initilizes NetworkTables
 		NetworkTable.initialize();
 	}
-	/**
-	 * Loads the visionTable params! :]
-	 **/
-
-	public static void loadVisionParams() {
-		try {
-			AttributeOptions name = new AttributeOptions("name", true);
-
-			AttributeOptions minHue = new AttributeOptions("minHue", true);
-			AttributeOptions maxHue = new AttributeOptions("maxHue", true);
-			AttributeOptions minSat = new AttributeOptions("minSaturation", true);
-			AttributeOptions maxSat = new AttributeOptions("maxSaturation", true);
-			AttributeOptions minVal = new AttributeOptions("minValue", true);
-			AttributeOptions maxVal = new AttributeOptions("maxValue", true);
-
-			AttributeOptions distToCentreImportance = new AttributeOptions("distToCentreImportance", true);
-
-			AttributeOptions imageFile = new AttributeOptions("imageFile", true);
-
-			AttributeOptions minArea = new AttributeOptions("minArea", true);
-
-			AttributeOptions erodeDilateIterations = new AttributeOptions("erodeDilateIterations", true);
-
-			AttributeOptions resolution = new AttributeOptions("resolution", true);
-
-			AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath", true);
-
-			AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime", true);
-
-			AttributeOptions slope = new AttributeOptions("slope", true);
-
-			AttributeOptions yIntercept = new AttributeOptions("yIntercept", true);
-
-			AttributeOptions group = new AttributeOptions("group", true);
-			AttributeOptions angle = new AttributeOptions("groupAngle",true);
-
-			AttributeOptions type = new AttributeOptions("type", true);
-
-			AttributeOptions identifier = new AttributeOptions("identifier", true);
-
-			AttributeOptions enabled = new AttributeOptions("enabled", false);
-
-			options = new ArrayList<AttributeOptions>();
-			options.add(name);
-			options.add(minHue);
-			options.add(maxHue);
-			options.add(minSat);
-			options.add(maxSat);
-			options.add(minVal);
-			options.add(maxVal);
-			options.add(distToCentreImportance);
-			options.add(imageFile);
-			options.add(minArea);
-			options.add(erodeDilateIterations);
-			options.add(resolution);
-			options.add(imgDumpPath);
-			options.add(imgDumpTime);
-			options.add(slope);
-			options.add(yIntercept);
-			options.add(group);
-			options.add(angle);
-			options.add(type);
-			options.add(identifier);
-			options.add(enabled);
-			List<String> lists = ConfigParser.listLists(visionParamsFile);
-
-			for (String s : lists) {
-
-				Map<String, String> data = ConfigParser.getProperties(visionParamsFile, s);
-
-				List<Attribute> attribs = new ArrayList<Attribute>();
-				attribs.add(new Attribute("name", s));
-				for (String s1 : data.keySet()) {
-					attribs.add(new Attribute(s1, data.get(s1)));
-				}
-				VisionParams params = new VisionParams(attribs, options);
-				String resolution1 = params.getByName("resolution").getValue();
-				int width = Integer.valueOf(resolution1.split("x")[0]);
-				int height = Integer.valueOf(resolution1.split("x")[1]);
-				params.getAttribs().add(new Attribute("width", width + ""));
-				params.getAttribs().add(new Attribute("height", height + ""));
-				NetworkTable visionTable = NetworkTable
-						.getTable("vision-" + params.getByName("name").getValue() + "/");
-				NetworkTablesManager.tables.put(s, visionTable);
-				// The parameters are now valid, because it didnt throw an error
-				visionParamsList.add(params);
-			}
-
-			sendVisionParams();
-
-		} catch (Exception e1) {
-			Log.e(e1.getMessage(), true);
-			Log.e("\n\nError reading the params file, check if the file is corrupt?", true);
-			System.exit(1);
-		}
-	}
-
-	public static void sendVisionParams() {
-
-		for (VisionParams params : visionParamsList) {
-
-			for (Attribute a : params.getAttribs()) {
-				if (a.getName().equals("name")) {
-					NetworkTable visionTable = NetworkTablesManager.tables.get(params.getByName("name").getValue());
-					visionTable.putString(a.getName(), a.getValue());
-				}
-			}
-		}
-	}
 
 	/**
 	 * Turns all the vision data into packets that kno da wae to get to the robo rio
@@ -255,7 +146,7 @@ public class Main {
 	 */
 
 	public static void main(String[] args) throws Exception {
-		System.out.println("Vision2019 Main "+Constants.VERSION_STRING+" developed by "+Constants.AUTHOR);
+		System.out.println("FVTS Main "+Constants.VERSION_STRING+" developed by "+Constants.AUTHOR);
 		
 		// Must be included!
 		// Loads OpenCV
@@ -288,7 +179,7 @@ public class Main {
 		visionParamsFile = new File(cmd.getOptionValue("config", "visionParams.properties"));
 
 		// read the vision calibration values from file.
-		Utils.loadVisionParams();
+		visionParamsList = Utils.loadVisionParams();
 
 		Map<String, String> masterConfig = ConfigParser.getProperties(MASTER_CONFIG_FILE, "config");
 
@@ -302,7 +193,7 @@ public class Main {
 				}
 			}
 		}
-		CLI.logFile = new File(masterConfig.get("logFile"));
+		CLI.logFile = Utils.findFirstAvailable(masterConfig.get("logFile"));
 
 		String allowOverride = masterConfig.get("allowOverride");
 

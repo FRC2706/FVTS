@@ -82,46 +82,45 @@ public class Utils {
 	/**
 	 * Loads the visionTable params! :]
 	 **/
-	
-	public static void loadVisionParams() {
+
+	public static List<VisionParams> loadVisionParams() {
 		try {
 			AttributeOptions name = new AttributeOptions("name", true);
-	
+
 			AttributeOptions minHue = new AttributeOptions("minHue", true);
 			AttributeOptions maxHue = new AttributeOptions("maxHue", true);
 			AttributeOptions minSat = new AttributeOptions("minSaturation", true);
 			AttributeOptions maxSat = new AttributeOptions("maxSaturation", true);
 			AttributeOptions minVal = new AttributeOptions("minValue", true);
 			AttributeOptions maxVal = new AttributeOptions("maxValue", true);
-	
-			AttributeOptions aspectRatioThresh = new AttributeOptions("aspectRatioThresh", true);
-	
+
 			AttributeOptions distToCentreImportance = new AttributeOptions("distToCentreImportance", true);
-	
+
 			AttributeOptions imageFile = new AttributeOptions("imageFile", true);
-	
+
 			AttributeOptions minArea = new AttributeOptions("minArea", true);
-	
+
 			AttributeOptions erodeDilateIterations = new AttributeOptions("erodeDilateIterations", true);
-	
+
 			AttributeOptions resolution = new AttributeOptions("resolution", true);
-	
+
 			AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath", true);
-	
+
 			AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime", true);
-	
+
 			AttributeOptions slope = new AttributeOptions("slope", true);
-	
+
 			AttributeOptions yIntercept = new AttributeOptions("yIntercept", true);
-	
+
 			AttributeOptions group = new AttributeOptions("group", true);
-	
+			AttributeOptions angle = new AttributeOptions("groupAngle",true);
+
 			AttributeOptions type = new AttributeOptions("type", true);
-	
+
 			AttributeOptions identifier = new AttributeOptions("identifier", true);
-	
+
 			AttributeOptions enabled = new AttributeOptions("enabled", false);
-	
+
 			Main.options = new ArrayList<AttributeOptions>();
 			Main.options.add(name);
 			Main.options.add(minHue);
@@ -130,7 +129,6 @@ public class Utils {
 			Main.options.add(maxSat);
 			Main.options.add(minVal);
 			Main.options.add(maxVal);
-			Main.options.add(aspectRatioThresh);
 			Main.options.add(distToCentreImportance);
 			Main.options.add(imageFile);
 			Main.options.add(minArea);
@@ -141,15 +139,17 @@ public class Utils {
 			Main.options.add(slope);
 			Main.options.add(yIntercept);
 			Main.options.add(group);
+			Main.options.add(angle);
 			Main.options.add(type);
 			Main.options.add(identifier);
 			Main.options.add(enabled);
 			List<String> lists = ConfigParser.listLists(Main.visionParamsFile);
-	
+			List<VisionParams> ret = new ArrayList<VisionParams>();
+
 			for (String s : lists) {
-	
+
 				Map<String, String> data = ConfigParser.getProperties(Main.visionParamsFile, s);
-	
+
 				List<Attribute> attribs = new ArrayList<Attribute>();
 				attribs.add(new Attribute("name", s));
 				for (String s1 : data.keySet()) {
@@ -165,15 +165,29 @@ public class Utils {
 						.getTable("vision-" + params.getByName("name").getValue() + "/");
 				NetworkTablesManager.tables.put(s, visionTable);
 				// The parameters are now valid, because it didnt throw an error
-				Main.visionParamsList.add(params);
+				ret.add(params);
 			}
-	
-			Main.sendVisionParams();
-	
+
+			sendVisionParams(ret);
+			return ret;
+
 		} catch (Exception e1) {
 			Log.e(e1.getMessage(), true);
 			Log.e("\n\nError reading the params file, check if the file is corrupt?", true);
 			System.exit(1);
+		}
+		return null;
+	}
+	public static void sendVisionParams(List<VisionParams> visionParamsList) {
+
+		for (VisionParams params : visionParamsList) {
+
+			for (Attribute a : params.getAttribs()) {
+				if (a.getName().equals("name")) {
+					NetworkTable visionTable = NetworkTablesManager.tables.get(params.getByName("name").getValue());
+					visionTable.putString(a.getName(), a.getValue());
+				}
+			}
 		}
 	}
 
@@ -204,5 +218,14 @@ public class Utils {
 	
 		ConfigParser.saveList(Main.visionParamsFile, params.getByName("name").getValue(), data);
 	}
-
+	public static File findFirstAvailable(String pattern) {
+		if(!pattern.contains("$1"))
+			return new File(pattern);
+		for(int i = 0; i < Integer.MAX_VALUE; i++) {
+			File f = new File(pattern.replaceAll("\\$1", ""+i));
+			if(!f.exists())
+				return f;
+		}
+		return null;
+	}
 }

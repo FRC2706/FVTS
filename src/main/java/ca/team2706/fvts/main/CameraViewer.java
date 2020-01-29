@@ -12,7 +12,7 @@ import ca.team2706.fvts.core.VisionCameraServer;
 
 public class CameraViewer {
 	public static void main(String[] args) {
-		System.out.println("Vision2019 CameraViewer " + Constants.VERSION_STRING + " developed by " + Constants.AUTHOR);
+		System.out.println("FVTS CameraViewer " + Constants.VERSION_STRING + " developed by " + Constants.AUTHOR);
 		System.loadLibrary(Constants.OPENCV_LIBRARY);
 		int cameraNum = -1;
 		if (args.length > 0) {
