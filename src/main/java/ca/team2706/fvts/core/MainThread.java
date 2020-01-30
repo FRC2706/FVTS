@@ -114,6 +114,7 @@ public class MainThread extends Thread {
 		File csvFile = new File(visionParams.getByName("csvLog").getValue().replaceAll("\\$1", ""+Main.runID));
 		
 		long lastTime = System.currentTimeMillis();
+		boolean first = true;
 		
 		Log.i("Initialized profile "+visionParams.getByName("name").getValue(), true);
 		
@@ -225,6 +226,23 @@ public class MainThread extends Thread {
 				}
 				if(csvFile.getParentFile().exists()) {
 					List<String> data = new ArrayList<String>();
+					if(first) {
+						data.add("Elapsed Time");
+						data.add("FPS");
+						data.add("Number of Targets");
+						data.add("Preffered Target X");
+						data.add("Preffered Target Y");
+						data.add("Preffered Target Area");
+						data.add("Preffered Target Distance");
+						try {
+							Log.logData(csvFile, data);
+						}catch(Exception e) {
+							Log.e("Error while logging vision data to csv file!", true);
+							Log.e(e.getMessage(), true);
+						}
+						data.clear();
+						first = false;
+					}
 					data.add(""+(System.currentTimeMillis()-lastTime));
 					data.add(""+visionData.fps);
 					data.add(""+visionData.targetsFound.size());

@@ -103,7 +103,12 @@ public class CSVGrapher extends JFrame{
 		XYSeries area = new XYSeries("Area Percentage");
 		XYSeries distance = new XYSeries("Distance");
         long currTime = 0;
-		for(CSVRecord entry : parser) {
+		boolean first = true;
+        for(CSVRecord entry : parser) {
+			if(first) {
+				first = false;
+				continue;
+			}
 			long deltaTime = Long.valueOf(entry.get(0));
 			
 			currTime += deltaTime;
