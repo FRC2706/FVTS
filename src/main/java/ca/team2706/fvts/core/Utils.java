@@ -215,7 +215,7 @@ public class Utils {
 		Map<String, String> data = new HashMap<String, String>();
 	
 		for (Attribute a : params.getAttribs()) {
-			if (!a.getName().equals("name")) {
+			if (!a.getName().equals("name") && !a.getName().equals("enabled") && !a.getName().equals("width") && !a.getName().equals("height")) {
 				data.put(a.getName(), a.getValue());
 			}
 		}
