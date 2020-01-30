@@ -113,6 +113,8 @@ public class MainThread extends Thread {
 		
 		File csvFile = new File(visionParams.getByName("csvLog").getValue().replaceAll("\\$1", ""+Main.runID));
 		
+		long lastTime = System.currentTimeMillis();
+		
 		Log.i("Initialized profile "+visionParams.getByName("name").getValue(), true);
 		
 		// Main video processing loop
@@ -204,7 +206,7 @@ public class MainThread extends Thread {
 					// dumps
 					
 					// then dump images asynchronously
-					if (elapsedTime >= visionParams.getByName("imgDumpTime").getValueI() && visionParams.getByName("imgDumpTime").getValueI() != -1) {
+					if (elapsedTime >= visionParams.getByName("imgDumpTime").getValueD() && visionParams.getByName("imgDumpTime").getValueD() != -1) {
 						// Sets the current number of seconds
 						current_time_seconds = (((double) System.currentTimeMillis()) / 1000);
 						try {
@@ -221,9 +223,9 @@ public class MainThread extends Thread {
 						}
 					}
 				}
-				
 				if(csvFile.getParentFile().exists()) {
 					List<String> data = new ArrayList<String>();
+					data.add(""+(System.currentTimeMillis()-lastTime));
 					data.add(""+visionData.fps);
 					data.add(""+visionData.targetsFound.size());
 					if(visionData.preferredTarget != null) {
@@ -244,6 +246,8 @@ public class MainThread extends Thread {
 				double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND)
 						* 1000;
 				Log.i("Vision FPS: "+visionData.fps+", pipeline took: "+pipelineTime+" ms\n",false);
+				
+				lastTime = System.currentTimeMillis();
 			} catch (Exception e) {
 				Log.e(e.getMessage(), true);e.printStackTrace();
 				try {

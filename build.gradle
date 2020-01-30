@@ -74,6 +74,7 @@ dependencies {
   compile cscoreDep()
   compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
   compile 'org.apache.commons:commons-csv:1.7'
+  compile 'jfree:jfreechart:1.0.13'
   
   testCompile 'junit:junit:4.12'
   testCompile tntcoreDep()
