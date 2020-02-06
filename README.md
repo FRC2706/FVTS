@@ -18,6 +18,8 @@ Team contact: frc2706@owcrobots.ca Supervising mentor: John Gray
 
 The base code for this was from the WPILib samples: https://github.com/wpilibsuite/VisionBuildSamples/tree/master/Java
 
+# Info
+
 This currently supports the following platforms
 
 * Windows
