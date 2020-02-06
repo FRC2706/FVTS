@@ -1,9 +1,11 @@
 # FVTS - The FRC Vision Tracking System
 ![](https://github.com/FRC2706/FVTS/workflows/Build%20%26%20Test/badge.svg)
 
-# Attribution and license
+# About
 
-2D Vision re-written in Java
+FVTS is a vision system written in Java designed to be used for any FRC game with minimal to no modifications.
+
+# Attribution and license
 
 We release our software under the MIT license in the hopes that other teams use and/or modify our software.
 
