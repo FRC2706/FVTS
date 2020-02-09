@@ -3,6 +3,10 @@ package ca.team2706.fvts.core;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.imageio.ImageIO;
 
@@ -17,9 +21,11 @@ public class MainThread extends Thread {
 
 	public VisionParams visionParams;
 	public ParamsSelector selector;
+	private boolean networkTables;
 
-	public MainThread(VisionParams params) {
+	public MainThread(VisionParams params, boolean doNetworkTables) {
 		this.visionParams = params;
+		this.networkTables = doNetworkTables;
 	}
 
 	public Mat frame;
@@ -27,9 +33,13 @@ public class MainThread extends Thread {
 	public boolean useCamera = true;
 	public static int timestamp = 0;
 	public double lastDist = 0;
+	public VisionData lastFrame = null;
+	public Lock lock;
 
 	@Override
 	public void run() {
+		if(!networkTables)
+			lock = new ReentrantLock();
 		
 		// Setup the camera server for this camera
 		try {
@@ -60,7 +70,7 @@ public class MainThread extends Thread {
 		} else {
 			// load the image from file.
 			try {
-				frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
+				frame = Utils.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
 			} catch (IOException e) {
 				Log.e(e.getMessage(), true);
 				frame = new Mat();
@@ -79,7 +89,7 @@ public class MainThread extends Thread {
 
 		} else {
 			try {
-				frame = Main.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
+				frame = Utils.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
 			} catch (IOException e) {
 				Log.e(e.getMessage(), true);
 				System.exit(1);
@@ -100,7 +110,14 @@ public class MainThread extends Thread {
 				e.printStackTrace();
 			}
 		}
-
+		
+		File csvFile = new File(visionParams.getByName("csvLog").getValue().replaceAll("\\$1", ""+Main.runID));
+		
+		long lastTime = System.currentTimeMillis();
+		boolean first = true;
+		
+		Log.i("Initialized profile "+visionParams.getByName("name").getValue(), true);
+		
 		// Main video processing loop
 		while (true) {
 			try {
@@ -151,19 +168,23 @@ public class MainThread extends Thread {
 
 				if (visionData.preferredTarget != null)
 					lastDist = visionData.preferredTarget.distance;
-
-				// Sends the data to the vision table
-				Main.sendVisionDataOverNetworkTables(visionData);
-
+				if(networkTables) {
+					// Sends the data to the vision table
+					Main.sendVisionDataOverNetworkTables(visionData);
+				}else {
+					lock.lock();
+					lastFrame = visionData;
+					lock.unlock();
+				}
 				// display the processed frame in the GUI
 				if (use_GUI) {
 					try {
 						// May throw a NullPointerException if initializing
 						// the window failed
-						BufferedImage raw = Main.matToBufferedImage(rawOutputImg);
+						BufferedImage raw = Utils.matToBufferedImage(rawOutputImg);
 
 						guiRawImg.updateImage(raw);
-						guiProcessedImg.updateImage(Main.matToBufferedImage(visionData.binMask.clone()));
+						guiProcessedImg.updateImage(Utils.matToBufferedImage(visionData.binMask.clone()));
 					} catch (IOException e) {
 						// means mat2BufferedImage broke
 						// non-fatal error, let the program continue
@@ -186,14 +207,14 @@ public class MainThread extends Thread {
 					// dumps
 					
 					// then dump images asynchronously
-					if (elapsedTime >= visionParams.getByName("imgDumpTime").getValueI() && visionParams.getByName("imgDumpTime").getValueI() != -1) {
+					if (elapsedTime >= visionParams.getByName("imgDumpTime").getValueD() && visionParams.getByName("imgDumpTime").getValueD() != -1) {
 						// Sets the current number of seconds
 						current_time_seconds = (((double) System.currentTimeMillis()) / 1000);
 						try {
 							Mat draw = frame.clone();
 							Pipeline.drawPreferredTarget(draw, visionData);
-							Bundle b = new Bundle(Main.matToBufferedImage(frame.clone()),
-									Main.matToBufferedImage(visionData.binMask), Main.matToBufferedImage(draw),
+							Bundle b = new Bundle(Utils.matToBufferedImage(frame.clone()),
+									Utils.matToBufferedImage(visionData.binMask), Utils.matToBufferedImage(draw),
 									timestamp, visionParams);
 							ImageDumpScheduler.schedule(b);
 							timestamp++;
@@ -203,10 +224,48 @@ public class MainThread extends Thread {
 						}
 					}
 				}
+				if(csvFile.getParentFile().exists()) {
+					List<String> data = new ArrayList<String>();
+					if(first) {
+						data.add("Elapsed Time");
+						data.add("FPS");
+						data.add("Number of Targets");
+						data.add("Preffered Target X");
+						data.add("Preffered Target Y");
+						data.add("Preffered Target Area");
+						data.add("Preffered Target Distance");
+						try {
+							Log.logData(csvFile, data);
+						}catch(Exception e) {
+							Log.e("Error while logging vision data to csv file!", true);
+							Log.e(e.getMessage(), true);
+						}
+						data.clear();
+						first = false;
+					}
+					data.add(""+(System.currentTimeMillis()-lastTime));
+					data.add(""+visionData.fps);
+					data.add(""+visionData.targetsFound.size());
+					if(visionData.preferredTarget != null) {
+						data.add(visionData.preferredTarget.xCentreNorm+"");
+						data.add(visionData.preferredTarget.yCentreNorm+"");
+						data.add(visionData.preferredTarget.areaNorm+"");
+						data.add(visionData.preferredTarget.distance+"");
+					}
+					try {
+						Log.logData(csvFile, data);
+					}catch(Exception e) {
+						Log.e("Error while logging vision data to csv file!", true);
+						Log.e(e.getMessage(), true);
+					}
+				}
+				
 				// Display the frame rate onto the console
 				double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND)
 						* 1000;
 				Log.i("Vision FPS: "+visionData.fps+", pipeline took: "+pipelineTime+" ms\n",false);
+				
+				lastTime = System.currentTimeMillis();
 			} catch (Exception e) {
 				Log.e(e.getMessage(), true);e.printStackTrace();
 				try {

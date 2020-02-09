@@ -20,9 +20,12 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import ca.team2706.fvts.core.Log;
+import ca.team2706.fvts.core.Utils;
 
 public class CLI implements Runnable, ActionListener {
 
+	public static File logFile;
+	
 	private JFrame frame;
 	private Socket s;
 	private PrintWriter out;
@@ -52,20 +55,11 @@ public class CLI implements Runnable, ActionListener {
 		new Thread() {
 			@Override
 			public void run() {
-
+				if(logFile == null || !logFile.getParentFile().exists())
+					return;
 				try {
-					File dir = new File("logs/");
-					if (!dir.exists()) {
-						dir.mkdirs();
-					}
-					File logFile = new File(dir, "log.log");
-
-					if (!logFile.exists()) {
-
-						logFile.getParentFile().mkdirs();
-						logFile.createNewFile();
-
-					}
+					logFile.delete();
+					logFile.createNewFile();
 
 					PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
 
@@ -226,7 +220,7 @@ public class CLI implements Runnable, ActionListener {
 			if (message.split(" ").length > 1) {
 				ip = message.split(" ")[1];
 			}
-			Main.loadVisionParams();
+			Utils.loadVisionParams();
 			Main.initNetworkTables(ip);
 			out.println("Success");
 			return;

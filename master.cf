@@ -1,6 +1,6 @@
 config:
   allowOverride=true
-  
+  logFile=logs/log$1.log
   
 enabled:
   tape=true
