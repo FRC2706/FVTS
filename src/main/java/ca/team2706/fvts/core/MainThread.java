@@ -1,5 +1,7 @@
 package ca.team2706.fvts.core;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -182,7 +184,13 @@ public class MainThread extends Thread {
 						// May throw a NullPointerException if initializing
 						// the window failed
 						BufferedImage raw = Utils.matToBufferedImage(rawOutputImg);
-
+						if(visionData.preferredTarget != null) {
+							double dist = visionData.preferredTarget.distance;
+							Graphics g = raw.createGraphics();
+							g.setColor(Color.GREEN);
+							g.drawString("dist: "+dist, 50, 50);
+							g.dispose();
+						}
 						guiRawImg.updateImage(raw);
 						guiProcessedImg.updateImage(Utils.matToBufferedImage(visionData.binMask.clone()));
 					} catch (IOException e) {
