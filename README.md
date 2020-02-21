@@ -3,7 +3,7 @@
 
 # About
 
-FVTS is a vision system written in Java designed to be used for any FRC game with minimal to no modifications. It is currently experimental and is not warranted for competition use.
+FVTS is a vision system written in Java designed to be used for any FRC game with minimal to no modifications. It is not fully tested and as such considered experimental, however it will likely work as shown by our non robot testing.
 
 # Attribution and license
 
