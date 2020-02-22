@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
 public class Main {
 
 	public static final File MASTER_CONFIG_FILE = new File("master.cf");
-	
+
 	public static String filename = "";
 	public static int timestamp = 0;
 	public static File timestampfile;
@@ -65,10 +65,6 @@ public class Main {
 	/** The vision parameters, this is used by the vision pipeline **/
 	public static List<VisionParams> visionParamsList = new ArrayList<VisionParams>();
 
-	
-
-	
-
 	public static boolean b = true;
 
 	/**
@@ -80,8 +76,8 @@ public class Main {
 	 */
 
 	public static void main(String[] args) throws Exception {
-		System.out.println("FVTS Main "+Constants.VERSION_STRING+" developed by "+Constants.AUTHOR);
-		
+		System.out.println("FVTS Main " + Constants.VERSION_STRING + " developed by " + Constants.AUTHOR);
+
 		// Must be included!
 		// Loads OpenCV
 		System.loadLibrary(Constants.OPENCV_LIBRARY);
@@ -109,7 +105,6 @@ public class Main {
 
 		// Connect NetworkTables, and get access to the publishing table
 		serverIp = cmd.getOptionValue("ip", "");
-		
 
 		visionParamsFile = new File(cmd.getOptionValue("config", "visionParams.properties"));
 
@@ -129,7 +124,7 @@ public class Main {
 			}
 		}
 		runID = Utils.findFirstAvailable(masterConfig.get("logFile"));
-		CLI.logFile = new File(masterConfig.get("logFile").replaceAll("\\$1", ""+runID));
+		CLI.logFile = new File(masterConfig.get("logFile").replaceAll("\\$1", "" + runID));
 
 		String allowOverride = masterConfig.get("allowOverride");
 
@@ -137,11 +132,6 @@ public class Main {
 
 			allowOverride = "true";
 		}
-		// Should network tables be started so that the settings can be overridden?
-		boolean allowOverrideB = Boolean.valueOf(allowOverride);
-
-		if (allowOverrideB)
-			NetworkTablesManager.init();
 
 		ImageDumpScheduler.start();
 
@@ -156,9 +146,9 @@ public class Main {
 					s = "true";
 				}
 				boolean enabled = Boolean.valueOf(s);
-				
-				Log.i(params.getByName("name").getValue()+" enabled: "+enabled,true);
-				
+
+				Log.i(params.getByName("name").getValue() + " enabled: " + enabled, true);
+
 				MainThread thread = new MainThread(params);
 				if (enabled) {
 					thread.start();
@@ -170,5 +160,10 @@ public class Main {
 			}
 
 		} // end main vision startup loop
+			// Should network tables be started so that the settings can be overridden?
+		boolean allowOverrideB = Boolean.valueOf(allowOverride);
+
+		if (allowOverrideB)
+			NetworkTablesManager.init();
 	}
 }

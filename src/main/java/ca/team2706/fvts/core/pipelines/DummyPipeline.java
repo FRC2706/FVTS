@@ -18,7 +18,11 @@ public class DummyPipeline extends AbstractPipeline {
 
 	@Override
 	public VisionData process(Mat src, VisionParams visionParams) {
-		return new VisionData();
+		VisionData data = new VisionData();
+		data.binMask = src;
+		data.outputImg = src;
+		data.params = visionParams;
+		return data;
 	}
 
 	@Override
