@@ -28,6 +28,7 @@ public class FaceDetectPipeline extends AbstractPipeline {
 	public FaceDetectPipeline() {
 		super("facedetect");
 	}
+
 	/** Numerical Constants **/
 	public static final int NANOSECONDS_PER_SECOND = 1000000000;
 
@@ -72,12 +73,23 @@ public class FaceDetectPipeline extends AbstractPipeline {
 		 * 
 		 */
 
-		for(Target t : ret.targetsFound) {
+		for (Target t : ret.targetsFound) {
 			double y = t.boundingBox.height;
 
-			double x = (y - visionParams.getByName("yIntercept").getValueD()) / visionParams.getByName("slope").getValueD();
+			double x = (y - visionParams.getByName("distYIntercept").getValueD())
+					/ visionParams.getByName("distSlope").getValueD();
 
-			// Now we have the distance in cm!!!
+			// Now we have the distance!!!
+
+			// Do the offset math which is using quadratics and please let this work, ive
+			// been trying this for 3 hours and its 00:00, i am very tired but this code
+			// keeps me up at night
+			double aoA = visionParams.getByName("aoA").getValueD();
+			double aoB = visionParams.getByName("aoB").getValueD();
+			double aoC = visionParams.getByName("aoC").getValueD();
+			double magic = Math.abs(t.xCentreNorm) / (t.areaNorm / (src.rows() * src.cols()));
+			double xo = Math.pow(magic, 2) * aoA + magic * aoB + aoC;
+			x += xo;
 
 			t.distance = x;
 
@@ -92,12 +104,12 @@ public class FaceDetectPipeline extends AbstractPipeline {
 	@Override
 	public void selectPreferredTarget(VisionData visionData, VisionParams visionParams) {
 		double maxArea = Double.NEGATIVE_INFINITY;
-		for(Target t : visionData.targetsFound) {
-			if(t.areaNorm > maxArea)
+		for (Target t : visionData.targetsFound) {
+			if (t.areaNorm > maxArea)
 				maxArea = t.areaNorm;
 		}
-		for(Target t : visionData.targetsFound) {
-			if(t.areaNorm == maxArea) {
+		for (Target t : visionData.targetsFound) {
+			if (t.areaNorm == maxArea) {
 				visionData.preferredTarget = t;
 				return;
 			}
@@ -140,18 +152,23 @@ public class FaceDetectPipeline extends AbstractPipeline {
 	public List<AttributeOptions> getOptions() {
 		List<AttributeOptions> ret = new ArrayList<AttributeOptions>();
 		ret.add(new AttributeOptions("minFaceSize", true));
-		ret.add(new AttributeOptions("slope", true));
-		ret.add(new AttributeOptions("yIntercept", true));
+		ret.add(new AttributeOptions("distSlope", true));
+		ret.add(new AttributeOptions("distYIntercept", true));
+		ret.add(new AttributeOptions("aoA", true));
+		ret.add(new AttributeOptions("aoB", true));
+		ret.add(new AttributeOptions("aoC", true));
 		return ret;
 	}
 
 	private boolean setup = false;
 	private Lock lock = new ReentrantLock();
+
 	@Override
 	public void init(MainThread thread) {
 		lock.lock();
-		if(!setup) {
-			faceDetector.load(new File(Constants.RESOURCE_FOLDER, "haarcascades/haarcascade_frontalface_alt.xml").getPath());
+		if (!setup) {
+			faceDetector.load(
+					new File(Constants.RESOURCE_FOLDER, "haarcascades/haarcascade_frontalface_alt.xml").getPath());
 			setup = true;
 		}
 		lock.unlock();

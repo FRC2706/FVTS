@@ -19,7 +19,7 @@ import ca.team2706.fvts.core.VisionData.Target;
 import ca.team2706.fvts.core.params.AttributeOptions;
 import ca.team2706.fvts.core.params.VisionParams;
 
-public class BlobDetectPipeline extends AbstractPipeline{
+public class BlobDetectPipeline extends AbstractPipeline {
 
 	public BlobDetectPipeline() {
 		super("blobdetect");
@@ -60,16 +60,20 @@ public class BlobDetectPipeline extends AbstractPipeline{
 		// Colour threshold
 		Mat hsvThreshold = new Mat();
 
-		Core.inRange(src, new Scalar(visionParams.getByName("minHue").getValueI(), visionParams.getByName("minSaturation").getValueI(), visionParams.getByName("minValue").getValueI()),
-				new Scalar(visionParams.getByName("maxHue").getValueI(), visionParams.getByName("maxSaturation").getValueI(), visionParams.getByName("maxValue").getValueI()), hsvThreshold);
+		Core.inRange(src, new Scalar(visionParams.getByName("minHue").getValueI(),
+				visionParams.getByName("minSaturation").getValueI(), visionParams.getByName("minValue").getValueI()),
+				new Scalar(visionParams.getByName("maxHue").getValueI(),
+						visionParams.getByName("maxSaturation").getValueI(),
+						visionParams.getByName("maxValue").getValueI()),
+				hsvThreshold);
 
 		// Erode - Dilate*2 - Erode
-		Imgproc.erode(hsvThreshold, erodeOne, new Mat(), new Point(), visionParams.getByName("erodeDilateIterations").getValueI(),
-				Core.BORDER_CONSTANT, new Scalar(0));
-		Imgproc.dilate(erodeOne, dilated, new Mat(), new Point(), 2 * visionParams.getByName("erodeDilateIterations").getValueI(),
-				Core.BORDER_CONSTANT, new Scalar(0));
-		Imgproc.erode(dilated, erodeTwo, new Mat(), new Point(), visionParams.getByName("erodeDilateIterations").getValueI(),
-				Core.BORDER_CONSTANT, new Scalar(0));
+		Imgproc.erode(hsvThreshold, erodeOne, new Mat(), new Point(),
+				visionParams.getByName("erodeDilateIterations").getValueI(), Core.BORDER_CONSTANT, new Scalar(0));
+		Imgproc.dilate(erodeOne, dilated, new Mat(), new Point(),
+				2 * visionParams.getByName("erodeDilateIterations").getValueI(), Core.BORDER_CONSTANT, new Scalar(0));
+		Imgproc.erode(dilated, erodeTwo, new Mat(), new Point(),
+				visionParams.getByName("erodeDilateIterations").getValueI(), Core.BORDER_CONSTANT, new Scalar(0));
 
 		visionData.binMask = erodeTwo.clone();
 
@@ -107,19 +111,29 @@ public class BlobDetectPipeline extends AbstractPipeline{
 		 * using y = mx+b we can determine that the formula to calculate x from y is x =
 		 * (y-b)/m
 		 * 
+		 * 
 		 */
 
-		for(Target t : visionData.targetsFound) {
+		for (Target t : visionData.targetsFound) {
 			double y = t.boundingBox.height;
 
-			double x = (y - visionParams.getByName("yIntercept").getValueD()) / visionParams.getByName("slope").getValueD();
+			double x = (y - visionParams.getByName("distYIntercept").getValueD())
+					/ visionParams.getByName("distSlope").getValueD();
 
-			// Now we have the distance in cm!!!
+			// Now we have the distance!!!
+
+			// Do the offset math which is using quadratics and please let this work, ive been trying this for 3 hours and its 00:00, i am very tired but this code keeps me up at night
+			double aoA = visionParams.getByName("aoA").getValueD();
+			double aoB = visionParams.getByName("aoB").getValueD();
+			double aoC = visionParams.getByName("aoC").getValueD();
+			double magic = Math.abs(t.xCentreNorm) / (t.areaNorm / (src.rows() * src.cols()));
+			double xo = Math.pow(magic,2) * aoA + magic * aoB + aoC;
+			x += xo;
 
 			t.distance = x;
 
 		}
-		
+
 		long now = System.nanoTime();
 		visionData.fps = ((double) NANOSECONDS_PER_SECOND) / (now - fpsTimer);
 		visionData.fps = ((int) (visionData.fps * 10)) / 10.0; // round to 1 decimal place
@@ -339,13 +353,16 @@ public class BlobDetectPipeline extends AbstractPipeline{
 
 		AttributeOptions resolution = new AttributeOptions("resolution", true);
 
-		AttributeOptions slope = new AttributeOptions("slope", true);
+		AttributeOptions slope = new AttributeOptions("distSlope", true);
+		AttributeOptions yIntercept = new AttributeOptions("distYIntercept", true);
 
-		AttributeOptions yIntercept = new AttributeOptions("yIntercept", true);
+		AttributeOptions aoA = new AttributeOptions("aoA", true);
+		AttributeOptions aoB = new AttributeOptions("aoB", true);
+		AttributeOptions aoC = new AttributeOptions("aoC", true);
 
 		AttributeOptions group = new AttributeOptions("group", true);
-		AttributeOptions angle = new AttributeOptions("groupAngle",true);
-		
+		AttributeOptions angle = new AttributeOptions("groupAngle", true);
+
 		ret.add(minHue);
 		ret.add(maxHue);
 		ret.add(minSat);
@@ -359,15 +376,18 @@ public class BlobDetectPipeline extends AbstractPipeline{
 		ret.add(resolution);
 		ret.add(slope);
 		ret.add(yIntercept);
+		ret.add(aoA);
+		ret.add(aoB);
+		ret.add(aoC);
 		ret.add(group);
 		ret.add(angle);
-		
+
 		return ret;
 	}
 
 	@Override
 	public void init(MainThread thread) {
-		
+
 	}
 
 }
