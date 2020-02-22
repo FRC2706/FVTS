@@ -17,9 +17,11 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 
+import ca.team2706.fvts.core.interfaces.AbstractInterface;
 import ca.team2706.fvts.core.params.Attribute;
 import ca.team2706.fvts.core.params.AttributeOptions;
 import ca.team2706.fvts.core.params.VisionParams;
+import ca.team2706.fvts.core.pipelines.AbstractPipeline;
 import ca.team2706.fvts.main.Main;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
@@ -79,74 +81,40 @@ public class Utils {
 		return bi;
 	}
 
+	public static List<AttributeOptions> getOptions(String pipelineName, String interfaceName){
+		AttributeOptions name = new AttributeOptions("name", true);
+
+		AttributeOptions type = new AttributeOptions("type", true);
+
+		AttributeOptions identifier = new AttributeOptions("identifier", true);
+
+		AttributeOptions enabled = new AttributeOptions("enabled", false);
+		
+		AttributeOptions csvLog = new AttributeOptions("csvLog", true);
+
+		List<AttributeOptions> options = new ArrayList<AttributeOptions>();
+		options.add(name);
+		
+		options.add(type);
+		options.add(identifier);
+		options.add(enabled);
+		options.add(csvLog);
+		
+		AbstractPipeline pipeline = AbstractPipeline.getByName(pipelineName);
+		options.addAll(pipeline.getOptions());
+		
+		AbstractInterface outputInterface = AbstractInterface.getByName(interfaceName);
+		options.addAll(outputInterface.getOptions());
+		
+		return options;
+	}
+	
 	/**
 	 * Loads the visionTable params! :]
 	 **/
 
 	public static List<VisionParams> loadVisionParams() {
 		try {
-			AttributeOptions name = new AttributeOptions("name", true);
-
-			AttributeOptions minHue = new AttributeOptions("minHue", true);
-			AttributeOptions maxHue = new AttributeOptions("maxHue", true);
-			AttributeOptions minSat = new AttributeOptions("minSaturation", true);
-			AttributeOptions maxSat = new AttributeOptions("maxSaturation", true);
-			AttributeOptions minVal = new AttributeOptions("minValue", true);
-			AttributeOptions maxVal = new AttributeOptions("maxValue", true);
-
-			AttributeOptions distToCentreImportance = new AttributeOptions("distToCentreImportance", true);
-
-			AttributeOptions imageFile = new AttributeOptions("imageFile", true);
-
-			AttributeOptions minArea = new AttributeOptions("minArea", true);
-
-			AttributeOptions erodeDilateIterations = new AttributeOptions("erodeDilateIterations", true);
-
-			AttributeOptions resolution = new AttributeOptions("resolution", true);
-
-			AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath", true);
-
-			AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime", true);
-
-			AttributeOptions slope = new AttributeOptions("slope", true);
-
-			AttributeOptions yIntercept = new AttributeOptions("yIntercept", true);
-
-			AttributeOptions group = new AttributeOptions("group", true);
-			AttributeOptions angle = new AttributeOptions("groupAngle",true);
-
-			AttributeOptions type = new AttributeOptions("type", true);
-
-			AttributeOptions identifier = new AttributeOptions("identifier", true);
-
-			AttributeOptions enabled = new AttributeOptions("enabled", false);
-			
-			AttributeOptions csvLog = new AttributeOptions("csvLog", true);
-
-			Main.options = new ArrayList<AttributeOptions>();
-			Main.options.add(name);
-			Main.options.add(minHue);
-			Main.options.add(maxHue);
-			Main.options.add(minSat);
-			Main.options.add(maxSat);
-			Main.options.add(minVal);
-			Main.options.add(maxVal);
-			Main.options.add(distToCentreImportance);
-			Main.options.add(imageFile);
-			Main.options.add(minArea);
-			Main.options.add(erodeDilateIterations);
-			Main.options.add(resolution);
-			Main.options.add(imgDumpPath);
-			Main.options.add(imgDumpTime);
-			Main.options.add(slope);
-			Main.options.add(yIntercept);
-			Main.options.add(group);
-			Main.options.add(angle);
-			Main.options.add(type);
-			Main.options.add(identifier);
-			Main.options.add(enabled);
-			Main.options.add(csvLog);
-			
 			List<String> lists = ConfigParser.listLists(Main.visionParamsFile);
 			List<VisionParams> ret = new ArrayList<VisionParams>();
 
@@ -156,10 +124,22 @@ public class Utils {
 
 				List<Attribute> attribs = new ArrayList<Attribute>();
 				attribs.add(new Attribute("name", s));
+				String pipelineName = null;
+				String interfaceName = null;
 				for (String s1 : data.keySet()) {
+					if(s1.equals("pipeline")) {
+						pipelineName = data.get(s1);
+					}else if(s1.equals("interface")){
+						interfaceName = data.get(s1);
+					}
 					attribs.add(new Attribute(s1, data.get(s1)));
 				}
-				VisionParams params = new VisionParams(attribs, Main.options);
+				if(interfaceName == null || pipelineName == null) {
+					Log.e("Missing pipeline or interface in config "+s, true);
+					System.exit(1);
+				}
+				List<AttributeOptions> options = getOptions(pipelineName, interfaceName);
+				VisionParams params = new VisionParams(attribs, options);
 				String resolution1 = params.getByName("resolution").getValue();
 				int width = Integer.valueOf(resolution1.split("x")[0]);
 				int height = Integer.valueOf(resolution1.split("x")[1]);

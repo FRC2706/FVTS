@@ -3,6 +3,7 @@ package ca.team2706.fvts.main;
 import java.io.File;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.locks.Lock;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -21,9 +22,10 @@ import ca.team2706.fvts.core.Utils;
 import ca.team2706.fvts.core.VisionCameraServer;
 import ca.team2706.fvts.core.VisionData;
 import ca.team2706.fvts.core.VisionData.Target;
+import ca.team2706.fvts.core.interfaces.AbstractInterface;
+import ca.team2706.fvts.core.interfaces.DummyInterface;
 import ca.team2706.fvts.core.params.Attribute;
 import ca.team2706.fvts.core.params.VisionParams;
-import ca.team2706.fvts.main.Main;
 
 public class DataViewer {
 	@SuppressWarnings("resource")
@@ -91,6 +93,7 @@ public class DataViewer {
 		ImageDumpScheduler.start();
 
 		VisionCameraServer.startServer();
+		DummyInterface overrideInterface = (DummyInterface) AbstractInterface.getByName("dummy");
 
 		for (VisionParams params : Main.visionParamsList) {
 			try {
@@ -104,7 +107,8 @@ public class DataViewer {
 
 				Log.i(params.getByName("name").getValue() + " enabled: " + enabled, true);
 
-				MainThread thread = new MainThread(params, false);
+				MainThread thread = new MainThread(params);
+				thread.setOutputInterface(overrideInterface);
 				if (enabled) {
 					thread.start();
 				}
@@ -119,12 +123,10 @@ public class DataViewer {
 		if (constant) {
 			while (true) {
 				for(MainThread thread : Main.threads) {
-					if(thread.lock == null)
-						continue;
-					thread.lock.lock();
-					VisionData data = thread.lastFrame;
-					thread.lastFrame = null;
-					thread.lock.unlock();
+					String name = thread.getVisionParams().getByName("name").getValue();
+					Lock l = overrideInterface.locks.get(name);
+					VisionData data = overrideInterface.lastFrame.get(name);
+					l.unlock();
 					System.out.println("Data (" + data.params.getByName("name").getValue() + "):");
 					System.out.println("FPS: " + data.fps);
 					System.out.println("Number of targets found: " + data.targetsFound.size());
@@ -152,14 +154,10 @@ public class DataViewer {
 			while(true) {
 				in.nextLine();
 				for(MainThread thread : Main.threads) {
-					if(thread.lock == null)
-						continue;
-					thread.lock.lock();
-					if(thread.lastFrame == null)
-						continue;
-					VisionData data = thread.lastFrame;
-					thread.lastFrame = null;
-					thread.lock.unlock();
+					String name = thread.getVisionParams().getByName("name").getValue();
+					Lock l = overrideInterface.locks.get(name);
+					VisionData data = overrideInterface.lastFrame.get(name);
+					l.unlock();
 					System.out.println("Data (" + data.params.getByName("name").getValue() + "):");
 					System.out.println("FPS: " + data.fps);
 					System.out.println("Number of targets found: " + data.targetsFound.size());

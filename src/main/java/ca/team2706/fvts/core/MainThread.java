@@ -7,8 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.imageio.ImageIO;
 
@@ -16,18 +14,44 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import ca.team2706.fvts.core.interfaces.AbstractInterface;
 import ca.team2706.fvts.core.params.VisionParams;
+import ca.team2706.fvts.core.pipelines.AbstractPipeline;
+import ca.team2706.fvts.core.pipelines.BlobDetectPipeline;
 import ca.team2706.fvts.main.Main;
 
 public class MainThread extends Thread {
 
 	public VisionParams visionParams;
 	public ParamsSelector selector;
-	private boolean networkTables;
 
-	public MainThread(VisionParams params, boolean doNetworkTables) {
+	public MainThread(VisionParams params) {
 		this.visionParams = params;
-		this.networkTables = doNetworkTables;
+		String interfaceN = visionParams.getByName("interface").getValue();
+		outputInterface = AbstractInterface.getByName(interfaceN);
+		if(outputInterface == null) {
+			Log.e("No interface found for profile "+visionParams.getByName("name").getValue(),true);
+			System.exit(1);
+		}
+		
+		
+		String pipelineN = visionParams.getByName("pipeline").getValue();
+		pipeline = AbstractPipeline.getByName(pipelineN);
+		if(pipeline == null) {
+			Log.e("No pipeline found for profile "+visionParams.getByName("name").getValue(), true);
+			System.exit(1);
+		}
+	}
+
+	public VisionParams getVisionParams() {
+		return visionParams;
+	}
+
+	public void setOutputInterface(AbstractInterface outputInterface) {
+		this.outputInterface = outputInterface;
+	}
+	public void setPipeline(AbstractPipeline pipeline) {
+		this.pipeline = pipeline;
 	}
 
 	public Mat frame;
@@ -35,14 +59,11 @@ public class MainThread extends Thread {
 	public boolean useCamera = true;
 	public static int timestamp = 0;
 	public double lastDist = 0;
-	public VisionData lastFrame = null;
-	public Lock lock;
-
+	private AbstractInterface outputInterface;
+	private AbstractPipeline pipeline;
+	
 	@Override
 	public void run() {
-		if(!networkTables)
-			lock = new ReentrantLock();
-		
 		// Setup the camera server for this camera
 		try {
 			VisionCameraServer.initCamera(this.visionParams.getByName("type").getValue(),
@@ -149,11 +170,11 @@ public class MainThread extends Thread {
 				// Log when the pipeline starts
 				long pipelineStart = System.nanoTime();
 				// Process the frame
-				VisionData visionData = Pipeline.process(frame, visionParams, use_GUI);
+				VisionData visionData = pipeline.process(frame, visionParams);
 				// Log when the pipeline stops
 				long pipelineEnd = System.nanoTime();
 				// Selects the prefered target
-				Pipeline.selectPreferredTarget(visionData, visionParams, visionParams.getByName("group").getValueI() == 1 ? true : false,visionParams.getByName("groupAngle").getValueI());
+				pipeline.selectPreferredTarget(visionData, visionParams);
 				// Creates the raw output image object
 				Mat rawOutputImg;
 				if (use_GUI) {
@@ -162,7 +183,7 @@ public class MainThread extends Thread {
 					rawOutputImg = frame.clone();
 					
 					// Draws the preffered target
-					Pipeline.drawPreferredTarget(rawOutputImg, visionData);
+					pipeline.drawPreferredTarget(rawOutputImg, visionData);
 				} else {
 					// Sets the raw image to the frame
 					rawOutputImg = frame.clone();
@@ -170,14 +191,9 @@ public class MainThread extends Thread {
 
 				if (visionData.preferredTarget != null)
 					lastDist = visionData.preferredTarget.distance;
-				if(networkTables) {
-					// Sends the data to the vision table
-					Main.sendVisionDataOverNetworkTables(visionData);
-				}else {
-					lock.lock();
-					lastFrame = visionData;
-					lock.unlock();
-				}
+				
+				outputInterface.publishData(visionData, this);
+				
 				// display the processed frame in the GUI
 				if (use_GUI) {
 					try {
@@ -220,7 +236,7 @@ public class MainThread extends Thread {
 						current_time_seconds = (((double) System.currentTimeMillis()) / 1000);
 						try {
 							Mat draw = frame.clone();
-							Pipeline.drawPreferredTarget(draw, visionData);
+							pipeline.drawPreferredTarget(draw, visionData);
 							Bundle b = new Bundle(Utils.matToBufferedImage(frame.clone()),
 									Utils.matToBufferedImage(visionData.binMask), Utils.matToBufferedImage(draw),
 									timestamp, visionParams);
@@ -269,7 +285,7 @@ public class MainThread extends Thread {
 				}
 				
 				// Display the frame rate onto the console
-				double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / Pipeline.NANOSECONDS_PER_SECOND)
+				double pipelineTime = (((double) (pipelineEnd - pipelineStart)) / BlobDetectPipeline.NANOSECONDS_PER_SECOND)
 						* 1000;
 				Log.i("Vision FPS: "+visionData.fps+", pipeline took: "+pipelineTime+" ms\n",false);
 				
@@ -285,19 +301,8 @@ public class MainThread extends Thread {
 		}
 
 	}
-
 	public void updateParams(VisionParams params) {
 		this.visionParams = params;
-	}
-
-	public VisionData forceProcess() {
-
-		VisionData visionData = Pipeline.process(frame, visionParams, false);
-
-		Pipeline.selectPreferredTarget(visionData, visionParams, visionParams.getByName("group").getValueI() == 1 ? true : false,visionParams.getByName("groupAngle").getValueI());
-
-		return visionData;
-
 	}
 
 }

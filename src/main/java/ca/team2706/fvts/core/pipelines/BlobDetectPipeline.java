@@ -1,4 +1,4 @@
-package ca.team2706.fvts.core;
+package ca.team2706.fvts.core.pipelines;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +13,16 @@ import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import ca.team2706.fvts.core.VisionData;
 import ca.team2706.fvts.core.VisionData.Target;
+import ca.team2706.fvts.core.params.AttributeOptions;
 import ca.team2706.fvts.core.params.VisionParams;
 
-public class Pipeline {
+public class BlobDetectPipeline extends AbstractPipeline{
+
+	public BlobDetectPipeline() {
+		super("blobdetect");
+	}
 
 	/** Numerical Constants **/
 	public static final int NANOSECONDS_PER_SECOND = 1000000000;
@@ -31,7 +37,7 @@ public class Pipeline {
 	 * @param visionParams Parameters for visionTable
 	 * @return All the data!
 	 */
-	public static VisionData process(Mat src, VisionParams visionParams, boolean use_GUI) {
+	public VisionData process(Mat src, VisionParams visionParams) {
 
 		// As a memory footprint optimization, when running on a Pi, re-use one working
 		// image in memory
@@ -108,7 +114,9 @@ public class Pipeline {
 	 *
 	 * @param visionData
 	 */
-	public static void selectPreferredTarget(VisionData visionData, VisionParams visionParams, boolean group, int groupAngle) {
+	public void selectPreferredTarget(VisionData visionData, VisionParams visionParams) {
+		boolean group = visionParams.getByName("group").getValueI() == 1 ? true : false;
+		int groupAngle = visionParams.getByName("groupAngle").getValueI();
 
 		if (visionData.targetsFound.size() == 0) {
 			return;
@@ -296,7 +304,7 @@ public class Pipeline {
 	private static final Scalar BACKGROUND_TARGET_COLOUR = new Scalar(237, 19, 75); // Purple (Non-Preffered Target)
 	private static final Scalar PREFERRED_TARGET_COLOUR = new Scalar(30, 180, 30); // Green (Preffered Target)
 
-	public static void drawPreferredTarget(Mat src, VisionData visionData) {
+	public void drawPreferredTarget(Mat src, VisionData visionData) {
 
 		// DRAW STUFF ONTO THE OUTPUT IMAGE
 		// for each target found, draw the bounding box and centre
@@ -321,6 +329,58 @@ public class Pipeline {
 							visionData.preferredTarget.boundingBox.y + visionData.preferredTarget.boundingBox.height),
 					PREFERRED_TARGET_COLOUR, 7);
 		}
+	}
+
+	@Override
+	public List<AttributeOptions> getOptions() {
+		List<AttributeOptions> ret = new ArrayList<AttributeOptions>();
+		AttributeOptions minHue = new AttributeOptions("minHue", true);
+		AttributeOptions maxHue = new AttributeOptions("maxHue", true);
+		AttributeOptions minSat = new AttributeOptions("minSaturation", true);
+		AttributeOptions maxSat = new AttributeOptions("maxSaturation", true);
+		AttributeOptions minVal = new AttributeOptions("minValue", true);
+		AttributeOptions maxVal = new AttributeOptions("maxValue", true);
+
+		AttributeOptions distToCentreImportance = new AttributeOptions("distToCentreImportance", true);
+
+		AttributeOptions imageFile = new AttributeOptions("imageFile", true);
+
+		AttributeOptions minArea = new AttributeOptions("minArea", true);
+
+		AttributeOptions erodeDilateIterations = new AttributeOptions("erodeDilateIterations", true);
+
+		AttributeOptions resolution = new AttributeOptions("resolution", true);
+
+		AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath", true);
+
+		AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime", true);
+
+		AttributeOptions slope = new AttributeOptions("slope", true);
+
+		AttributeOptions yIntercept = new AttributeOptions("yIntercept", true);
+
+		AttributeOptions group = new AttributeOptions("group", true);
+		AttributeOptions angle = new AttributeOptions("groupAngle",true);
+		
+		ret.add(minHue);
+		ret.add(maxHue);
+		ret.add(minSat);
+		ret.add(maxSat);
+		ret.add(minVal);
+		ret.add(maxVal);
+		ret.add(distToCentreImportance);
+		ret.add(imageFile);
+		ret.add(minArea);
+		ret.add(erodeDilateIterations);
+		ret.add(resolution);
+		ret.add(imgDumpPath);
+		ret.add(imgDumpTime);
+		ret.add(slope);
+		ret.add(yIntercept);
+		ret.add(group);
+		ret.add(angle);
+		
+		return ret;
 	}
 
 }

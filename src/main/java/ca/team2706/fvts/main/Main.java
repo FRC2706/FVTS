@@ -22,7 +22,6 @@ import ca.team2706.fvts.core.Utils;
 import ca.team2706.fvts.core.VisionCameraServer;
 import ca.team2706.fvts.core.VisionData;
 import ca.team2706.fvts.core.params.Attribute;
-import ca.team2706.fvts.core.params.AttributeOptions;
 import ca.team2706.fvts.core.params.VisionParams;
 
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
@@ -31,7 +30,6 @@ public class Main {
 
 	public static final File MASTER_CONFIG_FILE = new File("master.cf");
 	
-	public static List<AttributeOptions> options;
 	public static String filename = "";
 	public static int timestamp = 0;
 	public static File timestampfile;
@@ -39,6 +37,7 @@ public class Main {
 	public static File visionParamsFile;
 	public static boolean developmentMode = false;
 	public static int runID;
+	public static String serverIp = "";
 
 	public static List<MainThread> threads = new ArrayList<MainThread>();
 
@@ -67,74 +66,9 @@ public class Main {
 	/** The vision parameters, this is used by the vision pipeline **/
 	public static List<VisionParams> visionParamsList = new ArrayList<VisionParams>();
 
-	/**
-	 * Initilizes the Network Tables WARNING! Change 127.0.0.1 to the robot ip
-	 * before it is on master or it will not be fun :)
-	 */
-	public static void initNetworkTables(String ip) {
+	
 
-		// Tells the NetworkTable class that this is a client
-		NetworkTable.setClientMode();
-		// Sets the interval for updating NetworkTables
-		NetworkTable.setUpdateRate(0.02);
-		// Sets the vision table to the "vision" table that is in NetworkTables
-		loggingTable = NetworkTable.getTable("logging-level");
-
-		boolean use_GUI = true;
-
-		// If on Linux don't use guis
-		if (System.getProperty("os.arch").toLowerCase().indexOf("arm") != -1) {
-			use_GUI = false;
-		}
-
-		if (!use_GUI && ip.equals("")) {
-
-			// Sets the team number
-			NetworkTable.setTeam(2706); // Use this for the robit
-			// Enables DSClient
-			NetworkTable.setDSClientEnabled(true); // and this for the robit
-
-		} else {
-
-			if (ip.equals("")) {
-				ip = "localhost";
-			}
-
-			// Sets the IP adress to connect to
-			NetworkTable.setIPAddress(ip); // Use this for testing
-
-		}
-
-		// Initilizes NetworkTables
-		NetworkTable.initialize();
-	}
-
-	/**
-	 * Turns all the vision data into packets that kno da wae to get to the robo rio
-	 * :]
-	 *
-	 * @param visionData
-	 */
-	public static void sendVisionDataOverNetworkTables(VisionData visionData) {
-		NetworkTable visionTable = NetworkTablesManager.tables.get(visionData.params.getByName("name").getValue());
-		// Sends the data
-		// Puts the fps into the vision table
-		visionTable.putNumber("fps", visionData.fps);
-		// Puts the number of targets found into the vision table
-		visionTable.putNumber("numTargetsFound", visionData.targetsFound.size());
-
-		// If there is a target
-		if (visionData.preferredTarget != null) {
-			// Put the normalized x into the vision table
-			visionTable.putNumber("ctrX", visionData.preferredTarget.xCentreNorm);
-			// Puts the normalized area into the vision table
-			visionTable.putNumber("area", visionData.preferredTarget.areaNorm);
-
-			visionTable.putNumber("angle", visionData.preferredTarget.xCentreNorm * 45);
-			
-			visionTable.putNumber("distance", visionData.preferredTarget.distance);
-		}
-	}
+	
 
 	public static boolean b = true;
 
@@ -175,7 +109,8 @@ public class Main {
 		Main.developmentMode = cmd.hasOption("development");
 
 		// Connect NetworkTables, and get access to the publishing table
-		initNetworkTables(cmd.getOptionValue("ip", ""));
+		serverIp = cmd.getOptionValue("ip", "");
+		
 
 		visionParamsFile = new File(cmd.getOptionValue("config", "visionParams.properties"));
 
@@ -225,7 +160,7 @@ public class Main {
 				
 				Log.i(params.getByName("name").getValue()+" enabled: "+enabled,true);
 				
-				MainThread thread = new MainThread(params,true);
+				MainThread thread = new MainThread(params);
 				if (enabled) {
 					thread.start();
 				}
