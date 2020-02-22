@@ -22,7 +22,11 @@ public class NetworkTablesManager extends Thread{
 		
 		for(VisionParams params : Main.visionParamsList) {
 			
-			tables.get(params.getByName("name").getValue()).putBoolean("enabled", params.getByName("enabled").getValueB());
+			String name = params.getByName("name").getValue();
+			if(tables.get(name) == null)
+				tables.put(name, NetworkTable.getTable("vision-" + name + "/"));
+			
+			tables.get(name).putBoolean("enabled", params.getByName("enabled").getValueB());
 			
 		}
 		

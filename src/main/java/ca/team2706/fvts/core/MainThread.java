@@ -29,6 +29,7 @@ public class MainThread extends Thread {
 		this.visionParams = params;
 		String interfaceN = visionParams.getByName("interface").getValue();
 		outputInterface = AbstractInterface.getByName(interfaceN);
+		outputInterface.init(this);
 		if(outputInterface == null) {
 			Log.e("No interface found for profile "+visionParams.getByName("name").getValue(),true);
 			System.exit(1);
@@ -37,6 +38,7 @@ public class MainThread extends Thread {
 		
 		String pipelineN = visionParams.getByName("pipeline").getValue();
 		pipeline = AbstractPipeline.getByName(pipelineN);
+		pipeline.init(this);
 		if(pipeline == null) {
 			Log.e("No pipeline found for profile "+visionParams.getByName("name").getValue(), true);
 			System.exit(1);

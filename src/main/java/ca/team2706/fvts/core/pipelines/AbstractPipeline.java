@@ -6,6 +6,7 @@ import java.util.List;
 import org.opencv.core.Mat;
 
 import ca.team2706.fvts.core.Log;
+import ca.team2706.fvts.core.MainThread;
 import ca.team2706.fvts.core.VisionData;
 import ca.team2706.fvts.core.params.AttributeOptions;
 import ca.team2706.fvts.core.params.VisionParams;
@@ -15,6 +16,7 @@ public abstract class AbstractPipeline {
 	public abstract void selectPreferredTarget(VisionData visionData, VisionParams visionParams);
 	public abstract void drawPreferredTarget(Mat src, VisionData visionData);
 	public abstract List<AttributeOptions> getOptions();
+	public abstract void init(MainThread thread);
 	private String name;
 	public AbstractPipeline(String name) {
 		this.name = name;
@@ -28,6 +30,7 @@ public abstract class AbstractPipeline {
 			// Init
 			pipelines = new ArrayList<AbstractPipeline>();
 			pipelines.add(new BlobDetectPipeline());
+			pipelines.add(new DummyPipeline());
 		}
 		for(AbstractPipeline p : pipelines) {
 			if(p.getName().equalsIgnoreCase(name))

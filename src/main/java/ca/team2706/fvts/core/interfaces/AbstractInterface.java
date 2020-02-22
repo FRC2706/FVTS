@@ -28,6 +28,7 @@ public abstract class AbstractInterface {
 			// Init
 			interfaces = new ArrayList<AbstractInterface>();
 			interfaces.add(new NetworkTablesInterface());
+			interfaces.add(new DummyInterface());
 		}
 		for(AbstractInterface i : interfaces) {
 			if(i.getName().equalsIgnoreCase(name))

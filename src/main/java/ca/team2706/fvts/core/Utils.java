@@ -34,7 +34,7 @@ public class Utils {
 	 * @param suffix the suffix to put on the file name
 	 * @throws IOException
 	 */
-	
+
 	public static void imgDump(BufferedImage image, String suffix, int timestamp, String outputPath)
 			throws IOException {
 		// prepend the file name with the tamestamp integer, left-padded with
@@ -44,7 +44,7 @@ public class Utils {
 		if (match.equals("")) {
 			match = "practice";
 		}
-	
+
 		File output = new File(outputPath + match + "-" + String.format("%05d", timestamp) + "_" + suffix + ".png");
 		ImageIO.write(image, "png", output);
 	}
@@ -55,7 +55,7 @@ public class Utils {
 	 * @param Buffered Image to convert to matrix
 	 * @return The matrix from the buffered image
 	 */
-	
+
 	public static Mat bufferedImageToMat(BufferedImage bi) {
 		Mat mat = new Mat(bi.getHeight(), bi.getWidth(), CvType.CV_8UC3);
 		byte[] data = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
@@ -75,13 +75,13 @@ public class Utils {
 		MatOfByte mob = new MatOfByte();
 		Imgcodecs.imencode(".jpg", matrix, mob);
 		byte ba[] = mob.toArray();
-	
+
 		BufferedImage bi = ImageIO.read(new ByteArrayInputStream(ba));
 		matrix.release();
 		return bi;
 	}
 
-	public static List<AttributeOptions> getOptions(String pipelineName, String interfaceName){
+	public static List<AttributeOptions> getOptions(String pipelineName, String interfaceName) {
 		AttributeOptions name = new AttributeOptions("name", true);
 
 		AttributeOptions type = new AttributeOptions("type", true);
@@ -89,26 +89,26 @@ public class Utils {
 		AttributeOptions identifier = new AttributeOptions("identifier", true);
 
 		AttributeOptions enabled = new AttributeOptions("enabled", false);
-		
+
 		AttributeOptions csvLog = new AttributeOptions("csvLog", true);
 
 		List<AttributeOptions> options = new ArrayList<AttributeOptions>();
 		options.add(name);
-		
+
 		options.add(type);
 		options.add(identifier);
 		options.add(enabled);
 		options.add(csvLog);
-		
+
 		AbstractPipeline pipeline = AbstractPipeline.getByName(pipelineName);
 		options.addAll(pipeline.getOptions());
-		
+
 		AbstractInterface outputInterface = AbstractInterface.getByName(interfaceName);
 		options.addAll(outputInterface.getOptions());
-		
+
 		return options;
 	}
-	
+
 	/**
 	 * Loads the visionTable params! :]
 	 **/
@@ -127,15 +127,15 @@ public class Utils {
 				String pipelineName = null;
 				String interfaceName = null;
 				for (String s1 : data.keySet()) {
-					if(s1.equals("pipeline")) {
+					if (s1.equals("pipeline")) {
 						pipelineName = data.get(s1);
-					}else if(s1.equals("interface")){
+					} else if (s1.equals("interface")) {
 						interfaceName = data.get(s1);
 					}
 					attribs.add(new Attribute(s1, data.get(s1)));
 				}
-				if(interfaceName == null || pipelineName == null) {
-					Log.e("Missing pipeline or interface in config "+s, true);
+				if (interfaceName == null || pipelineName == null) {
+					Log.e("Missing pipeline or interface in config " + s, true);
 					System.exit(1);
 				}
 				List<AttributeOptions> options = getOptions(pipelineName, interfaceName);
@@ -145,14 +145,10 @@ public class Utils {
 				int height = Integer.valueOf(resolution1.split("x")[1]);
 				params.getAttribs().add(new Attribute("width", width + ""));
 				params.getAttribs().add(new Attribute("height", height + ""));
-				NetworkTable visionTable = NetworkTable
-						.getTable("vision-" + params.getByName("name").getValue() + "/");
-				NetworkTablesManager.tables.put(s, visionTable);
+
 				// The parameters are now valid, because it didn't throw an error
 				ret.add(params);
 			}
-
-			sendVisionParams(ret);
 			return ret;
 
 		} catch (Exception e1) {
@@ -162,15 +158,12 @@ public class Utils {
 		}
 		return null;
 	}
-	public static void sendVisionParams(List<VisionParams> visionParamsList) {
 
-		for (VisionParams params : visionParamsList) {
-
-			for (Attribute a : params.getAttribs()) {
-				if (a.getName().equals("name")) {
-					NetworkTable visionTable = NetworkTablesManager.tables.get(params.getByName("name").getValue());
-					visionTable.putString(a.getName(), a.getValue());
-				}
+	public static void sendVisionParams(VisionParams params) {
+		for (Attribute a : params.getAttribs()) {
+			if (a.getName().equals("name")) {
+				NetworkTable visionTable = NetworkTablesManager.tables.get(params.getByName("name").getValue());
+				visionTable.putString(a.getName(), a.getValue());
 			}
 		}
 	}
@@ -181,11 +174,11 @@ public class Utils {
 	 **/
 	public static void saveVisionParams() {
 		try {
-	
+
 			for (VisionParams params : Main.visionParamsList) {
 				Utils.saveVisionParams(params);
 			}
-	
+
 		} catch (Exception e1) {
 			Log.e(e1.getMessage(), true);
 		}
@@ -193,21 +186,23 @@ public class Utils {
 
 	public static void saveVisionParams(VisionParams params) throws Exception {
 		Map<String, String> data = new HashMap<String, String>();
-	
+
 		for (Attribute a : params.getAttribs()) {
-			if (!a.getName().equals("name") && !a.getName().equals("enabled") && !a.getName().equals("width") && !a.getName().equals("height")) {
+			if (!a.getName().equals("name") && !a.getName().equals("enabled") && !a.getName().equals("width")
+					&& !a.getName().equals("height")) {
 				data.put(a.getName(), a.getValue());
 			}
 		}
-	
+
 		ConfigParser.saveList(Main.visionParamsFile, params.getByName("name").getValue(), data);
 	}
+
 	public static int findFirstAvailable(String pattern) {
-		if(!pattern.contains("$1"))
+		if (!pattern.contains("$1"))
 			return 0;
-		for(int i = 0; i < Integer.MAX_VALUE; i++) {
-			File f = new File(pattern.replaceAll("\\$1", ""+i));
-			if(!f.exists())
+		for (int i = 0; i < Integer.MAX_VALUE; i++) {
+			File f = new File(pattern.replaceAll("\\$1", "" + i));
+			if (!f.exists())
 				return i;
 		}
 		return 0;

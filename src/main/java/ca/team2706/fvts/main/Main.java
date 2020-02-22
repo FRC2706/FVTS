@@ -20,7 +20,6 @@ import ca.team2706.fvts.core.MainThread;
 import ca.team2706.fvts.core.NetworkTablesManager;
 import ca.team2706.fvts.core.Utils;
 import ca.team2706.fvts.core.VisionCameraServer;
-import ca.team2706.fvts.core.VisionData;
 import ca.team2706.fvts.core.params.Attribute;
 import ca.team2706.fvts.core.params.VisionParams;
 
@@ -166,6 +165,7 @@ public class Main {
 				}
 				threads.add(thread);
 			} catch (Exception e) {
+				e.printStackTrace();
 				Log.e(e.getMessage(), true);
 			}
 

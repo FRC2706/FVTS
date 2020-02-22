@@ -13,6 +13,7 @@ import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import ca.team2706.fvts.core.MainThread;
 import ca.team2706.fvts.core.VisionData;
 import ca.team2706.fvts.core.VisionData.Target;
 import ca.team2706.fvts.core.params.AttributeOptions;
@@ -381,6 +382,11 @@ public class BlobDetectPipeline extends AbstractPipeline{
 		ret.add(angle);
 		
 		return ret;
+	}
+
+	@Override
+	public void init(MainThread thread) {
+		
 	}
 
 }
