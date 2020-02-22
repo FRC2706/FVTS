@@ -35,6 +35,8 @@ fi
 echo "Copying newly built jar to $PI_USER@$PI_ADDR"
 ssh ${PI_USER}@${PI_ADDR} "mkdir -p ${PI_DIR}"
 scp ${LOCAL_ZIP_PATH} ${PI_USER}@${PI_ADDR}:${PI_DIR}
+ssh ${PI_USER}@${PI_ADDR} "rm -rf resources/"
+scp -r resources/ ${PI_USER}@${PI_ADDR}:${PI_DIR}/
 ssh ${PI_USER}@${PI_ADDR} "yes | unzip ${PI_DIR}/$(basename ${LOCAL_ZIP_PATH}) -d ${PI_DIR}"
 
 # ERROR HANDLING: if the copy failed, abort

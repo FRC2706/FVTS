@@ -91,6 +91,10 @@ public class Utils {
 		AttributeOptions enabled = new AttributeOptions("enabled", false);
 
 		AttributeOptions csvLog = new AttributeOptions("csvLog", true);
+		
+		AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath", true);
+
+		AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime", true);
 
 		List<AttributeOptions> options = new ArrayList<AttributeOptions>();
 		options.add(name);
@@ -99,6 +103,8 @@ public class Utils {
 		options.add(identifier);
 		options.add(enabled);
 		options.add(csvLog);
+		options.add(imgDumpPath);
+		options.add(imgDumpTime);
 
 		AbstractPipeline pipeline = AbstractPipeline.getByName(pipelineName);
 		options.addAll(pipeline.getOptions());

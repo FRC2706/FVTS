@@ -94,13 +94,32 @@ public class BlobDetectPipeline extends AbstractPipeline{
 				target.xCentreNorm = ((double) target.xCentre - (src.width() / 2)) / (src.width() / 2);
 				target.yCentre = target.boundingBox.y + (target.boundingBox.height / 2);
 				target.yCentreNorm = ((double) target.yCentre - (src.height() / 2)) / (src.height() / 2);
-				target.areaNorm = (target.boundingBox.height * target.boundingBox.width) / ((double) imgArea);
+				target.areaNorm = areaNorm;
 				visionData.targetsFound.add(target);
 			}
 			// else
 			// skip this contour because it's too small
 		}
+		/*
+		 * 
+		 * Time to math the distance y = height of cube x = distance from cube
+		 * 
+		 * using y = mx+b we can determine that the formula to calculate x from y is x =
+		 * (y-b)/m
+		 * 
+		 */
 
+		for(Target t : visionData.targetsFound) {
+			double y = t.boundingBox.height;
+
+			double x = (y - visionParams.getByName("yIntercept").getValueD()) / visionParams.getByName("slope").getValueD();
+
+			// Now we have the distance in cm!!!
+
+			t.distance = x;
+
+		}
+		
 		long now = System.nanoTime();
 		visionData.fps = ((double) NANOSECONDS_PER_SECOND) / (now - fpsTimer);
 		visionData.fps = ((int) (visionData.fps * 10)) / 10.0; // round to 1 decimal place
@@ -267,38 +286,6 @@ public class BlobDetectPipeline extends AbstractPipeline{
 				bestScore = score;
 			}
 		}
-		/*
-		 * 
-		 * Time to math the distance y = height of cube x = distance from cube | | | | |
-		 * -------------------
-		 * 
-		 * using y = mx+b we can determine that the formula to calculate x from y is x =
-		 * (y-b)/m
-		 * 
-		 */
-
-		if (visionData.preferredTarget != null) {
-
-			double y = visionData.preferredTarget.boundingBox.height;
-
-			double x = (y - visionParams.getByName("yIntercept").getValueD()) / visionParams.getByName("slope").getValueD();
-
-			// Now we have the distance in cm!!!
-
-			visionData.preferredTarget.distance = x;
-
-		}
-		for(Target t : visionData.targetsFound) {
-			double y = t.boundingBox.height;
-
-			double x = (y - visionParams.getByName("yIntercept").getValueD()) / visionParams.getByName("slope").getValueD();
-
-			// Now we have the distance in cm!!!
-
-			t.distance = x;
-
-		}
-
 	}
 
 	// Create Colour Values
@@ -352,10 +339,6 @@ public class BlobDetectPipeline extends AbstractPipeline{
 
 		AttributeOptions resolution = new AttributeOptions("resolution", true);
 
-		AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath", true);
-
-		AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime", true);
-
 		AttributeOptions slope = new AttributeOptions("slope", true);
 
 		AttributeOptions yIntercept = new AttributeOptions("yIntercept", true);
@@ -374,8 +357,6 @@ public class BlobDetectPipeline extends AbstractPipeline{
 		ret.add(minArea);
 		ret.add(erodeDilateIterations);
 		ret.add(resolution);
-		ret.add(imgDumpPath);
-		ret.add(imgDumpTime);
 		ret.add(slope);
 		ret.add(yIntercept);
 		ret.add(group);

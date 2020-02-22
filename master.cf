@@ -7,3 +7,4 @@ enabled:
   cargo=false
   hatch=false
   outerHole=true
+  faceDetect=false
