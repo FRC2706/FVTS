@@ -98,7 +98,7 @@ public class Utils {
 		AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath", true);
 
 		AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime", true);
-
+		
 		List<AttributeOptions> options = new ArrayList<AttributeOptions>();
 		options.add(name);
 
@@ -187,11 +187,6 @@ public class Utils {
 					List<AttributeOptions> options = getOptions(pipelineName, interfaceName, mathNames,
 							imagePreprocessorNames);
 					VisionParams params = new VisionParams(attribs, options);
-					String resolution1 = params.getByName("resolution").getValue();
-					int width = Integer.valueOf(resolution1.split("x")[0]);
-					int height = Integer.valueOf(resolution1.split("x")[1]);
-					params.getAttribs().add(new Attribute("width", width + ""));
-					params.getAttribs().add(new Attribute("height", height + ""));
 
 					// The parameters are now valid, because it didn't throw an error
 					ret.add(params);

@@ -11,8 +11,6 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
 
 import ca.team2706.fvts.core.image.AbstractImagePreprocessor;
 import ca.team2706.fvts.core.interfaces.AbstractInterface;
@@ -213,10 +211,7 @@ public class MainThread extends Thread {
 						frame = newFrame;
 					}
 				} // else use the image from disk that we loaded above
-					// Resize the frame
-				Size sz = new Size(visionParams.getByName("width").getValueI(),
-						visionParams.getByName("height").getValueI());
-				Imgproc.resize(frame, frame, sz);
+				
 				// Process the frame!
 				// Log when the pipeline starts
 				long pipelineStart = System.nanoTime();

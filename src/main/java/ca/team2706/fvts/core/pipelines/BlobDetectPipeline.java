@@ -157,8 +157,6 @@ public class BlobDetectPipeline extends AbstractPipeline {
 
 		AttributeOptions erodeDilateIterations = new AttributeOptions("erodeDilateIterations", true);
 
-		AttributeOptions resolution = new AttributeOptions("resolution", true);
-
 		ret.add(minHue);
 		ret.add(maxHue);
 		ret.add(minSat);
@@ -168,7 +166,6 @@ public class BlobDetectPipeline extends AbstractPipeline {
 		ret.add(imageFile);
 		ret.add(minArea);
 		ret.add(erodeDilateIterations);
-		ret.add(resolution);
 
 		return ret;
 	}

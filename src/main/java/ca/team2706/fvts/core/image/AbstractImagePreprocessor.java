@@ -26,6 +26,7 @@ public abstract class AbstractImagePreprocessor {
 		if(imageProcessors == null) {
 			imageProcessors = new ArrayList<AbstractImagePreprocessor>();
 			imageProcessors.add(new ImageCropPreprocessor());
+			imageProcessors.add(new ImageResizingProcessor());
 		}
 		
 		for(AbstractImagePreprocessor p : imageProcessors) {
