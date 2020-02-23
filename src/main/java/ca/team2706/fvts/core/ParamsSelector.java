@@ -28,7 +28,7 @@ public class ParamsSelector extends JFrame implements ActionListener {
 	 */
 	private JPanel contentPane;
 	public ParamsSelector() throws Exception {
-		List<AttributeOptions> options = Utils.getOptions("blobdetect","networktables","group,prefferedtarget,distance,angleoffset");
+		List<AttributeOptions> options = Utils.getOptions("blobdetect","networktables","group,prefferedtarget,distance,angleoffset","crop");
 		List<Attribute> attribs = new ArrayList<Attribute>();
 		for (AttributeOptions o : options) {
 			Attribute a = new Attribute(o.getName(), "");

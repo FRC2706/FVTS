@@ -32,6 +32,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Make sure the target folder exists and copy the newly built zip to the pi
+ssh ${PI_USER}@${PI_ADDR} "rm -rf ${PI_DIR}"
 echo "Copying newly built jar to $PI_USER@$PI_ADDR"
 ssh ${PI_USER}@${PI_ADDR} "mkdir -p ${PI_DIR}"
 scp ${LOCAL_ZIP_PATH} ${PI_USER}@${PI_ADDR}:${PI_DIR}
@@ -39,15 +40,5 @@ ssh ${PI_USER}@${PI_ADDR} "rm -rf resources/"
 scp -r resources/ ${PI_USER}@${PI_ADDR}:${PI_DIR}/
 ssh ${PI_USER}@${PI_ADDR} "yes | unzip ${PI_DIR}/$(basename ${LOCAL_ZIP_PATH}) -d ${PI_DIR}"
 
-# ERROR HANDLING: if the copy failed, abort
-if [ $? -ne ]; then
-  # output to stderr
-  >&2 echo "Error: Copy failed! Aborting."
-  exit 1
-fi
-
 # Push the vision params file too
 source pi_scripts/pushVisionParamsToPi.sh ${PI_ADDR}
-
-# Restart the vision process on the pi
-source pi_scripts/restartVisionProcessOnPi.sh ${PI_ADDR}

@@ -17,6 +17,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 
+import ca.team2706.fvts.core.image.AbstractImagePreprocessor;
 import ca.team2706.fvts.core.interfaces.AbstractInterface;
 import ca.team2706.fvts.core.math.AbstractMathProcessor;
 import ca.team2706.fvts.core.params.Attribute;
@@ -82,7 +83,8 @@ public class Utils {
 		return bi;
 	}
 
-	public static List<AttributeOptions> getOptions(String pipelineName, String interfaceName, String mathNames) {
+	public static List<AttributeOptions> getOptions(String pipelineName, String interfaceName, String mathNames,
+			String preProcessors) {
 		AttributeOptions name = new AttributeOptions("name", true);
 
 		AttributeOptions type = new AttributeOptions("type", true);
@@ -108,14 +110,41 @@ public class Utils {
 		options.add(imgDumpTime);
 
 		AbstractPipeline pipeline = AbstractPipeline.getByName(pipelineName);
+		if (pipeline == null) {
+			Log.e("Failed to find pipeline by the name of " + pipelineName, true);
+			System.exit(1);
+		}
 		options.addAll(pipeline.getOptions());
 
 		AbstractInterface outputInterface = AbstractInterface.getByName(interfaceName);
+		if (outputInterface == null) {
+			Log.e("Failed to find interface by the name of " + interfaceName, true);
+			System.exit(1);
+		}
 		options.addAll(outputInterface.getOptions());
-		String[] maths = mathNames.split(",");
-		for (String math : maths) {
-			AbstractMathProcessor processor = AbstractMathProcessor.getByName(math);
-			options.addAll(processor.getOptions());
+
+		if (mathNames != null) {
+			String[] maths = mathNames.split(",");
+			for (String math : maths) {
+				AbstractMathProcessor processor = AbstractMathProcessor.getByName(math);
+				if (processor == null) {
+					Log.e("Failed to find math processor by the name of " + math, true);
+					System.exit(1);
+				}
+				options.addAll(processor.getOptions());
+			}
+		}
+
+		if (preProcessors != null) {
+			String[] preProcessorsA = preProcessors.split(",");
+			for (String processor : preProcessorsA) {
+				AbstractImagePreprocessor p = AbstractImagePreprocessor.getByName(processor);
+				if (p == null) {
+					Log.e("Failed to find image preprocessor by the name of " + processor, true);
+					System.exit(1);
+				}
+				options.addAll(p.getOptions());
+			}
 		}
 
 		return options;
@@ -138,6 +167,7 @@ public class Utils {
 					String pipelineName = null;
 					String interfaceName = null;
 					String mathNames = null;
+					String imagePreprocessorNames = null;
 					for (String s1 : data.keySet()) {
 						if (s1.equals("pipeline")) {
 							pipelineName = data.get(s1);
@@ -145,14 +175,17 @@ public class Utils {
 							interfaceName = data.get(s1);
 						} else if (s1.equals("maths")) {
 							mathNames = data.get(s1);
+						} else if (s1.equals("preprocessors")) {
+							imagePreprocessorNames = data.get(s1);
 						}
 						attribs.add(new Attribute(s1, data.get(s1)));
 					}
-					if (interfaceName == null || pipelineName == null || mathNames == null) {
-						Log.e("Missing pipeline, interface or maths in config " + s, true);
+					if (interfaceName == null || pipelineName == null) {
+						Log.e("Missing pipeline or interface in config " + s, true);
 						System.exit(1);
 					}
-					List<AttributeOptions> options = getOptions(pipelineName, interfaceName, mathNames);
+					List<AttributeOptions> options = getOptions(pipelineName, interfaceName, mathNames,
+							imagePreprocessorNames);
 					VisionParams params = new VisionParams(attribs, options);
 					String resolution1 = params.getByName("resolution").getValue();
 					int width = Integer.valueOf(resolution1.split("x")[0]);

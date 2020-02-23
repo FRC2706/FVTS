@@ -24,6 +24,6 @@ fi
 
 # TODO Explain-y comments
 
-scp ${PI_USER}@${PI_ADDR} pi_scripts/vision.service ${PI_USER}@${PI_ADDR}:/tmp
+scp pi_scripts/vision.service ${PI_USER}@${PI_ADDR}:/tmp
 ssh ${PI_USER}@${PI_ADDR} "sudo cp /tmp/vision.service /etc/systemd/system && sudo systemctl stop vision.service && sudo systemctl disable vision.service && sudo systemctl daemon-reload && sudo systemctl enable vision.service && sudo systemctl start vision.service"
 
