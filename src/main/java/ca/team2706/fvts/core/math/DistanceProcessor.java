@@ -27,11 +27,16 @@ public class DistanceProcessor extends AbstractMathProcessor{
 		 * using y = mx+b we can determine that the formula to calculate x from y is x =
 		 * (y-b)/m
 		 * 
+		 * NOTE: To keep things nice and constant across resolutions (and because I didn't want to break backwards
+		 * compatibility because im too lazy to recallibrate the configs) 
+		 * the resolution used to distance sensing is 640x480 and the height is just scaled from its native resolution to match
 		 * 
 		 */
 
+		double scaleFactor = 480d/visionParams.getByName("height").getValueI();
+		
 		for (Target t : visionData.targetsFound) {
-			double y = t.boundingBox.height;
+			double y = t.boundingBox.height * scaleFactor;
 
 			double x = (y - visionParams.getByName("distYIntercept").getValueD())
 					/ visionParams.getByName("distSlope").getValueD();
