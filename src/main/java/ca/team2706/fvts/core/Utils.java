@@ -18,6 +18,7 @@ import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 
 import ca.team2706.fvts.core.interfaces.AbstractInterface;
+import ca.team2706.fvts.core.math.AbstractMathProcessor;
 import ca.team2706.fvts.core.params.Attribute;
 import ca.team2706.fvts.core.params.AttributeOptions;
 import ca.team2706.fvts.core.params.VisionParams;
@@ -81,7 +82,7 @@ public class Utils {
 		return bi;
 	}
 
-	public static List<AttributeOptions> getOptions(String pipelineName, String interfaceName) {
+	public static List<AttributeOptions> getOptions(String pipelineName, String interfaceName, String mathNames) {
 		AttributeOptions name = new AttributeOptions("name", true);
 
 		AttributeOptions type = new AttributeOptions("type", true);
@@ -91,7 +92,7 @@ public class Utils {
 		AttributeOptions enabled = new AttributeOptions("enabled", false);
 
 		AttributeOptions csvLog = new AttributeOptions("csvLog", true);
-		
+
 		AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath", true);
 
 		AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime", true);
@@ -111,6 +112,11 @@ public class Utils {
 
 		AbstractInterface outputInterface = AbstractInterface.getByName(interfaceName);
 		options.addAll(outputInterface.getOptions());
+		String[] maths = mathNames.split(",");
+		for (String math : maths) {
+			AbstractMathProcessor processor = AbstractMathProcessor.getByName(math);
+			options.addAll(processor.getOptions());
+		}
 
 		return options;
 	}
@@ -123,42 +129,47 @@ public class Utils {
 		try {
 			List<String> lists = ConfigParser.listLists(Main.visionParamsFile);
 			List<VisionParams> ret = new ArrayList<VisionParams>();
-
 			for (String s : lists) {
+				try {
+					Map<String, String> data = ConfigParser.getProperties(Main.visionParamsFile, s);
 
-				Map<String, String> data = ConfigParser.getProperties(Main.visionParamsFile, s);
-
-				List<Attribute> attribs = new ArrayList<Attribute>();
-				attribs.add(new Attribute("name", s));
-				String pipelineName = null;
-				String interfaceName = null;
-				for (String s1 : data.keySet()) {
-					if (s1.equals("pipeline")) {
-						pipelineName = data.get(s1);
-					} else if (s1.equals("interface")) {
-						interfaceName = data.get(s1);
+					List<Attribute> attribs = new ArrayList<Attribute>();
+					attribs.add(new Attribute("name", s));
+					String pipelineName = null;
+					String interfaceName = null;
+					String mathNames = null;
+					for (String s1 : data.keySet()) {
+						if (s1.equals("pipeline")) {
+							pipelineName = data.get(s1);
+						} else if (s1.equals("interface")) {
+							interfaceName = data.get(s1);
+						} else if (s1.equals("maths")) {
+							mathNames = data.get(s1);
+						}
+						attribs.add(new Attribute(s1, data.get(s1)));
 					}
-					attribs.add(new Attribute(s1, data.get(s1)));
-				}
-				if (interfaceName == null || pipelineName == null) {
-					Log.e("Missing pipeline or interface in config " + s, true);
-					System.exit(1);
-				}
-				List<AttributeOptions> options = getOptions(pipelineName, interfaceName);
-				VisionParams params = new VisionParams(attribs, options);
-				String resolution1 = params.getByName("resolution").getValue();
-				int width = Integer.valueOf(resolution1.split("x")[0]);
-				int height = Integer.valueOf(resolution1.split("x")[1]);
-				params.getAttribs().add(new Attribute("width", width + ""));
-				params.getAttribs().add(new Attribute("height", height + ""));
+					if (interfaceName == null || pipelineName == null || mathNames == null) {
+						Log.e("Missing pipeline, interface or maths in config " + s, true);
+						System.exit(1);
+					}
+					List<AttributeOptions> options = getOptions(pipelineName, interfaceName, mathNames);
+					VisionParams params = new VisionParams(attribs, options);
+					String resolution1 = params.getByName("resolution").getValue();
+					int width = Integer.valueOf(resolution1.split("x")[0]);
+					int height = Integer.valueOf(resolution1.split("x")[1]);
+					params.getAttribs().add(new Attribute("width", width + ""));
+					params.getAttribs().add(new Attribute("height", height + ""));
 
-				// The parameters are now valid, because it didn't throw an error
-				ret.add(params);
+					// The parameters are now valid, because it didn't throw an error
+					ret.add(params);
+				} catch (Exception e) {
+					Log.e("Error in config " + s, true);
+					throw new Exception();
+				}
 			}
 			return ret;
 
 		} catch (Exception e1) {
-			Log.e(e1.getMessage(), true);
 			Log.e("\n\nError reading the params file, check if the file is corrupt?", true);
 			System.exit(1);
 		}

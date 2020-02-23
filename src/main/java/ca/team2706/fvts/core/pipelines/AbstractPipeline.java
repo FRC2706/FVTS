@@ -13,7 +13,6 @@ import ca.team2706.fvts.core.params.VisionParams;
 
 public abstract class AbstractPipeline {
 	public abstract VisionData process(Mat src, VisionParams visionParams);
-	public abstract void selectPreferredTarget(VisionData visionData, VisionParams visionParams);
 	public abstract void drawPreferredTarget(Mat src, VisionData visionData);
 	public abstract List<AttributeOptions> getOptions();
 	public abstract void init(MainThread thread);

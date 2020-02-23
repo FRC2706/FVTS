@@ -15,6 +15,7 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import ca.team2706.fvts.core.interfaces.AbstractInterface;
+import ca.team2706.fvts.core.math.AbstractMathProcessor;
 import ca.team2706.fvts.core.params.VisionParams;
 import ca.team2706.fvts.core.pipelines.AbstractPipeline;
 import ca.team2706.fvts.core.pipelines.BlobDetectPipeline;
@@ -29,19 +30,31 @@ public class MainThread extends Thread {
 		this.visionParams = params;
 		String interfaceN = visionParams.getByName("interface").getValue();
 		outputInterface = AbstractInterface.getByName(interfaceN);
-		outputInterface.init(this);
 		if(outputInterface == null) {
 			Log.e("No interface found for profile "+visionParams.getByName("name").getValue(),true);
 			System.exit(1);
 		}
-		
+		outputInterface.init(this);
 		
 		String pipelineN = visionParams.getByName("pipeline").getValue();
 		pipeline = AbstractPipeline.getByName(pipelineN);
-		pipeline.init(this);
 		if(pipeline == null) {
 			Log.e("No pipeline found for profile "+visionParams.getByName("name").getValue(), true);
 			System.exit(1);
+		}
+		pipeline.init(this);
+		
+		String mathNames = visionParams.getByName("maths").getValue();
+		String[] maths = mathNames.split(",");
+		this.maths = new ArrayList<AbstractMathProcessor>();
+		for(String math : maths) {
+			AbstractMathProcessor processor = AbstractMathProcessor.getByName(math);
+			if(processor == null) {
+				Log.e("No math processor found for profile "+visionParams.getByName("name").getValue()+" by the name of "+math, true);
+				System.exit(1);
+			}
+			processor.init(this);
+			this.maths.add(processor);
 		}
 	}
 
@@ -52,9 +65,6 @@ public class MainThread extends Thread {
 	public void setOutputInterface(AbstractInterface outputInterface) {
 		this.outputInterface = outputInterface;
 	}
-	public void setPipeline(AbstractPipeline pipeline) {
-		this.pipeline = pipeline;
-	}
 
 	public Mat frame;
 	public double current_time_seconds;
@@ -63,6 +73,7 @@ public class MainThread extends Thread {
 	public double lastDist = 0;
 	private AbstractInterface outputInterface;
 	private AbstractPipeline pipeline;
+	private List<AbstractMathProcessor> maths;
 	
 	@Override
 	public void run() {
@@ -175,8 +186,9 @@ public class MainThread extends Thread {
 				VisionData visionData = pipeline.process(frame, visionParams);
 				// Log when the pipeline stops
 				long pipelineEnd = System.nanoTime();
-				// Selects the prefered target
-				pipeline.selectPreferredTarget(visionData, visionParams);
+				for(AbstractMathProcessor processor : maths) {
+					processor.process(visionData, this);
+				}
 				// Creates the raw output image object
 				Mat rawOutputImg;
 				if (use_GUI) {

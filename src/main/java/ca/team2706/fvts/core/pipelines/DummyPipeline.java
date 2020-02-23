@@ -26,11 +26,6 @@ public class DummyPipeline extends AbstractPipeline {
 	}
 
 	@Override
-	public void selectPreferredTarget(VisionData visionData, VisionParams visionParams) {
-		
-	}
-
-	@Override
 	public void drawPreferredTarget(Mat src, VisionData visionData) {
 		
 	}

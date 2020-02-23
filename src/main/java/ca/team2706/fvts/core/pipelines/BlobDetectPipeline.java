@@ -6,16 +6,13 @@ import java.util.List;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import ca.team2706.fvts.core.MainThread;
 import ca.team2706.fvts.core.VisionData;
-import ca.team2706.fvts.core.VisionData.Target;
 import ca.team2706.fvts.core.params.AttributeOptions;
 import ca.team2706.fvts.core.params.VisionParams;
 
@@ -104,35 +101,6 @@ public class BlobDetectPipeline extends AbstractPipeline {
 			// else
 			// skip this contour because it's too small
 		}
-		/*
-		 * 
-		 * Time to math the distance y = height of cube x = distance from cube
-		 * 
-		 * using y = mx+b we can determine that the formula to calculate x from y is x =
-		 * (y-b)/m
-		 * 
-		 * 
-		 */
-
-		for (Target t : visionData.targetsFound) {
-			double y = t.boundingBox.height;
-
-			double x = (y - visionParams.getByName("distYIntercept").getValueD())
-					/ visionParams.getByName("distSlope").getValueD();
-
-			// Now we have the distance!!!
-
-			// Do the offset math which is using quadratics and please let this work, ive been trying this for 3 hours and its 00:00, i am very tired but this code keeps me up at night
-			double aoA = visionParams.getByName("aoA").getValueD();
-			double aoB = visionParams.getByName("aoB").getValueD();
-			double aoC = visionParams.getByName("aoC").getValueD();
-			double magic = Math.abs(t.xCentreNorm) / (t.areaNorm / (src.rows() * src.cols()));
-			double xo = Math.pow(magic,2) * aoA + magic * aoB + aoC;
-			x += xo;
-
-			t.distance = x;
-
-		}
 
 		long now = System.nanoTime();
 		visionData.fps = ((double) NANOSECONDS_PER_SECOND) / (now - fpsTimer);
@@ -140,166 +108,6 @@ public class BlobDetectPipeline extends AbstractPipeline {
 		fpsTimer = now;
 
 		return visionData;
-	}
-
-	/**
-	 * From all the targets found in visionData.targetsFound, select the one that
-	 * we're going to send to the roboRIO.
-	 *
-	 * @param visionData
-	 */
-	public void selectPreferredTarget(VisionData visionData, VisionParams visionParams) {
-		boolean group = visionParams.getByName("group").getValueI() == 1 ? true : false;
-		int groupAngle = visionParams.getByName("groupAngle").getValueI();
-
-		if (visionData.targetsFound.size() == 0) {
-			return;
-		}
-
-		if (group) {
-
-			ArrayList<Target> newTargets = new ArrayList<Target>();
-
-			for (Target target : visionData.targetsFound) {
-
-				MatOfPoint2f contour = new MatOfPoint2f(target.contour.toArray());
-
-				RotatedRect rect = Imgproc.minAreaRect(contour);
-
-				rect.angle = rect.angle + groupAngle;
-
-				if (rect.angle > 0) {
-					continue;
-				}
-
-				Target minTarget = null;
-				double minDist = Double.MAX_VALUE;
-
-				for (Target target2 : visionData.targetsFound) {
-
-					if (target2 != target) {
-
-						if (target2.xCentre < target.xCentre) {
-							continue;
-						}
-
-						MatOfPoint2f contour2 = new MatOfPoint2f(target2.contour.toArray());
-
-						RotatedRect rect2 = Imgproc.minAreaRect(contour2);
-						rect2.angle = rect2.angle + groupAngle;
-
-						if (rect2.angle < 0) {
-							continue;
-						}
-
-						double w = Math.abs(target.xCentre - target2.xCentre);
-						double h = Math.abs(target.yCentre - target2.yCentre);
-
-						double dist = Math.sqrt(Math.pow(w, 2) + Math.pow(h, 2));
-
-						if (dist < minDist) {
-
-							minDist = dist;
-							minTarget = target2;
-
-						}
-
-					}
-
-				}
-
-				boolean missing = false;
-
-				for (Target target2 : visionData.targetsFound) {
-
-					if (target2 != target) {
-
-						if (target2.xCentre < target.xCentre) {
-							continue;
-						}
-
-						MatOfPoint2f contour2 = new MatOfPoint2f(target2.contour.toArray());
-
-						RotatedRect rect2 = Imgproc.minAreaRect(contour2);
-						rect2.angle = rect2.angle + 40;
-
-						if (rect2.angle > 0) {
-							continue;
-						}
-
-						double w = Math.abs(target.xCentre - target2.xCentre);
-						double h = Math.abs(target.yCentre - target2.yCentre);
-
-						double dist = Math.sqrt(Math.pow(w, 2) + Math.pow(h, 2));
-
-						if (dist < minDist) {
-
-							missing = true;
-
-						}
-
-					}
-
-				}
-
-				if (minTarget == null || missing) {
-					continue;
-				}
-
-				Target target3 = new Target();
-
-				double x = target.boundingBox.x < minTarget.boundingBox.x ? target.boundingBox.x
-						: minTarget.boundingBox.x;
-				double y = target.boundingBox.y < minTarget.boundingBox.y ? target.boundingBox.y
-						: minTarget.boundingBox.y;
-
-				double width = Math.abs(target.boundingBox.x - minTarget.boundingBox.x) + minTarget.boundingBox.width;
-				double height = Math.abs(target.boundingBox.y - minTarget.boundingBox.y) + minTarget.boundingBox.height;
-
-				target3.boundingBox = new Rect((int) x, (int) y, (int) width, (int) height);
-				target3.xCentre = (int) (x + (width / 2));
-				target3.xCentreNorm = ((double) target3.xCentre - (visionData.binMask.width() / 2))
-						/ (visionData.binMask.width() / 2);
-				target3.yCentre = (int) (y + (height / 2));
-				target3.yCentreNorm = ((double) target3.yCentre - (visionData.binMask.height() / 2))
-						/ (visionData.binMask.height() / 2);
-				target3.areaNorm = (target3.boundingBox.height * target3.boundingBox.width)
-						/ ((double) visionData.binMask.width() * visionData.binMask.height());
-
-				newTargets.add(target3);
-
-			}
-
-			visionData.targetsFound = newTargets;
-
-		}
-
-		// loop over the targets to find the largest area of any target found.
-		// this is so we can give the largest a score of 1.0, and each other target a
-		// score that is a
-		// percentage of the area of the largest.
-		double largestAreaNorm = Double.NEGATIVE_INFINITY;
-		for (VisionData.Target target : visionData.targetsFound) {
-			if (target.areaNorm > largestAreaNorm)
-				largestAreaNorm = target.areaNorm;
-		}
-
-		double bestScore = Double.NEGATIVE_INFINITY;
-		for (VisionData.Target target : visionData.targetsFound) {
-
-			// Give each target a score, and select the one with the highest score.
-
-			double areaScore = target.areaNorm / largestAreaNorm;
-			double distFromCentrePenalty = Math.abs(target.xCentreNorm);
-
-			double score = (1 - visionParams.getByName("distToCentreImportance").getValueD()) * areaScore
-					- visionParams.getByName("distToCentreImportance").getValueD() * distFromCentrePenalty;
-
-			if (bestScore < score) {
-				visionData.preferredTarget = target;
-				bestScore = score;
-			}
-		}
 	}
 
 	// Create Colour Values
@@ -343,8 +151,6 @@ public class BlobDetectPipeline extends AbstractPipeline {
 		AttributeOptions minVal = new AttributeOptions("minValue", true);
 		AttributeOptions maxVal = new AttributeOptions("maxValue", true);
 
-		AttributeOptions distToCentreImportance = new AttributeOptions("distToCentreImportance", true);
-
 		AttributeOptions imageFile = new AttributeOptions("imageFile", true);
 
 		AttributeOptions minArea = new AttributeOptions("minArea", true);
@@ -353,34 +159,16 @@ public class BlobDetectPipeline extends AbstractPipeline {
 
 		AttributeOptions resolution = new AttributeOptions("resolution", true);
 
-		AttributeOptions slope = new AttributeOptions("distSlope", true);
-		AttributeOptions yIntercept = new AttributeOptions("distYIntercept", true);
-
-		AttributeOptions aoA = new AttributeOptions("aoA", true);
-		AttributeOptions aoB = new AttributeOptions("aoB", true);
-		AttributeOptions aoC = new AttributeOptions("aoC", true);
-
-		AttributeOptions group = new AttributeOptions("group", true);
-		AttributeOptions angle = new AttributeOptions("groupAngle", true);
-
 		ret.add(minHue);
 		ret.add(maxHue);
 		ret.add(minSat);
 		ret.add(maxSat);
 		ret.add(minVal);
 		ret.add(maxVal);
-		ret.add(distToCentreImportance);
 		ret.add(imageFile);
 		ret.add(minArea);
 		ret.add(erodeDilateIterations);
 		ret.add(resolution);
-		ret.add(slope);
-		ret.add(yIntercept);
-		ret.add(aoA);
-		ret.add(aoB);
-		ret.add(aoC);
-		ret.add(group);
-		ret.add(angle);
 
 		return ret;
 	}

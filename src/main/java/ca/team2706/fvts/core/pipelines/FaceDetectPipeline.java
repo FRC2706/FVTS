@@ -19,7 +19,6 @@ import org.opencv.objdetect.Objdetect;
 import ca.team2706.fvts.core.Constants;
 import ca.team2706.fvts.core.MainThread;
 import ca.team2706.fvts.core.VisionData;
-import ca.team2706.fvts.core.VisionData.Target;
 import ca.team2706.fvts.core.params.AttributeOptions;
 import ca.team2706.fvts.core.params.VisionParams;
 
@@ -64,57 +63,11 @@ public class FaceDetectPipeline extends AbstractPipeline {
 			target.areaNorm = (target.boundingBox.height * target.boundingBox.width) / ((double) imageArea);
 			ret.targetsFound.add(target);
 		}
-		/*
-		 * 
-		 * Time to math the distance y = height of cube x = distance from cube
-		 * 
-		 * using y = mx+b we can determine that the formula to calculate x from y is x =
-		 * (y-b)/m
-		 * 
-		 */
-
-		for (Target t : ret.targetsFound) {
-			double y = t.boundingBox.height;
-
-			double x = (y - visionParams.getByName("distYIntercept").getValueD())
-					/ visionParams.getByName("distSlope").getValueD();
-
-			// Now we have the distance!!!
-
-			// Do the offset math which is using quadratics and please let this work, ive
-			// been trying this for 3 hours and its 00:00, i am very tired but this code
-			// keeps me up at night
-			double aoA = visionParams.getByName("aoA").getValueD();
-			double aoB = visionParams.getByName("aoB").getValueD();
-			double aoC = visionParams.getByName("aoC").getValueD();
-			double magic = Math.abs(t.xCentreNorm) / (t.areaNorm / (src.rows() * src.cols()));
-			double xo = Math.pow(magic, 2) * aoA + magic * aoB + aoC;
-			x += xo;
-
-			t.distance = x;
-
-		}
 		long now = System.nanoTime();
 		ret.fps = ((double) NANOSECONDS_PER_SECOND) / (now - fpsTimer);
 		ret.fps = ((int) (ret.fps * 10)) / 10.0; // round to 1 decimal place
 		fpsTimer = now;
 		return ret;
-	}
-
-	@Override
-	public void selectPreferredTarget(VisionData visionData, VisionParams visionParams) {
-		double maxArea = Double.NEGATIVE_INFINITY;
-		for (Target t : visionData.targetsFound) {
-			if (t.areaNorm > maxArea)
-				maxArea = t.areaNorm;
-		}
-		for (Target t : visionData.targetsFound) {
-			if (t.areaNorm == maxArea) {
-				visionData.preferredTarget = t;
-				return;
-			}
-		}
-		return;
 	}
 
 	// Create Colour Values
@@ -152,11 +105,6 @@ public class FaceDetectPipeline extends AbstractPipeline {
 	public List<AttributeOptions> getOptions() {
 		List<AttributeOptions> ret = new ArrayList<AttributeOptions>();
 		ret.add(new AttributeOptions("minFaceSize", true));
-		ret.add(new AttributeOptions("distSlope", true));
-		ret.add(new AttributeOptions("distYIntercept", true));
-		ret.add(new AttributeOptions("aoA", true));
-		ret.add(new AttributeOptions("aoB", true));
-		ret.add(new AttributeOptions("aoC", true));
 		return ret;
 	}
 
