@@ -19,7 +19,7 @@ public abstract class AbstractMathProcessor {
 	public AbstractMathProcessor(String name) {
 		this.name = name;
 	}
-	private static List<AbstractMathProcessor> maths = null;
+	public static List<AbstractMathProcessor> maths = null;
 	public static AbstractMathProcessor getByName(String name) {
 		if(maths == null) {
 			// Init

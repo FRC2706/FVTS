@@ -151,8 +151,6 @@ public class BlobDetectPipeline extends AbstractPipeline {
 		AttributeOptions minVal = new AttributeOptions("minValue", true);
 		AttributeOptions maxVal = new AttributeOptions("maxValue", true);
 
-		AttributeOptions imageFile = new AttributeOptions("imageFile", true);
-
 		AttributeOptions minArea = new AttributeOptions("minArea", true);
 
 		AttributeOptions erodeDilateIterations = new AttributeOptions("erodeDilateIterations", true);
@@ -163,7 +161,6 @@ public class BlobDetectPipeline extends AbstractPipeline {
 		ret.add(maxSat);
 		ret.add(minVal);
 		ret.add(maxVal);
-		ret.add(imageFile);
 		ret.add(minArea);
 		ret.add(erodeDilateIterations);
 

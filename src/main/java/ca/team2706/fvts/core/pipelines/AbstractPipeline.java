@@ -23,7 +23,7 @@ public abstract class AbstractPipeline {
 	public String getName() {
 		return name;
 	}
-	private static List<AbstractPipeline> pipelines = null;
+	public static List<AbstractPipeline> pipelines = null;
 	public static AbstractPipeline getByName(String name) {
 		if(pipelines == null) {
 			// Init

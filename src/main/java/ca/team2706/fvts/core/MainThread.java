@@ -8,11 +8,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.imageio.ImageIO;
-
 import org.opencv.core.Mat;
 
 import ca.team2706.fvts.core.image.AbstractImagePreprocessor;
+import ca.team2706.fvts.core.input.AbstractInputDevice;
 import ca.team2706.fvts.core.interfaces.AbstractInterface;
 import ca.team2706.fvts.core.math.AbstractMathProcessor;
 import ca.team2706.fvts.core.params.VisionParams;
@@ -86,7 +85,7 @@ public class MainThread extends Thread {
 
 	public Mat frame;
 	public double current_time_seconds;
-	public boolean useCamera = true;
+	public boolean useCamera;
 	public static int timestamp = 0;
 	public double lastDist = 0;
 	private AbstractInterface outputInterface;
@@ -109,30 +108,14 @@ public class MainThread extends Thread {
 
 		frame = new Mat();
 
-		// Whether to use a camera, or load an image file from disk.
-		if (visionParams.getByName("type").getValue().equals("usb")
-				&& visionParams.getByName("identifier").getValueI() == -1) {
-			useCamera = false;
-		}
-
-		if (useCamera) {
-			try {
-				VisionCameraServer.initCamera(visionParams.getByName("type").getValue(),
-						visionParams.getByName("identifier").getValue());
-				VisionCameraServer.update();
-			} catch (Exception e) {
-				Log.e(e.getMessage(), true);
-			}
-
-		} else {
-			// load the image from file.
-			try {
-				frame = Utils
-						.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
-			} catch (IOException e) {
-				Log.e(e.getMessage(), true);
-				frame = new Mat();
-			}
+		AbstractInputDevice input = AbstractInputDevice.getByName(visionParams.getByName("type").getValue());
+		useCamera = !input.isStaticFrame();
+		try {
+			VisionCameraServer.initCamera(visionParams.getByName("type").getValue(),
+					visionParams.getByName("identifier").getValue());
+			VisionCameraServer.update();
+		} catch (Exception e) {
+			Log.e(e.getMessage(), true);
 		}
 		// The window to display the raw image
 		DisplayGui guiRawImg = null;
@@ -141,25 +124,8 @@ public class MainThread extends Thread {
 		// Wether to open the guis
 		boolean use_GUI = Main.developmentMode;
 
-		if (useCamera) {
-
-			frame = VisionCameraServer.getFrame(visionParams.getByName("type").getValue(),
-					visionParams.getByName("identifier").getValue());
-
-		} else {
-			try {
-				frame = Utils
-						.bufferedImageToMat(ImageIO.read(new File(visionParams.getByName("imageFile").getValue())));
-				for (AbstractImagePreprocessor processor : processors) {
-					Mat newFrame = processor.process(frame, this);
-					frame.release();
-					frame = newFrame;
-				}
-			} catch (IOException e) {
-				Log.e(e.getMessage(), true);
-				System.exit(1);
-			}
-		}
+		frame = VisionCameraServer.getFrame(visionParams.getByName("type").getValue(),
+				visionParams.getByName("identifier").getValue());
 
 		// Set up the GUI display windows
 		if (use_GUI) {
@@ -201,17 +167,17 @@ public class MainThread extends Thread {
 					break;
 				}
 
+				// Read the frame
+				frame = VisionCameraServer.getFrame(visionParams.getByName("type").getValue(),
+						visionParams.getByName("identifier").getValue());
 				if (useCamera) {
-					// Read the frame from the camera, if it fails try again
-					frame = VisionCameraServer.getFrame(visionParams.getByName("type").getValue(),
-							visionParams.getByName("identifier").getValue());
 					for (AbstractImagePreprocessor processor : processors) {
 						Mat newFrame = processor.process(frame, this);
 						frame.release();
 						frame = newFrame;
 					}
-				} // else use the image from disk that we loaded above
-				
+				}
+
 				// Process the frame!
 				// Log when the pipeline starts
 				long pipelineStart = System.nanoTime();

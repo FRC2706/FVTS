@@ -22,7 +22,7 @@ public abstract class AbstractInterface {
 		this.name = name;
 	}
 
-	private static List<AbstractInterface> interfaces = null;
+	public static List<AbstractInterface> interfaces = null;
 	public static AbstractInterface getByName(String name) {
 		if(interfaces == null) {
 			// Init
