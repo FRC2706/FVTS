@@ -87,18 +87,18 @@ public class Utils {
 			String preProcessors) {
 		AttributeOptions name = new AttributeOptions("name", true);
 
-		AttributeOptions type = new AttributeOptions("type", true);
+		AttributeOptions type = new AttributeOptions("core/type", true);
 
-		AttributeOptions identifier = new AttributeOptions("identifier", true);
+		AttributeOptions identifier = new AttributeOptions("core/identifier", true);
 
 		AttributeOptions enabled = new AttributeOptions("enabled", false);
 
-		AttributeOptions csvLog = new AttributeOptions("csvLog", true);
+		AttributeOptions csvLog = new AttributeOptions("core/csvLog", true);
 
-		AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath", true);
+		AttributeOptions imgDumpPath = new AttributeOptions("core/imgDumpPath", true);
 
-		AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime", true);
-		
+		AttributeOptions imgDumpTime = new AttributeOptions("core/imgDumpTime", true);
+
 		List<AttributeOptions> options = new ArrayList<AttributeOptions>();
 		options.add(name);
 
@@ -160,7 +160,7 @@ public class Utils {
 			List<VisionParams> ret = new ArrayList<VisionParams>();
 			for (String s : lists) {
 				try {
-					Map<String, String> data = ConfigParser.getProperties(Main.visionParamsFile, s);
+					Map<String, Map<String, String>> data = ConfigParser.getProperties(Main.visionParamsFile, s);
 
 					List<Attribute> attribs = new ArrayList<Attribute>();
 					attribs.add(new Attribute("name", s));
@@ -168,17 +168,25 @@ public class Utils {
 					String interfaceName = null;
 					String mathNames = null;
 					String imagePreprocessorNames = null;
+					if (data.get("core") == null) {
+						Log.e("Config " + s + " is missing the core section!", true);
+						System.exit(1);
+					}
 					for (String s1 : data.keySet()) {
-						if (s1.equals("pipeline")) {
-							pipelineName = data.get(s1);
-						} else if (s1.equals("interface")) {
-							interfaceName = data.get(s1);
-						} else if (s1.equals("maths")) {
-							mathNames = data.get(s1);
-						} else if (s1.equals("preprocessors")) {
-							imagePreprocessorNames = data.get(s1);
+						for (String s2 : data.get(s1).keySet()) {
+							if (s1.equals("core")) {
+								if (s2.equals("pipeline")) {
+									pipelineName = data.get("core").get(s2);
+								} else if (s2.equals("interface")) {
+									interfaceName = data.get("core").get(s2);
+								} else if (s2.equals("maths")) {
+									mathNames = data.get("core").get(s2);
+								} else if (s2.equals("preprocessors")) {
+									imagePreprocessorNames = data.get("core").get(s2);
+								}
+							}
+							attribs.add(new Attribute(s1 + "/" + s2, data.get(s1).get(s2)));
 						}
-						attribs.add(new Attribute(s1, data.get(s1)));
 					}
 					if (interfaceName == null || pipelineName == null) {
 						Log.e("Missing pipeline or interface in config " + s, true);
@@ -230,12 +238,16 @@ public class Utils {
 	}
 
 	public static void saveVisionParams(VisionParams params) throws Exception {
-		Map<String, String> data = new HashMap<String, String>();
+		Map<String, Map<String,String>> data = new HashMap<String, Map<String,String>>();
 
 		for (Attribute a : params.getAttribs()) {
-			if (!a.getName().equals("name") && !a.getName().equals("enabled") && !a.getName().equals("width")
-					&& !a.getName().equals("height")) {
-				data.put(a.getName(), a.getValue());
+			if (a.getName().contains("/")) {
+				String key = a.getName().split("\\/")[0];
+				Map<String,String> map = data.get(key);
+				if(map == null)
+					map = new HashMap<String,String>();
+				map.put(a.getName().split("\\/",2)[1], a.getValue());
+				data.put(key, map);
 			}
 		}
 

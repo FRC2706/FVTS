@@ -8,9 +8,7 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import ca.team2706.fvts.core.MainThread;
-import ca.team2706.fvts.core.params.Attribute;
 import ca.team2706.fvts.core.params.AttributeOptions;
-import ca.team2706.fvts.core.params.VisionParams;
 
 public class ImageResizingProcessor extends AbstractImagePreprocessor{
 
@@ -20,29 +18,26 @@ public class ImageResizingProcessor extends AbstractImagePreprocessor{
 
 	@Override
 	public void init(MainThread thread) {
-		VisionParams params = thread.visionParams;
-		String resolution = params.getByName("resolution").getValue();
-		int width = Integer.valueOf(resolution.split("x")[0]);
-		int height = Integer.valueOf(resolution.split("x")[1]);
-		params.getAttribs().add(new Attribute("width", width + ""));
-		params.getAttribs().add(new Attribute("height", height + ""));
+		
 	}
 
 	@Override
 	public List<AttributeOptions> getOptions() {
 		List<AttributeOptions> ret = new ArrayList<AttributeOptions>();
 		
-		AttributeOptions resolution = new AttributeOptions("resolution", true);
+		AttributeOptions width = new AttributeOptions(getName()+"/"+"width", true);
+		AttributeOptions height = new AttributeOptions(getName()+"/"+"height", true);
 		
-		ret.add(resolution);
+		ret.add(width);
+		ret.add(height);
 		
 		return ret;
 	}
 
 	@Override
 	public Mat process(Mat src, MainThread thread) {
-		int width = thread.visionParams.getByName("width").getValueI();
-		int height = thread.visionParams.getByName("height").getValueI();
+		int width = thread.visionParams.getByName(getName()+"/"+"width").getValueI();
+		int height = thread.visionParams.getByName(getName()+"/"+"height").getValueI();
 		Mat dst = new Mat(height,width,src.type());
 		// Resize the frame
 		Size sz = new Size(width,height);

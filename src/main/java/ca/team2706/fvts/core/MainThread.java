@@ -26,7 +26,7 @@ public class MainThread extends Thread {
 
 	public MainThread(VisionParams params) {
 		this.visionParams = params;
-		String interfaceN = visionParams.getByName("interface").getValue();
+		String interfaceN = visionParams.getByName("core/interface").getValue();
 		outputInterface = AbstractInterface.getByName(interfaceN);
 		if (outputInterface == null) {
 			Log.e("No interface found for profile " + visionParams.getByName("name").getValue(), true);
@@ -34,7 +34,7 @@ public class MainThread extends Thread {
 		}
 		outputInterface.init(this);
 
-		String pipelineN = visionParams.getByName("pipeline").getValue();
+		String pipelineN = visionParams.getByName("core/pipeline").getValue();
 		pipeline = AbstractPipeline.getByName(pipelineN);
 		if (pipeline == null) {
 			Log.e("No pipeline found for profile " + visionParams.getByName("name").getValue(), true);
@@ -43,8 +43,8 @@ public class MainThread extends Thread {
 		pipeline.init(this);
 
 		this.maths = new ArrayList<AbstractMathProcessor>();
-		if (visionParams.getByName("maths") != null) {
-			String mathNames = visionParams.getByName("maths").getValue();
+		if (visionParams.getByName("core/maths") != null) {
+			String mathNames = visionParams.getByName("core/maths").getValue();
 			String[] maths = mathNames.split(",");
 			for (String math : maths) {
 				AbstractMathProcessor processor = AbstractMathProcessor.getByName(math);
@@ -59,8 +59,8 @@ public class MainThread extends Thread {
 		}
 
 		this.processors = new ArrayList<AbstractImagePreprocessor>();
-		if (visionParams.getByName("preprocessors") != null) {
-			String preProcessorNames = visionParams.getByName("preprocessors").getValue();
+		if (visionParams.getByName("core/preprocessors") != null) {
+			String preProcessorNames = visionParams.getByName("core/preprocessors").getValue();
 			String[] processors = preProcessorNames.split(",");
 			for (String p : processors) {
 				AbstractImagePreprocessor processor = AbstractImagePreprocessor.getByName(p);
@@ -97,8 +97,8 @@ public class MainThread extends Thread {
 	public void run() {
 		// Setup the camera server for this camera
 		try {
-			VisionCameraServer.initCamera(this.visionParams.getByName("type").getValue(),
-					this.visionParams.getByName("identifier").getValue());
+			VisionCameraServer.initCamera(this.visionParams.getByName("core/type").getValue(),
+					this.visionParams.getByName("core/identifier").getValue());
 		} catch (Exception e2) {
 			Log.e(e2.getMessage(), true);
 			e2.printStackTrace();
@@ -108,11 +108,11 @@ public class MainThread extends Thread {
 
 		frame = new Mat();
 
-		AbstractInputDevice input = AbstractInputDevice.getByName(visionParams.getByName("type").getValue());
+		AbstractInputDevice input = AbstractInputDevice.getByName(visionParams.getByName("core/type").getValue());
 		useCamera = !input.isStaticFrame();
 		try {
-			VisionCameraServer.initCamera(visionParams.getByName("type").getValue(),
-					visionParams.getByName("identifier").getValue());
+			VisionCameraServer.initCamera(visionParams.getByName("core/type").getValue(),
+					visionParams.getByName("core/identifier").getValue());
 			VisionCameraServer.update();
 		} catch (Exception e) {
 			Log.e(e.getMessage(), true);
@@ -124,8 +124,8 @@ public class MainThread extends Thread {
 		// Wether to open the guis
 		boolean use_GUI = Main.developmentMode;
 
-		frame = VisionCameraServer.getFrame(visionParams.getByName("type").getValue(),
-				visionParams.getByName("identifier").getValue());
+		frame = VisionCameraServer.getFrame(visionParams.getByName("core/type").getValue(),
+				visionParams.getByName("core/identifier").getValue());
 
 		// Set up the GUI display windows
 		if (use_GUI) {
@@ -142,7 +142,7 @@ public class MainThread extends Thread {
 			}
 		}
 
-		File csvFile = new File(visionParams.getByName("csvLog").getValue().replaceAll("\\$1", "" + Main.runID));
+		File csvFile = new File(visionParams.getByName("core/csvLog").getValue().replaceAll("\\$1", "" + Main.runID));
 
 		long lastTime = System.currentTimeMillis();
 		boolean first = true;
@@ -168,8 +168,8 @@ public class MainThread extends Thread {
 				}
 
 				// Read the frame
-				frame = VisionCameraServer.getFrame(visionParams.getByName("type").getValue(),
-						visionParams.getByName("identifier").getValue());
+				frame = VisionCameraServer.getFrame(visionParams.getByName("core/type").getValue(),
+						visionParams.getByName("core/identifier").getValue());
 				if (useCamera) {
 					for (AbstractImagePreprocessor processor : processors) {
 						Mat newFrame = processor.process(frame, this);
@@ -244,8 +244,8 @@ public class MainThread extends Thread {
 					// dumps
 
 					// then dump images asynchronously
-					if (elapsedTime >= visionParams.getByName("imgDumpTime").getValueD()
-							&& visionParams.getByName("imgDumpTime").getValueD() != -1) {
+					if (elapsedTime >= visionParams.getByName("core/imgDumpTime").getValueD()
+							&& visionParams.getByName("core/imgDumpTime").getValueD() != -1) {
 						// Sets the current number of seconds
 						current_time_seconds = (((double) System.currentTimeMillis()) / 1000);
 						try {

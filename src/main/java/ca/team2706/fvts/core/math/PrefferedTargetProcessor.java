@@ -38,8 +38,8 @@ public class PrefferedTargetProcessor extends AbstractMathProcessor {
 			double areaScore = target.areaNorm / largestAreaNorm;
 			double distFromCentrePenalty = Math.abs(target.xCentreNorm);
 
-			double score = (1 - visionParams.getByName("distToCentreImportance").getValueD()) * areaScore
-					- visionParams.getByName("distToCentreImportance").getValueD() * distFromCentrePenalty;
+			double score = (1 - visionParams.getByName(getName()+"/"+"distToCentreImportance").getValueD()) * areaScore
+					- visionParams.getByName(getName()+"/"+"distToCentreImportance").getValueD() * distFromCentrePenalty;
 
 			if (bestScore < score) {
 				visionData.preferredTarget = target;
@@ -57,7 +57,7 @@ public class PrefferedTargetProcessor extends AbstractMathProcessor {
 	public List<AttributeOptions> getOptions() {
 		List<AttributeOptions> ret = new ArrayList<AttributeOptions>();
 		
-		AttributeOptions distToCentreImportance = new AttributeOptions("distToCentreImportance", true);
+		AttributeOptions distToCentreImportance = new AttributeOptions(getName()+"/"+"distToCentreImportance", true);
 		
 		ret.add(distToCentreImportance);
 		

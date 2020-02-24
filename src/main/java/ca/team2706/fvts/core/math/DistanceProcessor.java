@@ -33,13 +33,13 @@ public class DistanceProcessor extends AbstractMathProcessor{
 		 * 
 		 */
 
-		double scaleFactor = 480d/visionParams.getByName("height").getValueI();
+		double scaleFactor = 480d/visionData.binMask.rows();
 		
 		for (Target t : visionData.targetsFound) {
 			double y = t.boundingBox.height * scaleFactor;
 
-			double x = (y - visionParams.getByName("distYIntercept").getValueD())
-					/ visionParams.getByName("distSlope").getValueD();
+			double x = (y - visionParams.getByName(getName()+"/"+"distYIntercept").getValueD())
+					/ visionParams.getByName(getName()+"/"+"distSlope").getValueD();
 
 			// Now we have the distance!!!
 			t.distance = x;
@@ -56,8 +56,8 @@ public class DistanceProcessor extends AbstractMathProcessor{
 	public List<AttributeOptions> getOptions() {
 		List<AttributeOptions> ret = new ArrayList<AttributeOptions>();
 		
-		AttributeOptions slope = new AttributeOptions("distSlope", true);
-		AttributeOptions yIntercept = new AttributeOptions("distYIntercept", true);
+		AttributeOptions slope = new AttributeOptions(getName()+"/"+"distSlope", true);
+		AttributeOptions yIntercept = new AttributeOptions(getName()+"/"+"distYIntercept", true);
 		
 		ret.add(slope);
 		ret.add(yIntercept);

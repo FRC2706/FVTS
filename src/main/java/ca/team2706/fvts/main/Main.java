@@ -111,9 +111,9 @@ public class Main {
 		// read the vision calibration values from file.
 		visionParamsList = Utils.loadVisionParams();
 
-		Map<String, String> masterConfig = ConfigParser.getProperties(MASTER_CONFIG_FILE, "config");
+		Map<String, String> masterConfig = ConfigParser.getPropertiesM(MASTER_CONFIG_FILE, "config");
 
-		Map<String, String> masterEnabled = ConfigParser.getProperties(MASTER_CONFIG_FILE, "enabled");
+		Map<String, String> masterEnabled = ConfigParser.getPropertiesM(MASTER_CONFIG_FILE, "enabled");
 
 		// Go through and enable the configs
 		for (String s : masterEnabled.keySet()) {

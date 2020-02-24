@@ -24,7 +24,7 @@ public class GroupProcessor extends AbstractMathProcessor {
 		if(visionData.targetsFound.size() == 0)
 			return;
 		
-		int groupAngle = visionData.params.getByName("groupAngle").getValueI();
+		int groupAngle = visionData.params.getByName(getName()+"/"+"groupAngle").getValueI();
 		ArrayList<Target> newTargets = new ArrayList<Target>();
 
 		for (Target target : visionData.targetsFound) {
@@ -140,15 +140,14 @@ public class GroupProcessor extends AbstractMathProcessor {
 
 	@Override
 	public void init(MainThread main) {
-		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
 	public List<AttributeOptions> getOptions() {
 		List<AttributeOptions> ret = new ArrayList<AttributeOptions>();
 
-		AttributeOptions angle = new AttributeOptions("groupAngle", true);
+		AttributeOptions angle = new AttributeOptions(getName()+"/"+"groupAngle", true);
 
 		ret.add(angle);
 

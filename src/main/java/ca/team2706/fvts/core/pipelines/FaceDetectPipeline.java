@@ -44,7 +44,7 @@ public class FaceDetectPipeline extends AbstractPipeline {
 		Imgproc.cvtColor(src, binMask, Imgproc.COLOR_BGR2GRAY);
 		Imgproc.equalizeHist(binMask, binMask);
 		ret.binMask = binMask;
-		double faceSize = binMask.rows() * visionParams.getByName("minFaceSize").getValueD();
+		double faceSize = binMask.rows() * visionParams.getByName(getName()+"/"+"minFaceSize").getValueD();
 		MatOfRect faces = new MatOfRect();
 		faceDetector.detectMultiScale(binMask, faces, 1.1, 2, 0 | Objdetect.CASCADE_SCALE_IMAGE,
 				new Size(faceSize, faceSize), new Size());
@@ -104,7 +104,7 @@ public class FaceDetectPipeline extends AbstractPipeline {
 	@Override
 	public List<AttributeOptions> getOptions() {
 		List<AttributeOptions> ret = new ArrayList<AttributeOptions>();
-		ret.add(new AttributeOptions("minFaceSize", true));
+		ret.add(new AttributeOptions(getName()+"/"+"minFaceSize", true));
 		return ret;
 	}
 

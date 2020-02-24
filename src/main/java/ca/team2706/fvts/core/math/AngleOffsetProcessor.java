@@ -32,9 +32,9 @@ public class AngleOffsetProcessor extends AbstractMathProcessor {
 
 		for (Target t : visionData.targetsFound) {
 			// Do the offset math which is using quadratics and please let this work, ive been trying this for 3 hours and its 00:00, i am very tired but this code keeps me up at night
-			double aoA = visionParams.getByName("aoA").getValueD();
-			double aoB = visionParams.getByName("aoB").getValueD();
-			double aoC = visionParams.getByName("aoC").getValueD();
+			double aoA = visionParams.getByName(getName()+"/"+"aoA").getValueD();
+			double aoB = visionParams.getByName(getName()+"/"+"aoB").getValueD();
+			double aoC = visionParams.getByName(getName()+"/"+"aoC").getValueD();
 			double magic = Math.abs(t.xCentreNorm) / (t.areaNorm / (visionData.binMask.rows() * visionData.binMask.cols()));
 			double xo = Math.pow(magic,2) * aoA + magic * aoB + aoC;
 			t.distance += xo;
@@ -50,9 +50,9 @@ public class AngleOffsetProcessor extends AbstractMathProcessor {
 	public List<AttributeOptions> getOptions() {
 		List<AttributeOptions> ret = new ArrayList<AttributeOptions>();
 		
-		AttributeOptions aoA = new AttributeOptions("aoA", true);
-		AttributeOptions aoB = new AttributeOptions("aoB", true);
-		AttributeOptions aoC = new AttributeOptions("aoC", true);
+		AttributeOptions aoA = new AttributeOptions(getName()+"/"+"aoA", true);
+		AttributeOptions aoB = new AttributeOptions(getName()+"/"+"aoB", true);
+		AttributeOptions aoC = new AttributeOptions(getName()+"/"+"aoC", true);
 		
 		ret.add(aoA);
 		ret.add(aoB);

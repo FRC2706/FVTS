@@ -57,20 +57,20 @@ public class BlobDetectPipeline extends AbstractPipeline {
 		// Colour threshold
 		Mat hsvThreshold = new Mat();
 
-		Core.inRange(src, new Scalar(visionParams.getByName("minHue").getValueI(),
-				visionParams.getByName("minSaturation").getValueI(), visionParams.getByName("minValue").getValueI()),
-				new Scalar(visionParams.getByName("maxHue").getValueI(),
-						visionParams.getByName("maxSaturation").getValueI(),
-						visionParams.getByName("maxValue").getValueI()),
+		Core.inRange(src, new Scalar(visionParams.getByName(getName()+"/"+"minHue").getValueI(),
+				visionParams.getByName(getName()+"/"+"minSaturation").getValueI(), visionParams.getByName(getName()+"/"+"minValue").getValueI()),
+				new Scalar(visionParams.getByName(getName()+"/"+"maxHue").getValueI(),
+						visionParams.getByName(getName()+"/"+"maxSaturation").getValueI(),
+						visionParams.getByName(getName()+"/"+"maxValue").getValueI()),
 				hsvThreshold);
 
 		// Erode - Dilate*2 - Erode
 		Imgproc.erode(hsvThreshold, erodeOne, new Mat(), new Point(),
-				visionParams.getByName("erodeDilateIterations").getValueI(), Core.BORDER_CONSTANT, new Scalar(0));
+				visionParams.getByName(getName()+"/"+"erodeDilateIterations").getValueI(), Core.BORDER_CONSTANT, new Scalar(0));
 		Imgproc.dilate(erodeOne, dilated, new Mat(), new Point(),
-				2 * visionParams.getByName("erodeDilateIterations").getValueI(), Core.BORDER_CONSTANT, new Scalar(0));
+				2 * visionParams.getByName(getName()+"/"+"erodeDilateIterations").getValueI(), Core.BORDER_CONSTANT, new Scalar(0));
 		Imgproc.erode(dilated, erodeTwo, new Mat(), new Point(),
-				visionParams.getByName("erodeDilateIterations").getValueI(), Core.BORDER_CONSTANT, new Scalar(0));
+				visionParams.getByName(getName()+"/"+"erodeDilateIterations").getValueI(), Core.BORDER_CONSTANT, new Scalar(0));
 
 		visionData.binMask = erodeTwo.clone();
 
@@ -86,7 +86,7 @@ public class BlobDetectPipeline extends AbstractPipeline {
 			// height * width for area (easier and less CPU cycles than contour.area)
 			double areaNorm = ((double) boundingRect.width * boundingRect.height) / imgArea;
 
-			if (areaNorm >= visionParams.getByName("minArea").getValueD()) {
+			if (areaNorm >= visionParams.getByName(getName()+"/"+"minArea").getValueD()) {
 
 				VisionData.Target target = new VisionData.Target();
 				target.boundingBox = boundingRect;
@@ -144,16 +144,16 @@ public class BlobDetectPipeline extends AbstractPipeline {
 	@Override
 	public List<AttributeOptions> getOptions() {
 		List<AttributeOptions> ret = new ArrayList<AttributeOptions>();
-		AttributeOptions minHue = new AttributeOptions("minHue", true);
-		AttributeOptions maxHue = new AttributeOptions("maxHue", true);
-		AttributeOptions minSat = new AttributeOptions("minSaturation", true);
-		AttributeOptions maxSat = new AttributeOptions("maxSaturation", true);
-		AttributeOptions minVal = new AttributeOptions("minValue", true);
-		AttributeOptions maxVal = new AttributeOptions("maxValue", true);
+		AttributeOptions minHue = new AttributeOptions(getName()+"/"+"minHue", true);
+		AttributeOptions maxHue = new AttributeOptions(getName()+"/"+"maxHue", true);
+		AttributeOptions minSat = new AttributeOptions(getName()+"/"+"minSaturation", true);
+		AttributeOptions maxSat = new AttributeOptions(getName()+"/"+"maxSaturation", true);
+		AttributeOptions minVal = new AttributeOptions(getName()+"/"+"minValue", true);
+		AttributeOptions maxVal = new AttributeOptions(getName()+"/"+"maxValue", true);
 
-		AttributeOptions minArea = new AttributeOptions("minArea", true);
+		AttributeOptions minArea = new AttributeOptions(getName()+"/"+"minArea", true);
 
-		AttributeOptions erodeDilateIterations = new AttributeOptions("erodeDilateIterations", true);
+		AttributeOptions erodeDilateIterations = new AttributeOptions(getName()+"/"+"erodeDilateIterations", true);
 
 		ret.add(minHue);
 		ret.add(maxHue);

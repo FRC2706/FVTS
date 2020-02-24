@@ -24,20 +24,20 @@ public class ImageCropPreprocessor extends AbstractImagePreprocessor {
 	public List<AttributeOptions> getOptions() {
 		List<AttributeOptions> ret = new ArrayList<AttributeOptions>();
 		
-		ret.add(new AttributeOptions("cX1", true));
-		ret.add(new AttributeOptions("cY1", true));
-		ret.add(new AttributeOptions("cX2", true));
-		ret.add(new AttributeOptions("cY2", true));
+		ret.add(new AttributeOptions(getName()+"/"+"cX1", true));
+		ret.add(new AttributeOptions(getName()+"/"+"cY1", true));
+		ret.add(new AttributeOptions(getName()+"/"+"cX2", true));
+		ret.add(new AttributeOptions(getName()+"/"+"cY2", true));
 		
 		return ret;
 	}
 
 	@Override
 	public Mat process(Mat src, MainThread thread) {
-		int cX1 = (int) (thread.visionParams.getByName("cX1").getValueD() * src.cols());
-		int cY1 = (int) (thread.visionParams.getByName("cY1").getValueD() * src.rows());
-		int cX2 = (int) (thread.visionParams.getByName("cX2").getValueD() * src.cols());
-		int cY2 = (int) (thread.visionParams.getByName("cY2").getValueD() * src.rows());
+		int cX1 = (int) (thread.visionParams.getByName(getName()+"/"+"cX1").getValueD() * src.cols());
+		int cY1 = (int) (thread.visionParams.getByName(getName()+"/"+"cY1").getValueD() * src.rows());
+		int cX2 = (int) (thread.visionParams.getByName(getName()+"/"+"cX2").getValueD() * src.cols());
+		int cY2 = (int) (thread.visionParams.getByName(getName()+"/"+"cY2").getValueD() * src.rows());
 		
 		int width = (int) Math.abs(cX1-cX2);
 		int height = (int) Math.abs(cY1-cY2);

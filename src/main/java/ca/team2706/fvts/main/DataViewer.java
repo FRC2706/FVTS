@@ -65,9 +65,9 @@ public class DataViewer {
 		// read the vision calibration values from file.
 		Utils.loadVisionParams();
 
-		Map<String, String> masterConfig = ConfigParser.getProperties(new File("master.cf"), "config");
+		Map<String, String> masterConfig = ConfigParser.getPropertiesM(new File("master.cf"), "config");
 
-		Map<String, String> masterEnabled = ConfigParser.getProperties(new File("master.cf"), "enabled");
+		Map<String, String> masterEnabled = ConfigParser.getPropertiesM(new File("master.cf"), "enabled");
 
 		// Go through and enable the configs
 		for (String s : masterEnabled.keySet()) {
