@@ -8,26 +8,25 @@ import org.opencv.videoio.VideoCapture;
 
 import ca.team2706.fvts.core.Log;
 
-public class USBCameraInputDevice extends AbstractInputDevice{
-	public USBCameraInputDevice() {
-		super("usb");
+public class VideoDummyInputDevice extends AbstractInputDevice{
+	public VideoDummyInputDevice() {
+		super("video");
 	}
 
-	public static Map<Integer, VideoCapture> cameras = new HashMap<Integer, VideoCapture>();
+	public static Map<String, VideoCapture> videos = new HashMap<String, VideoCapture>();
 	
 	private Mat frame = new Mat();
 	
 	@Override
 	public void init(String identifier) throws Exception{
-		int id = Integer.valueOf(identifier);
 
-		if(cameras.containsKey(id) || id == -1) {
+		if(videos.containsKey(identifier)) {
 			return;
 		}
 		
-		VideoCapture capture = new VideoCapture(id);
+		VideoCapture capture = new VideoCapture(identifier);
 		
-		Log.i("Waiting for camera to respond!",true);
+		Log.i("Waiting for file to be read!",true);
 		
 		while(!capture.isOpened()) {
 			try {
@@ -37,21 +36,20 @@ public class USBCameraInputDevice extends AbstractInputDevice{
 			}
 		}
 		
-		Log.i("Camera successfully connected",true);
+		Log.i("Video successfully opened",true);
 
 		if(!capture.read(frame)) {
 			
-			Log.e("Failed to connect to camera #"+identifier,true);
+			Log.e("Failed to open video file "+identifier,true);
 			
 			System.exit(1);
-			
 		}
-		cameras.put(id, capture);
+		videos.put(identifier, capture);
 	}
 
 	@Override
 	public Mat getFrame(String identifier) {
-		cameras.get(Integer.valueOf(identifier)).read(frame);
+		videos.get(identifier).read(frame);
 		return frame;
 	}
 }

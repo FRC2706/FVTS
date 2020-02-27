@@ -1,15 +1,10 @@
 package ca.team2706.fvts.core.input;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
-
 import org.opencv.core.Mat;
-
-import ca.team2706.fvts.core.Utils;
+import org.opencv.videoio.VideoCapture;
 
 public class ImageDummyInputDevice extends AbstractInputDevice{
 
@@ -21,9 +16,9 @@ public class ImageDummyInputDevice extends AbstractInputDevice{
 	@Override
 	public void init(String identifier) throws Exception{
 		if(!frames.containsKey(identifier)) {
-			File f = new File(identifier);
-			BufferedImage image = ImageIO.read(f);
-			Mat frame = Utils.bufferedImageToMat(image);
+			VideoCapture capture = new VideoCapture(identifier);
+			Mat frame = new Mat();
+			capture.read(frame);
 			frames.put(identifier, frame);
 		}
 	}
