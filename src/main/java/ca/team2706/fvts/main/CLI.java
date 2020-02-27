@@ -20,7 +20,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import ca.team2706.fvts.core.Log;
-import ca.team2706.fvts.core.Utils;
 
 public class CLI implements Runnable, ActionListener {
 
@@ -213,16 +212,6 @@ public class CLI implements Runnable, ActionListener {
 		}
 		if (message.equalsIgnoreCase("?help")) {
 			help(out);
-			return;
-		}
-		if (message.equalsIgnoreCase("?reload")) {
-			String ip = null;
-			if (message.split(" ").length > 1) {
-				ip = message.split(" ")[1];
-			}
-			Utils.loadVisionParams();
-			Main.initNetworkTables(ip);
-			out.println("Success");
 			return;
 		}
 		if (message.equalsIgnoreCase("?shutdown")) {

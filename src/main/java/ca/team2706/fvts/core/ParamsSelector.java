@@ -17,7 +17,6 @@ import javax.swing.border.EmptyBorder;
 import ca.team2706.fvts.core.params.Attribute;
 import ca.team2706.fvts.core.params.AttributeOptions;
 import ca.team2706.fvts.core.params.VisionParams;
-import ca.team2706.fvts.main.Main;
 
 public class ParamsSelector extends JFrame implements ActionListener {
 
@@ -29,15 +28,16 @@ public class ParamsSelector extends JFrame implements ActionListener {
 	 */
 	private JPanel contentPane;
 	public ParamsSelector() throws Exception {
+		List<AttributeOptions> options = Utils.getOptions("blobdetect","networktables","group,prefferedtarget,distance,angleoffset","crop");
 		List<Attribute> attribs = new ArrayList<Attribute>();
-		for (AttributeOptions o : Main.options) {
+		for (AttributeOptions o : options) {
 			Attribute a = new Attribute(o.getName(), "");
 			attribs.add(a);
 		}
 
-		this.visionParams = new VisionParams(attribs, Main.options);
+		this.visionParams = new VisionParams(attribs, options);
 
-		new MainThread(visionParams,true);
+		new MainThread(visionParams);
 	}
 	
 	private JButton btnUpdate,btnSave;

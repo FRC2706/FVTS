@@ -15,14 +15,14 @@ public class ConfigTester {
 		Main.visionParamsFile = new File("visionParams.properties");
 		
 		// Check if allowOverride is enabled
-		Map<String, String> masterConfig = ConfigParser.getProperties(Main.MASTER_CONFIG_FILE, "config");
+		Map<String, String> masterConfig = ConfigParser.getPropertiesM(Main.MASTER_CONFIG_FILE, "config");
 		
 		boolean allowOverride = Boolean.valueOf(masterConfig.get("allowOverride"));
 		if(allowOverride)
 			System.out.println("Warn: Remote override is enabled!!!");
 		
 		// Check to make sure all the profiles are enabled
-		Map<String, String> masterEnabled = ConfigParser.getProperties(Main.MASTER_CONFIG_FILE, "enabled");
+		Map<String, String> masterEnabled = ConfigParser.getPropertiesM(Main.MASTER_CONFIG_FILE, "enabled");
 		
 		for(String s : masterEnabled.keySet()) {
 			boolean b = Boolean.valueOf(masterEnabled.get(s));

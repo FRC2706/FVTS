@@ -17,9 +17,13 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 
+import ca.team2706.fvts.core.image.AbstractImagePreprocessor;
+import ca.team2706.fvts.core.interfaces.AbstractInterface;
+import ca.team2706.fvts.core.math.AbstractMathProcessor;
 import ca.team2706.fvts.core.params.Attribute;
 import ca.team2706.fvts.core.params.AttributeOptions;
 import ca.team2706.fvts.core.params.VisionParams;
+import ca.team2706.fvts.core.pipelines.AbstractPipeline;
 import ca.team2706.fvts.main.Main;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
@@ -32,7 +36,7 @@ public class Utils {
 	 * @param suffix the suffix to put on the file name
 	 * @throws IOException
 	 */
-	
+
 	public static void imgDump(BufferedImage image, String suffix, int timestamp, String outputPath)
 			throws IOException {
 		// prepend the file name with the tamestamp integer, left-padded with
@@ -42,7 +46,7 @@ public class Utils {
 		if (match.equals("")) {
 			match = "practice";
 		}
-	
+
 		File output = new File(outputPath + match + "-" + String.format("%05d", timestamp) + "_" + suffix + ".png");
 		ImageIO.write(image, "png", output);
 	}
@@ -53,7 +57,7 @@ public class Utils {
 	 * @param Buffered Image to convert to matrix
 	 * @return The matrix from the buffered image
 	 */
-	
+
 	public static Mat bufferedImageToMat(BufferedImage bi) {
 		Mat mat = new Mat(bi.getHeight(), bi.getWidth(), CvType.CV_8UC3);
 		byte[] data = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
@@ -73,10 +77,77 @@ public class Utils {
 		MatOfByte mob = new MatOfByte();
 		Imgcodecs.imencode(".jpg", matrix, mob);
 		byte ba[] = mob.toArray();
-	
+
 		BufferedImage bi = ImageIO.read(new ByteArrayInputStream(ba));
 		matrix.release();
 		return bi;
+	}
+
+	public static List<AttributeOptions> getOptions(String pipelineName, String interfaceName, String mathNames,
+			String preProcessors) {
+		AttributeOptions name = new AttributeOptions("name", true);
+
+		AttributeOptions type = new AttributeOptions("core/type", true);
+
+		AttributeOptions identifier = new AttributeOptions("core/identifier", true);
+
+		AttributeOptions enabled = new AttributeOptions("enabled", false);
+
+		AttributeOptions csvLog = new AttributeOptions("core/csvLog", true);
+
+		AttributeOptions imgDumpPath = new AttributeOptions("core/imgDumpPath", true);
+
+		AttributeOptions imgDumpTime = new AttributeOptions("core/imgDumpTime", true);
+
+		List<AttributeOptions> options = new ArrayList<AttributeOptions>();
+		options.add(name);
+
+		options.add(type);
+		options.add(identifier);
+		options.add(enabled);
+		options.add(csvLog);
+		options.add(imgDumpPath);
+		options.add(imgDumpTime);
+
+		AbstractPipeline pipeline = AbstractPipeline.getByName(pipelineName);
+		if (pipeline == null) {
+			Log.e("Failed to find pipeline by the name of " + pipelineName, true);
+			System.exit(1);
+		}
+		options.addAll(pipeline.getOptions());
+
+		AbstractInterface outputInterface = AbstractInterface.getByName(interfaceName);
+		if (outputInterface == null) {
+			Log.e("Failed to find interface by the name of " + interfaceName, true);
+			System.exit(1);
+		}
+		options.addAll(outputInterface.getOptions());
+
+		if (mathNames != null) {
+			String[] maths = mathNames.split(",");
+			for (String math : maths) {
+				AbstractMathProcessor processor = AbstractMathProcessor.getByName(math);
+				if (processor == null) {
+					Log.e("Failed to find math processor by the name of " + math, true);
+					System.exit(1);
+				}
+				options.addAll(processor.getOptions());
+			}
+		}
+
+		if (preProcessors != null) {
+			String[] preProcessorsA = preProcessors.split(",");
+			for (String processor : preProcessorsA) {
+				AbstractImagePreprocessor p = AbstractImagePreprocessor.getByName(processor);
+				if (p == null) {
+					Log.e("Failed to find image preprocessor by the name of " + processor, true);
+					System.exit(1);
+				}
+				options.addAll(p.getOptions());
+			}
+		}
+
+		return options;
 	}
 
 	/**
@@ -85,112 +156,67 @@ public class Utils {
 
 	public static List<VisionParams> loadVisionParams() {
 		try {
-			AttributeOptions name = new AttributeOptions("name", true);
-
-			AttributeOptions minHue = new AttributeOptions("minHue", true);
-			AttributeOptions maxHue = new AttributeOptions("maxHue", true);
-			AttributeOptions minSat = new AttributeOptions("minSaturation", true);
-			AttributeOptions maxSat = new AttributeOptions("maxSaturation", true);
-			AttributeOptions minVal = new AttributeOptions("minValue", true);
-			AttributeOptions maxVal = new AttributeOptions("maxValue", true);
-
-			AttributeOptions distToCentreImportance = new AttributeOptions("distToCentreImportance", true);
-
-			AttributeOptions imageFile = new AttributeOptions("imageFile", true);
-
-			AttributeOptions minArea = new AttributeOptions("minArea", true);
-
-			AttributeOptions erodeDilateIterations = new AttributeOptions("erodeDilateIterations", true);
-
-			AttributeOptions resolution = new AttributeOptions("resolution", true);
-
-			AttributeOptions imgDumpPath = new AttributeOptions("imgDumpPath", true);
-
-			AttributeOptions imgDumpTime = new AttributeOptions("imgDumpTime", true);
-
-			AttributeOptions slope = new AttributeOptions("slope", true);
-
-			AttributeOptions yIntercept = new AttributeOptions("yIntercept", true);
-
-			AttributeOptions group = new AttributeOptions("group", true);
-			AttributeOptions angle = new AttributeOptions("groupAngle",true);
-
-			AttributeOptions type = new AttributeOptions("type", true);
-
-			AttributeOptions identifier = new AttributeOptions("identifier", true);
-
-			AttributeOptions enabled = new AttributeOptions("enabled", false);
-			
-			AttributeOptions csvLog = new AttributeOptions("csvLog", true);
-
-			Main.options = new ArrayList<AttributeOptions>();
-			Main.options.add(name);
-			Main.options.add(minHue);
-			Main.options.add(maxHue);
-			Main.options.add(minSat);
-			Main.options.add(maxSat);
-			Main.options.add(minVal);
-			Main.options.add(maxVal);
-			Main.options.add(distToCentreImportance);
-			Main.options.add(imageFile);
-			Main.options.add(minArea);
-			Main.options.add(erodeDilateIterations);
-			Main.options.add(resolution);
-			Main.options.add(imgDumpPath);
-			Main.options.add(imgDumpTime);
-			Main.options.add(slope);
-			Main.options.add(yIntercept);
-			Main.options.add(group);
-			Main.options.add(angle);
-			Main.options.add(type);
-			Main.options.add(identifier);
-			Main.options.add(enabled);
-			Main.options.add(csvLog);
-			
 			List<String> lists = ConfigParser.listLists(Main.visionParamsFile);
 			List<VisionParams> ret = new ArrayList<VisionParams>();
-
 			for (String s : lists) {
+				try {
+					Map<String, Map<String, String>> data = ConfigParser.getProperties(Main.visionParamsFile, s);
 
-				Map<String, String> data = ConfigParser.getProperties(Main.visionParamsFile, s);
+					List<Attribute> attribs = new ArrayList<Attribute>();
+					attribs.add(new Attribute("name", s));
+					String pipelineName = null;
+					String interfaceName = null;
+					String mathNames = null;
+					String imagePreprocessorNames = null;
+					if (data.get("core") == null) {
+						Log.e("Config " + s + " is missing the core section!", true);
+						System.exit(1);
+					}
+					for (String s1 : data.keySet()) {
+						for (String s2 : data.get(s1).keySet()) {
+							if (s1.equals("core")) {
+								if (s2.equals("pipeline")) {
+									pipelineName = data.get("core").get(s2);
+								} else if (s2.equals("interface")) {
+									interfaceName = data.get("core").get(s2);
+								} else if (s2.equals("maths")) {
+									mathNames = data.get("core").get(s2);
+								} else if (s2.equals("preprocessors")) {
+									imagePreprocessorNames = data.get("core").get(s2);
+								}
+							}
+							attribs.add(new Attribute(s1 + "/" + s2, data.get(s1).get(s2)));
+						}
+					}
+					if (interfaceName == null || pipelineName == null) {
+						Log.e("Missing pipeline or interface in config " + s, true);
+						System.exit(1);
+					}
+					List<AttributeOptions> options = getOptions(pipelineName, interfaceName, mathNames,
+							imagePreprocessorNames);
+					VisionParams params = new VisionParams(attribs, options);
 
-				List<Attribute> attribs = new ArrayList<Attribute>();
-				attribs.add(new Attribute("name", s));
-				for (String s1 : data.keySet()) {
-					attribs.add(new Attribute(s1, data.get(s1)));
+					// The parameters are now valid, because it didn't throw an error
+					ret.add(params);
+				} catch (Exception e) {
+					Log.e("Error in config " + s, true);
+					throw new Exception();
 				}
-				VisionParams params = new VisionParams(attribs, Main.options);
-				String resolution1 = params.getByName("resolution").getValue();
-				int width = Integer.valueOf(resolution1.split("x")[0]);
-				int height = Integer.valueOf(resolution1.split("x")[1]);
-				params.getAttribs().add(new Attribute("width", width + ""));
-				params.getAttribs().add(new Attribute("height", height + ""));
-				NetworkTable visionTable = NetworkTable
-						.getTable("vision-" + params.getByName("name").getValue() + "/");
-				NetworkTablesManager.tables.put(s, visionTable);
-				// The parameters are now valid, because it didn't throw an error
-				ret.add(params);
 			}
-
-			sendVisionParams(ret);
 			return ret;
 
 		} catch (Exception e1) {
-			Log.e(e1.getMessage(), true);
 			Log.e("\n\nError reading the params file, check if the file is corrupt?", true);
 			System.exit(1);
 		}
 		return null;
 	}
-	public static void sendVisionParams(List<VisionParams> visionParamsList) {
 
-		for (VisionParams params : visionParamsList) {
-
-			for (Attribute a : params.getAttribs()) {
-				if (a.getName().equals("name")) {
-					NetworkTable visionTable = NetworkTablesManager.tables.get(params.getByName("name").getValue());
-					visionTable.putString(a.getName(), a.getValue());
-				}
+	public static void sendVisionParams(VisionParams params) {
+		for (Attribute a : params.getAttribs()) {
+			if (a.getName().equals("name")) {
+				NetworkTable visionTable = NetworkTablesManager.tables.get(params.getByName("name").getValue());
+				visionTable.putString(a.getName(), a.getValue());
 			}
 		}
 	}
@@ -201,33 +227,39 @@ public class Utils {
 	 **/
 	public static void saveVisionParams() {
 		try {
-	
+
 			for (VisionParams params : Main.visionParamsList) {
 				Utils.saveVisionParams(params);
 			}
-	
+
 		} catch (Exception e1) {
 			Log.e(e1.getMessage(), true);
 		}
 	}
 
 	public static void saveVisionParams(VisionParams params) throws Exception {
-		Map<String, String> data = new HashMap<String, String>();
-	
+		Map<String, Map<String,String>> data = new HashMap<String, Map<String,String>>();
+
 		for (Attribute a : params.getAttribs()) {
-			if (!a.getName().equals("name") && !a.getName().equals("enabled") && !a.getName().equals("width") && !a.getName().equals("height")) {
-				data.put(a.getName(), a.getValue());
+			if (a.getName().contains("/")) {
+				String key = a.getName().split("\\/")[0];
+				Map<String,String> map = data.get(key);
+				if(map == null)
+					map = new HashMap<String,String>();
+				map.put(a.getName().split("\\/",2)[1], a.getValue());
+				data.put(key, map);
 			}
 		}
-	
+
 		ConfigParser.saveList(Main.visionParamsFile, params.getByName("name").getValue(), data);
 	}
+
 	public static int findFirstAvailable(String pattern) {
-		if(!pattern.contains("$1"))
+		if (!pattern.contains("$1"))
 			return 0;
-		for(int i = 0; i < Integer.MAX_VALUE; i++) {
-			File f = new File(pattern.replaceAll("\\$1", ""+i));
-			if(!f.exists())
+		for (int i = 0; i < Integer.MAX_VALUE; i++) {
+			File f = new File(pattern.replaceAll("\\$1", "" + i));
+			if (!f.exists())
 				return i;
 		}
 		return 0;
