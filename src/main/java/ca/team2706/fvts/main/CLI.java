@@ -217,22 +217,7 @@ public class CLI implements Runnable, ActionListener {
 		if (message.equalsIgnoreCase("?shutdown")) {
 			out.println("Shutting down!");
 			out.flush();
-			String os = System.getProperty("os.name");
-			if (os.contains("Windows")) {
-				String[] args = new String[] { "cmd", "/c", "taskkill", "/f", "/t", "/im", "javaw.exe" };
-				try {
-					new ProcessBuilder(args).start();
-				} catch (IOException e) {
-					Log.e(e.getMessage(),true);
-				}
-			} else {
-				String[] args = new String[] { "/bin/bash", "-c", "sudo", "systemctl", "stop", "java" };
-				try {
-					new ProcessBuilder(args).start();
-				} catch (IOException e) {
-					Log.e(e.getMessage(),true);
-				}
-			}
+			System.exit(0);
 		}
 		if (message.equalsIgnoreCase("?logs")) {
 			for (String s : logs) {
